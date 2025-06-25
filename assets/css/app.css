@@ -1,0 +1,95 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+:root{
+  --theme-color:#6f42c1;
+}
+.btn-outline-purple {
+    color: var(--theme-color);
+    border-color:var(--theme-color);
+}
+.btn-outline-purple:hover {
+    color: #fff;
+    background-color: var(--theme-color);
+    border-color: var(--theme-color);
+}
+
+.bg-purple{
+  background-color: var(--theme-color);
+}
+
+.switch {
+ --false: #E81B1B;
+ --true: var(--theme-color);
+}
+
+input[type=checkbox] {
+ appearance: none;
+ height: 2rem;
+ width: 3.5rem;
+ background-color: #f4f6f9;
+ position: relative;
+ border-radius: .2em;
+ cursor: pointer;
+}
+
+input[type=checkbox]::before {
+ content: '';
+ display: block;
+ height: 1.9em;
+ width: 1.9em;
+ transform: translate(-50%, -50%);
+ position: absolute;
+ top: 50%;
+ left: calc(1.9em/2 + .3em);
+ background-color: var(--false);
+ border-radius: .2em;
+ transition: .3s ease;
+}
+
+input[type=checkbox]:checked::before {
+ background-color: var(--true);
+ left: calc(100% - (1.9em/2 + .3em));
+}
+
+/* Tabulator */
+.tabulator .tabulator-header-filter input,
+.tabulator .tabulator-header-filter select {
+  padding: 5px 10px;
+  height: 32px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.tabulator .tabulator-header-filter input:focus,
+.tabulator .tabulator-header-filter select:focus {
+  border-color: #4A90E2;
+  outline: none;
+  background-color: #fdfdfd;
+}
+
+.tabulator .tabulator-header-filter select {
+  appearance: none;
+  background: #fff url('data:image/svg+xml;utf8,<svg fill="%23666" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+  background-size: 12px;
+  padding-inline:10px 24px;
+}
+
+.tabulator .tabulator-header-filter input:hover,
+.tabulator .tabulator-header-filter select:hover {
+  border-color: #999;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Tabulator */

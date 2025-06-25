@@ -1,0 +1,27 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <a href="<%= locals.addURL ? addURL : '' %>" class="btn btn-dark">Add new</a>
+            <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#openModal">
+                Add New
+            </button> -->
+        </div>
+        <div class="col-12">
+            <div class="d-flex justify-content-between mt-3">
+                <div class="d-flex gap-2">
+                    <button id="download-csv" class="btn btn-outline-purple btn-sm">Download CSV</button>
+                    <button id="download-xlsx" class="btn btn-outline-purple btn-sm">Download XLSX</button>
+                    <button id="download-pdf" class="btn btn-outline-purple btn-sm">Download PDF</button>
+                </div>
+                <select id="hide-column-select" class="form-control w-25">
+                    <option selected disabled>Hide Column</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-12">
+            <input type="hidden" id="dataTableAPI" value="<%= locals.dataTableAPI ? dataTableAPI : ''  %>">
+            <div id="tabulator"></div>
+        </div>
+    </div>
+</div>
+<%- include('./partials/table.script.ejs') %>

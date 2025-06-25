@@ -1,0 +1,24 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-primary">
+                <div class="card-header bg-purple">
+                    <h3 class="card-title">Add Information</h3>
+                </div>
+                <form id="SubmitForm" enctype="application/x-www-form-urlencoded">
+                    <div class="card-body">
+                        <div class="form-group mb-0">
+                            <input type="text" class="form-control" id="modalInput" name="name"
+                                placeholder="Subject Name">
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button id="submitFormBtn" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" value="<%= api %>" id="apiInput">

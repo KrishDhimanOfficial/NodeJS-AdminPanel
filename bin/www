@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+const startTime = Date.now()
+
+import app from '../app.js'
+import debug from 'debug'
+import http from 'http'
+import config from '../config/config.js'
+import cluster from 'cluster'
+import numcpu from 'os'
+import chalk from 'chalk'
+import connectDB from '../config/connectDB.js'
+
+const log = debug('backend:server')
+
+if (cluster.isPrimary) {
+  for (let i = 0; i < numcpu.availableParallelism(); ++i)  cluster.fork()
+  console.log(`Primary ${process.pid} is running`)
+  cluster.on('exit', (worker, code, signal) => console.log(`worker ${worker.process.pid} died`))
+} else {
+  const port = config.port;
+
+  connectDB()
+  app.set('port', port)
+
+  const server = http.createServer(app)  // Create HTTP server.
+
+  server.listen(port, () => {
+    const endTime = Date.now(); // ⏱ Record end time
+    const duration = endTime - startTime; // Time taken in ms
+    console.log(chalk.blue(`🚀 Startup Time: ${duration} ms`))
+    console.log(chalk.yellow(`Running http://localhost:${port}`))
+  })
+
+  server.on('error', onError)
+  server.on('listening', onListening)
+  server.setTimeout(10000)
+
+  /**
+   * Event listener for HTTP server "error" event.
+   */
+
+  function onError(error) {
+    if (error.syscall !== 'listen') throw error
+
+    var bind = typeof port === 'string'
+      ? 'Pipe ' + port
+      : 'Port ' + port
+
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+      case 'EACCES':
+        console.error(bind + ' requires elevated privileges')
+        process.exit(1)
+        break
+      case 'EADDRINUSE':
+        console.error(bind + ' is already in use')
+        process.exit(1)
+        break
+      default:
+        throw error
+    }
+  }
+
+  /**
+   * Event listener for HTTP server "listening" event.
+   */
+
+  function onListening() {
+    const addr = server.address()
+    const bind = typeof addr === 'string'
+      ? 'pipe ' + addr
+      : 'port ' + addr.port
+    log('Listening on ' + bind)
+  }
+}
