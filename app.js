@@ -12,6 +12,7 @@ import session from 'express-session'
 import config from './config/config.js'
 import MongoStore from 'connect-mongo'
 import router from './routes/server.routes.js'
+import chalk from 'chalk'
 
 const app = express()
 
@@ -84,6 +85,7 @@ app.use(expressLayouts)
 // folder setup
 app.use('/uploads', express.static('uploads'))
 app.use('/assets', express.static('assets'))
+
 
 app.use('/admin', router)
 

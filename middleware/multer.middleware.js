@@ -7,10 +7,10 @@ const DEFAULT_SIZES = {
     file: 5 * 1024 * 1024  // 5MB
 }
 
-const createStorage = (dir) => {
+const createStorage = async (dir) => {
     const uploadPath = path.join('uploads', dir)
     // Ensure the folder exists
-    if (!fs.existsSync(uploadPath)) fs.mkdir(uploadPath, { recursive: true });
+    if (!fs.existsSync(uploadPath)) fs.mkdir(uploadPath, { recursive: true })
 
     return multer.diskStorage({
         destination: (req, file, cb) => {
@@ -78,9 +78,9 @@ export const rendermulterError = (err, req, res, next) => {
     }
 } // Error handling middleware
 
-export const upload = (folderName = '',
+const upload = (folderName = '',
+    options = { image: true, file: false },
     sizeOptions = { imageSIZE: DEFAULT_SIZES.image, fileSIZE: DEFAULT_SIZES.file },
-    options = { image: true, file: false }
 ) => {
     return multer({
         storage: createStorage(folderName),
@@ -92,4 +92,21 @@ export const upload = (folderName = '',
         },
         fileFilter: options.image ? imageFilter : fileFilter
     })
+}
+
+// Create middleware
+export const multerMiddleware = (config = {}) => {
+    switch (config.type) {
+        case 'single':
+            return upload(config.folder, config.options, config.options?.limits)
+                .single(config.field)
+        case 'array':
+            return upload(config.folder, config.options, config.options?.limits)
+                .array(config.field, config.maxCount || 10)
+        case 'fields':
+            return upload(config.folder, config.options, config.options?.limits)
+                .fields(config.fields)
+        default:
+            return upload().none()
+    }
 }
