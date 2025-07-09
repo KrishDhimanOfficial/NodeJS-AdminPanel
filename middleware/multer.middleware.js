@@ -78,7 +78,7 @@ export const rendermulterError = (err, req, res, next) => {
     }
 } // Error handling middleware
 
-const upload = (folderName = '',
+export const upload = (folderName = '',
     options = { image: true, file: false },
     sizeOptions = { imageSIZE: DEFAULT_SIZES.image, fileSIZE: DEFAULT_SIZES.file },
 ) => {
@@ -94,19 +94,19 @@ const upload = (folderName = '',
     })
 }
 
-// Create middleware
-export const multerMiddleware = (config = {}) => {
-    switch (config.type) {
-        case 'single':
-            return upload(config.folder, config.options, config.options?.limits)
-                .single(config.field)
-        case 'array':
-            return upload(config.folder, config.options, config.options?.limits)
-                .array(config.field, config.maxCount || 10)
-        case 'fields':
-            return upload(config.folder, config.options, config.options?.limits)
-                .fields(config.fields)
-        default:
-            return upload().none()
-    }
-}
+// // Create middleware
+// export const multerMiddleware = (config = {}) => {
+//     switch (config.type) {
+//         case 'single':
+//             return upload(config.folder, config.options, config.options?.limits)
+//                 .single(config.field)
+//         case 'array':
+//             return upload(config.folder, config.options, config.options?.limits)
+//                 .array(config.field, config.maxCount || 10)
+//         case 'fields':
+//             return upload(config.folder, config.options, config.options?.limits)
+//                 .fields(config.fields)
+//         default:
+//             return upload().none()
+//     }
+// }

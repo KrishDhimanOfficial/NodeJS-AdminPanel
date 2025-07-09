@@ -1,20 +1,18 @@
 import express from "express"
-import strategyRouter from "./auth.routes.js"
 import adminModel from '../models/admin.model.js'
-import { multerMiddleware } from '../middleware/multer.middleware.js'
 import { createCrudController } from "../controllers/crud.controller.js"
 import { isAuthenticated } from "../middleware/auth.middleware.js"
-import { Login_Auth } from "../config/auth.strategy.js"
 import { loadModels } from '../lib/modelLoader.js'
 import resources from "../lib/resources.lib.js"
 import mongoose from "mongoose"
+import adminPanelController from "../controllers/adminPanel.controller.js"
+import authControllers from "../controllers/auth.controller.js"
 const router = express.Router()
 
-
-router.get('/logout', (req, res, next) => strategyRouter.localStrategyLogout)
+router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
 router.route('/login')
     .get((req, res) => res.render('login', { layout: false, title: 'Login' }))
-    .post((req, res, next) => strategyRouter.localStrategy(req, res, next, adminModel))
+    .post(async (req, res, next) => authControllers.localStrategy(req, res, next, adminModel))
 
 router.use((req, res, next) => {
     res.locals.baseUrl = req.baseUrl
@@ -24,25 +22,27 @@ router.use((req, res, next) => {
     next()
 })
 
-// router.use(isAuthenticated)
+router.use(isAuthenticated)
 router.get('/', (req, res) => res.render('dashboard', { layout: 'layout', title: 'Dashboard' }))
+router.get('/profile', adminPanelController.renderAdminProfile)
+router.route('/profile')
+    .post(adminPanelController.updateAdminProfile)
 
 const createCRUDRoutes = async () => {
     const models = await loadModels({ resources })
 
     for await (const { modelName, model, options, aggregate, multer } of models) {
-        // console.log(file);
 
-        const controller = createCrudController(model, options)
+        const controller = createCrudController(model, options, aggregate)
         // console.log({ modelName, model, options, aggregate });
 
-        router.get(`/resource/api/${modelName}`, controller.getAllJsonData)
+        router.get(`/resources/api/${modelName}`, controller.getAllJsonData)
         router.get(`/resources/${modelName}`, async (req, res) => {
             // const accept = req.get('Accept')
             return res.render('datatable', {
                 title: modelName,
                 addURL: `${req.originalUrl}/add`,
-                dataTableAPI: `${req.baseUrl}/resource/api/${modelName}`,
+                dataTableAPI: `${req.baseUrl}/resources/api/${modelName}`,
                 api: req.originalUrl,
             })
         })
@@ -58,7 +58,7 @@ const createCRUDRoutes = async () => {
                 fields
             })
         })
-        router.post(`/resources/${modelName}`, multerMiddleware(multer), controller.create)
+        router.post(`/resources/${modelName}`, multer(), controller.create)
         router.get(`/resources/${modelName}/:id`, async (req, res) => {
             const response = await model.findById(req.params.id)
             return res.render(`${modelName}/update`, {
@@ -67,7 +67,8 @@ const createCRUDRoutes = async () => {
                 response
             })
         })
-        router.put(`/resources/${modelName}/:id`,multerMiddleware(multer),  controller.update)
+        router.put(`/resources/${modelName}/:id`, multer(), controller.update)
+        router.patch(`/resources/${modelName}/:id`, multer(), controller.updateModelStatus)
         router.delete(`/resources/${modelName}/:id`, controller.remove)
     }
 }

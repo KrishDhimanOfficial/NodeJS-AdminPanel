@@ -6,6 +6,7 @@ const config = {
     mongodb_URL: String(process.env.MONGODB_URL),
     node_env: String(process.env.NODE_ENV),
     securityKey: String(process.env.SECURITY_KEY),
+    mogo_store_secret_key: String(process.env.MOGO_STORE_SECRET_KEY),
     serverURL: String(process.env.SERVER_URL),
     smtpHost: String(process.env.SMTP_HOST),
     smtpPort: parseInt(process.env.SMTP_PORT),

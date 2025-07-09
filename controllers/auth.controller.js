@@ -1,9 +1,8 @@
-import { Login_Auth } from '../config/auth.strategy.js';
+import { Login_Auth } from "../config/auth.strategy.js"
 
-const strategyRouter = {
+const authControllers = {
     localStrategy: async (req, res, next, model) => {
         const passportInstance = await Login_Auth(model)
-
         passportInstance.authenticate('local-login', (err, user, info) => {
             if (err) return next(err)
             if (!user) {
@@ -20,6 +19,7 @@ const strategyRouter = {
             })
         })(req, res, next)
     },
+    
     localStrategyLogout: async (req, res, next) => {
         return req.logout((err) => {
             if (err) return next(err)
@@ -31,4 +31,4 @@ const strategyRouter = {
     }
 }
 
-export default strategyRouter
+export default authControllers

@@ -4,7 +4,7 @@ import '../vendor/pace-progress/pace.min.js'
 import '../vendor/adminlte/adminlte.min.js'
 import Fetch from "./fetch.js"
 import {
-    initializeTabulator, datatable, displayPreviewImage, apiInput,
+    datatable, displayPreviewImage, apiInput,
     Form, Notify, previewImageInput, openDangerModal
 } from "./variable.js";
 

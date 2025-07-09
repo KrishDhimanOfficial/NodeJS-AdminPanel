@@ -3,14 +3,14 @@
  * @param {mongoose.Model} model - The Mongoose model.
  * @returns {object} CRUD methods
 */
-import mongoose, { modelNames } from "mongoose";
+import mongoose from "mongoose";
 import validate from "../services/validate.service.js"
+import { deleteFile, containsImage } from '../services/removeFile.service.js'
 import chalk from 'chalk';
 const log = console.log
-
 const validateId = mongoose.Types.ObjectId.isValid;
 
-export const createCrudController = (model, options = {}) => ({
+export const createCrudController = (model, options = {}, aggregate) => ({
     create: async (req, res) => {
         try {
             const val = options.check;
@@ -23,15 +23,19 @@ export const createCrudController = (model, options = {}) => ({
             return res.status(200).json({ success: 'created successfully.', redirect: req.originalUrl })
         } catch (error) {
             if (error.name === 'ValidationError') validate(res, error.errors)
-            if (error.code === 11000) res.status(400).json({ info: 'Value Already Exists.' })
             log(chalk.red(`create -> ${model} : ${error.message}`))
         }
     },
 
     getAllJsonData: async (req, res) => {
         try {
-            const data = (await model.find({}, options.isVisible)).reverse()
-            return res.json({ data, columns: options.list })
+            const response = typeof aggregate === 'function' && await aggregate()
+            if (response) {
+                return res.status(200).json(response)
+            } else {
+                const data = (await model.find({}, options.isVisible)).reverse()
+                return res.status(200).json({ data, columns: options.list })
+            }
         } catch (error) {
             log(chalk.red(`getAllJsonData -> ${model} : ${error.message}`))
         }
@@ -92,7 +96,15 @@ export const createCrudController = (model, options = {}) => ({
 
             const response = await model.findByIdAndDelete(req.params.id)
             if (!response) return res.status(404).json({ error: 'Not found' })
-            await res.status(200).json({ success: 'Deleted successfully' })
+
+            const containImage = containsImage(response)
+            if (containImage.hasImage) { //TODO:add folder Name
+                containImage.type === 'single'
+                    ? deleteFile(`${folder}/${containImage.value}`)
+                    : containImage.value?.forEach(file => deleteFile(`${folder}/${file}`))
+            }
+
+            return res.status(200).json({ success: 'Deleted successfully' })
         } catch (error) {
             log(chalk.red(`remove -> ${model} : ${error.message}`))
         }

@@ -18,18 +18,21 @@ const adminSchema = new mongoose.Schema({
             'Please fill a valid email address.'
         ]
     },
+    role: {
+        type: String,
+        enum: ['superAdmin', 'admin',],
+        default: 'admin',
+    },
+    phone: {
+        type: String,
+        default: null,
+    },
     password: {
         type: String,
         required: [true, 'Password is required'],
         minlength: [6, 'Password must be at least 6 characters long'],
-        select: false,
     },
-    role: {
-        type: String,
-        enum: ['admin', 'super-admin'],
-        default: 'admin',
-    },
-    image: {
+    profile: {
         type: String,
     },
 },

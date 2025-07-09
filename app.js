@@ -12,7 +12,6 @@ import session from 'express-session'
 import config from './config/config.js'
 import MongoStore from 'connect-mongo'
 import router from './routes/server.routes.js'
-import chalk from 'chalk'
 
 const app = express()
 
@@ -49,22 +48,27 @@ app.use(rateLimit(
   }
 ))
 // app.use(cookieParser(config.securityKey))
-app.use(
-  session({
+app.use(session(
+  {
     secret: config.securityKey,
-    saveUninitialized: false,
     resave: false,
-    proxy: true,
-    store: MongoStore.create({ mongoUrl: config.mongodb_URL }),
+    saveUninitialized: false,
     cookie: {
-      maxAge: 3600000, // 1h
-      path: '/',
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
+      maxAge: 4 * 60 * 60 * 1000,
+      secure: config.node_env === 'production',
+      httpOnly: true,      // can't be accessed via JS
+      sameSite: 'strict', // prevent CSRF
     },
-  })
-)
+    store: MongoStore.create({
+      mongoUrl: config.mongodb_URL,
+      ttl: 4 * 60 * 60, // 4 hours Auto Remove from DB Sessions
+      autoRemove: 'native',
+      crypto: {
+        secret: config.mogo_store_secret_key
+      }
+    })
+  }
+))
 app.use(passport.initialize())
 app.use(passport.session())
 
