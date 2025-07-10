@@ -13,9 +13,11 @@ export const Login_Auth = async (model, field1 = 'email', field2 = 'password') =
                 usernameField: field1,
                 passwordField: field2,
             },
-            async (searchField, password, done) => {
+            async (email, password, done) => {
                 try {
-                    const user = await model.findOne({ searchField })
+                    const user = await model.findOne({ email })
+                    console.log(user);
+                    
 
                     if (!user) return done(null, false, { error: 'User not found' });
 

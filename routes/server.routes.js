@@ -22,7 +22,7 @@ router.use((req, res, next) => {
     next()
 })
 
-router.use(isAuthenticated)
+// router.use(isAuthenticated)
 router.get('/', (req, res) => res.render('dashboard', { layout: 'layout', title: 'Dashboard' }))
 router.get('/profile', adminPanelController.renderAdminProfile)
 router.route('/profile')
@@ -44,6 +44,7 @@ const createCRUDRoutes = async () => {
                 addURL: `${req.originalUrl}/add`,
                 dataTableAPI: `${req.baseUrl}/resources/api/${modelName}`,
                 api: req.originalUrl,
+                admin: req.user
             })
         })
         router.get(`/resources/${modelName}/add`, (req, res) => {

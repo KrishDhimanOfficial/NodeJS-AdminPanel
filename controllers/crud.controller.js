@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import validate from "../services/validate.service.js"
 import { deleteFile, containsImage } from '../services/removeFile.service.js'
 import chalk from 'chalk';
+import handleAggregatePagination from "../services/handlepagination.service.js";
 const log = console.log
 const validateId = mongoose.Types.ObjectId.isValid;
 
@@ -23,21 +24,33 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             return res.status(200).json({ success: 'created successfully.', redirect: req.originalUrl })
         } catch (error) {
             if (error.name === 'ValidationError') validate(res, error.errors)
-            log(chalk.red(`create -> ${model} : ${error.message}`))
+            log(chalk.red(`create -> ${model.modelName} : ${error.message}`))
         }
     },
 
     getAllJsonData: async (req, res) => {
         try {
-            const response = typeof aggregate === 'function' && await aggregate()
-            if (response) {
-                return res.status(200).json(response)
+            const query = { page: req.query.page, limit: req.query.size }
+
+            if (typeof aggregate === 'object') {
+                const response = await handleAggregatePagination(model, aggregate, query)
+
+                return res.status(200).json({
+                    last_page: response.totalPages,
+                    data: response.collectionData,
+                    columns: options.list
+                })
             } else {
-                const data = (await model.find({}, options.isVisible)).reverse()
-                return res.status(200).json({ data, columns: options.list })
+                const response = await handleAggregatePagination(model, [{ $project: options.isVisible }], query)
+
+                return res.status(200).json({
+                    last_page: response.totalPages,
+                    data: response.collectionData.reverse(),
+                    columns: options.list
+                })
             }
         } catch (error) {
-            log(chalk.red(`getAllJsonData -> ${model} : ${error.message}`))
+            log(chalk.red(`getAllJsonData -> ${model.modelName} : ${error.message}`))
         }
     },
 
@@ -51,7 +64,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
                 response
             })
         } catch (error) {
-            log(chalk.red(`getOne -> ${model} : ${error.message}`))
+            log(chalk.red(`getOne -> ${model.modelName} : ${error.message}`))
         }
     },
 
@@ -72,7 +85,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             return res.status(200).json({ success: 'update successfully', redirect: req.originalUrl })
         } catch (error) {
             if (error.name === 'ValidationError') validate(res, error.errors)
-            log(chalk.red(`update -> ${model} : ${error.message}`))
+            log(chalk.red(`update -> ${model.modelName} : ${error.message}`))
         }
     },
     updateModelStatus: async (req, res) => {
@@ -86,7 +99,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             if (!response) return res.status(400).json({ error: 'Something went wrong, please try again later.' })
             return res.status(200).json({ success: 'updated successfully.' })
         } catch (error) {
-            log(chalk.red(`updateModelStatus -> ${model} : ${error.message}`))
+            log(chalk.red(`updateModelStatus -> ${model.modelName} : ${error.message}`))
         }
     },
 
@@ -106,7 +119,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
 
             return res.status(200).json({ success: 'Deleted successfully' })
         } catch (error) {
-            log(chalk.red(`remove -> ${model} : ${error.message}`))
+            log(chalk.red(`remove -> ${model.modelName} : ${error.message}`))
         }
     }
 })

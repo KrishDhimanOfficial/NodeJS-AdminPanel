@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import bcrypt from 'bcrypt'
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -50,4 +51,5 @@ userSchema.pre('save', async function (next) {
     next()
 })
 
+userSchema.plugin(mongooseAggregatePaginate)
 export default mongoose.model('user', userSchema)

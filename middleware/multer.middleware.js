@@ -54,10 +54,10 @@ export const handlemulterError = (err, req, res, next) => {
 
     if (err instanceof multer.MulterError) {
         // A Multer error occurred when uploading.
-        return res.json({ error: err.message })
+        return res.status(400).json({ error: err.message })
     } else if (err) {
         // Custom error occurred when uploading.
-        return res.json({ error: err.message })
+        return res.status(400).json({ error: err.message })
     } else {
         next()
     }
@@ -93,20 +93,3 @@ export const upload = (folderName = '',
         fileFilter: options.image ? imageFilter : fileFilter
     })
 }
-
-// // Create middleware
-// export const multerMiddleware = (config = {}) => {
-//     switch (config.type) {
-//         case 'single':
-//             return upload(config.folder, config.options, config.options?.limits)
-//                 .single(config.field)
-//         case 'array':
-//             return upload(config.folder, config.options, config.options?.limits)
-//                 .array(config.field, config.maxCount || 10)
-//         case 'fields':
-//             return upload(config.folder, config.options, config.options?.limits)
-//                 .fields(config.fields)
-//         default:
-//             return upload().none()
-//     }
-// }

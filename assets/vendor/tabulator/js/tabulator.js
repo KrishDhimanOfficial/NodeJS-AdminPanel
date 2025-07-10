@@ -4,6 +4,7 @@ const xlsxbtn = document.getElementById("download-xlsx")
 const csvbtn = document.getElementById("download-csv")
 const select = document.querySelector('#hide-column-select')
 const dataTableAPI = document.querySelector('#dataTableAPI')
+
 const capitalizeFirstLetter = (str) => {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1)
@@ -29,7 +30,7 @@ const filterOptions = { // Tabulator Filter Options
         editable: false,
         headerFilterParams: { valuesLookup: true, clearable: true }
     },
-    dob: {
+    date: {
         sorter: 'date',
         headerFilter: 'input',
         headerFilterPlaceholder: 'Search'
@@ -102,9 +103,9 @@ const initializeTabulator = async () => {
     try {
         return new Promise(async (resolve) => {
             table = new Tabulator("#tabulator", {
-                layout: "fitColumns",         // fit columns to width of table
-                addRowPos: "top",           // when adding a new row, add it to the top of the table
-                history: true,             // allow undo and redo actions on the table
+                layout: "fitColumns",   // fit columns to width of table
+                addRowPos: "top",      // when adding a new row, add it to the top of the table
+                history: true,        // allow undo and redo actions on the table
                 printAsHtml: true,
                 pagination: true,
                 paginationSize: 10,
@@ -137,7 +138,7 @@ const initializeTabulator = async () => {
                     this.setColumns(columns) // ✅ Set columns after data arrives
                     return response
                 },
-                movableColumns: true,      //allow column order to be changed
+                movableColumns: true,  //allow column order to be changed
                 tableBuilt: () => { resolve() }
             })
         })
