@@ -1,20 +1,21 @@
 import multer from 'multer'
 import path from 'path'
-import fs from 'fs'
+import fs from 'node:fs'
 
 const DEFAULT_SIZES = {
     image: 1 * 1024 * 1024, // 1MB
     file: 5 * 1024 * 1024  // 5MB
 }
 
-const createStorage = async (dir) => {
+const createStorage = (dir) => {
     const uploadPath = path.join('uploads', dir)
+
     // Ensure the folder exists
-    if (!fs.existsSync(uploadPath)) fs.mkdir(uploadPath, { recursive: true })
+    if (!fs.existsSync(uploadPath)) fs.promises.mkdir(uploadPath, { recursive: true })
 
     return multer.diskStorage({
         destination: (req, file, cb) => {
-            cb(null, `./uploads/${dir}`)
+            cb(null, uploadPath)
         },
         filename: (req, file, cb) => {
             const randomNo = Math.round(Math.random() * 10)
@@ -25,7 +26,7 @@ const createStorage = async (dir) => {
 }
 
 const imageFilter = (req, file, cb) => {
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp']
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.pdf']
     const ext = path.extname(file.originalname).toLowerCase()
 
     if (!allowedExtensions.includes(ext)) { // Check file extension

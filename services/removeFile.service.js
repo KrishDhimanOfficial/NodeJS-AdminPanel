@@ -1,17 +1,22 @@
-import fs from 'fs'
-import path from 'path'
-import config from '../config/config.js'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+import fs from 'node:fs'
+import chalk from 'chalk'
 
-const deleteFile = async (file) => {
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+const deleteFile = async (folderPath) => {
     try {
-        const __dirname = path.dirname(`${config.serverURL}`)
-        const imagePath = path.join(__dirname, '../uploads', file)
+        const imagePath = path.join(__dirname, '..', folderPath)
 
-        await fs.promises.rm(imagePath)
+        if (fs.existsSync(imagePath)) await fs.promises.rm(imagePath, { force: true })
+        else console.log(chalk.red(`File not found: ${imagePath}`))
     } catch (error) {
-        console.log('deleteImage : ' + error.message)
+        console.error(chalk.red('deleteFile error:', error.message))
     }
 }
+
 
 const containsImage = (obj) => {
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp'];

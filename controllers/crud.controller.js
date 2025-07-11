@@ -14,16 +14,33 @@ const validateId = mongoose.Types.ObjectId.isValid;
 export const createCrudController = (model, options = {}, aggregate) => ({
     create: async (req, res) => {
         try {
+            // console.log(req.files);
             const val = options.check;
             const IsExist = await model.findOne({ val })
             if (IsExist) res.status(400).json({ info: `${options.check} Already Exist.` })
 
-            const response = await model.create(req.body)
+            if (req.file) req.body[req.file.fieldname] = req.file.path
+            else if (req.files && typeof req.files === 'object') Object.entries(req.files).forEach(([fieldName, files]) => {
+                if (files.length === 1) {
+                    req.body[fieldName] = files[0].path; // single file
+                } else {
+                    req.body[fieldName] = files.map(file => file.path) // multiple files
+                }
+            })
+            else if (req.files && Array.isArray(req.files)) req.body[req.files[0]?.fieldname] = req.files.map(file => file.path)
+
+            const response = await model.create(req.body) // save to database
 
             if (!response) return res.status(400).json({ error: 'Something went wrong, please try again later.' })
             return res.status(200).json({ success: 'created successfully.', redirect: req.originalUrl })
         } catch (error) {
             if (error.name === 'ValidationError') validate(res, error.errors)
+            if (req.file && error) { // Delete the uploaded file
+                await deleteFile(req.file.path)
+            }
+            if (Array.isArray(req.files) && error) { // Delete the uploaded file
+                req.files.forEach(async (file) => await deleteFile(file.path))
+            }
             log(chalk.red(`create -> ${model.modelName} : ${error.message}`))
         }
     },
@@ -111,10 +128,10 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             if (!response) return res.status(404).json({ error: 'Not found' })
 
             const containImage = containsImage(response)
-            if (containImage.hasImage) { //TODO:add folder Name
+            if (containImage.hasImage) {
                 containImage.type === 'single'
-                    ? deleteFile(`${folder}/${containImage.value}`)
-                    : containImage.value?.forEach(file => deleteFile(`${folder}/${file}`))
+                    ? deleteFile(containImage.value)
+                    : containImage.value?.forEach(file => deleteFile(file))
             }
 
             return res.status(200).json({ success: 'Deleted successfully' })
