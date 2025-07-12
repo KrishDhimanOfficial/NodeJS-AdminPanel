@@ -7,15 +7,15 @@
                 <div class="card-body box-profile">
                     <div class="text-center">
                         <img class="profile-user-img img-fluid img-circle"
-                            src="<%= false ? `/uploads/admin/${admin.avatar}` : '/assets/images/user.png' %>"
+                            src="<%= admin.profile ? `/${admin.profile}` : '/assets/images/user.png' %>"
                             alt="User profile picture">
                     </div>
                     <h3 class="profile-username text-center">
-                        <%# admin.name %>
+                        <%= admin.name.split(' ')[0].charAt(0).toUpperCase() + admin.name.split(' ')[0].slice(1) %>
                     </h3>
 
                     <p class="text-muted text-center">
-                        <%# admin.role %>
+                        <%= admin.role %>
                     </p>
                 </div>
                 <!-- /.card-body -->
@@ -28,12 +28,12 @@
                 <div class="card-header p-2">
                     <ul class="nav nav-pills">
                         <li class="nav-item">
-                            <a class="nav-link active" href="#settings" data-toggle="tab">
+                            <a class="nav-link <%= locals.active %>" href="#settings" data-toggle="tab">
                                 Settings
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#password" data-toggle="tab">
+                            <a class="nav-link <%= locals.pactive %>" href="#password" data-toggle="tab">
                                 Change Password
                             </a>
                         </li>
@@ -41,65 +41,47 @@
                 </div><!-- /.card-header -->
                 <div class="card-body">
                     <div class="tab-content">
-                        <div class="tab-pane active" id="settings">
-                            <form action="<%# formAction %>" method="post" class="form-horizontal"
-                                enctype="multipart/form-data">
+                        <div class="tab-pane <%= locals.active %>" id="settings">
+                            <form id="SubmitForm" class="form-horizontal">
                                 <div class="form-group row">
                                     <label for="inputName" class="col-sm-2 col-form-label">Name</label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="name" id="inputName"
-                                            placeholder="Name" value="<%# admin.name %>">
-                                        <%# include('../partials/alert',{error: locals.errors && errors.name ?
-                                            errors.name.message : false}) %>
+                                            placeholder="Name" value="<%= admin.name %>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
                                     <div class="col-sm-10">
                                         <input type="email" class="form-control" name="email" id="inputEmail"
-                                            placeholder="Email" value="<%# admin.email %>">
-                                        <%# include('../partials/alert',{error: locals.errors && errors.email ?
-                                            errors.email.message : false}) %>
+                                            placeholder="Email" value="<%= admin.email %>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="phone" class="col-sm-2 col-form-label">Phone</label>
                                     <div class="col-sm-10">
                                         <input type="text" class="form-control" name="phone" id="phone"
-                                            placeholder="Phone" value="<%# admin.phone %>">
-                                        <%# include('../partials/alert',{error: locals.errors && errors.phone ?
-                                            errors.phone.message : false}) %>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label for="inputExperience" class="col-sm-2 col-form-label">Address</label>
-                                    <div class="col-sm-10">
-                                        <textarea class="form-control" name="address" id="inputExperience"
-                                            placeholder="Address"><%# admin.address %></textarea>
-                                        <%# include('../partials/alert',{error: locals.errors && errors.address ?
-                                            errors.address.message : false}) %>
+                                            placeholder="Phone" value="<%= admin.phone %>">
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <label for="image" class="col-sm-2 col-form-label">Upload Image</label>
                                     <div class="col-sm-10">
-                                        <input type="file" class="form-control" name="avatar" id="image">
+                                        <input type="file" class="form-control" name="profile" id="image">
                                         <span>
                                             <b>Note: </b>Image size should be less than 1MB</b>
                                         </span>
-                                        <%# include('../partials/alert',{error: locals.errors && errors.image ?
-                                            errors.image.message : false}) %>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="offset-sm-2 col-sm-10">
-                                        <button type="submit" class="btn btn-dark">update profile</button>
+                                        <button id="submitFormBtn" class="btn btn-dark">update profile</button>
                                     </div>
                                 </div>
                             </form>
                         </div>
-                        <div class="tab-pane" id="password">
-                            <form id="SubmitForm" class="form-horizontal" enctype="application/x-www-form-urlencoded">
+                        <div class="tab-pane <%= locals.pactive %>" id="password">
+                            <form action="<%= updatapassword %>" class="form-horizontal" method="post" autocomplete="off">
                                 <div class="form-group row">
                                     <label for="oldPassword" class="col-sm-2 col-form-label">Old Password</label>
                                     <div class="col-sm-10">
@@ -116,14 +98,19 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="offset-sm-2 col-sm-10">
-                                        <button id="submitFormBtn" class="btn btn-dark">change password</button>
+                                        <button  class="btn btn-dark">change password</button>
                                     </div>
                                 </div>
+                            <% if (locals.error || locals.success) { %>
+                                <div class="alert <%= locals.error ? 'alert-danger' : 'alert-success' %> alert-danger mt-2" role="alert">
+                                    <%= locals.error || locals.success %>
+                                </div>
+                                <% } %>
                             </form>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+</div>
 </div>

@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const config = {
+    allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.pdf'],
     serverURL: process.env.SERVER_URL,
     port: parseInt(process.env.PORT) || 3000,
     mongodb_URL: String(process.env.MONGODB_URL),

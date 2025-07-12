@@ -19,28 +19,45 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             const IsExist = await model.findOne({ val })
             if (IsExist) res.status(400).json({ info: `${options.check} Already Exist.` })
 
-            if (req.file) req.body[req.file.fieldname] = req.file.path
-            else if (req.files && typeof req.files === 'object') Object.entries(req.files).forEach(([fieldName, files]) => {
-                if (files.length === 1) {
-                    req.body[fieldName] = files[0].path; // single file
-                } else {
-                    req.body[fieldName] = files.map(file => file.path) // multiple files
+            if (req.file?.fieldname && req.file?.path) {
+                req.body[req.file.fieldname] = req.file.path;
+            } // Case: upload.single()
+
+            if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
+                for (const [fieldName, files] of Object.entries(req.files)) {
+                    files.length === 1
+                        ? req.body[fieldName] = files[0].path
+                        : req.body[fieldName] = files.map(file => file.path)
                 }
-            })
-            else if (req.files && Array.isArray(req.files)) req.body[req.files[0]?.fieldname] = req.files.map(file => file.path)
+            } // Case: upload.fields()
 
-            const response = await model.create(req.body) // save to database
+            if (Array.isArray(req.files)) {
+                const fieldName = req.files[0]?.fieldname;
+                if (fieldName) req.body[fieldName] = req.files.map(file => file.path)
+            }  // Case: upload.array()
 
+            const response = await model.create(req.body) // Save
             if (!response) return res.status(400).json({ error: 'Something went wrong, please try again later.' })
             return res.status(200).json({ success: 'created successfully.', redirect: req.originalUrl })
         } catch (error) {
             if (error.name === 'ValidationError') validate(res, error.errors)
-            if (req.file && error) { // Delete the uploaded file
+            if (req.file && error) {
                 await deleteFile(req.file.path)
-            }
-            if (Array.isArray(req.files) && error) { // Delete the uploaded file
-                req.files.forEach(async (file) => await deleteFile(file.path))
-            }
+            } // Delete single file (upload.single)
+
+            if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
+                for (const [fieldName, files] of Object.entries(req.files)) {
+                    for (const file of files) {
+                        if (file?.path) await deleteFile(file.path);
+                    }
+                }
+            }  // Delete files in fields object (upload.fields)
+
+            if (Array.isArray(req.files)) {
+                for (const file of req.files) {
+                    if (file?.path) await deleteFile(file.path)
+                }
+            } // Delete array of files (upload.array)
             log(chalk.red(`create -> ${model.modelName} : ${error.message}`))
         }
     },
@@ -49,8 +66,8 @@ export const createCrudController = (model, options = {}, aggregate) => ({
         try {
             const query = { page: req.query.page, limit: req.query.size }
 
-            if (typeof aggregate === 'object') {
-                const response = await handleAggregatePagination(model, aggregate, query)
+            if (typeof aggregate === 'function') {
+                const response = await handleAggregatePagination(model, aggregate(req, res), query)
 
                 return res.status(200).json({
                     last_page: response.totalPages,
@@ -129,9 +146,11 @@ export const createCrudController = (model, options = {}, aggregate) => ({
 
             const containImage = containsImage(response)
             if (containImage.hasImage) {
-                containImage.type === 'single'
-                    ? deleteFile(containImage.value)
-                    : containImage.value?.forEach(file => deleteFile(file))
+                containImage.fields.forEach(field => {
+                    field.type === 'single'
+                        ? deleteFile(field.value)
+                        : field.value?.forEach(file => deleteFile(file))
+                })
             }
 
             return res.status(200).json({ success: 'Deleted successfully' })

@@ -1,6 +1,7 @@
 import multer from 'multer'
-import path from 'path'
+import path from 'node:path'
 import fs from 'node:fs'
+import config from '../config/config.js'
 
 const DEFAULT_SIZES = {
     image: 1 * 1024 * 1024, // 1MB
@@ -26,10 +27,9 @@ const createStorage = (dir) => {
 }
 
 const imageFilter = (req, file, cb) => {
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.pdf']
     const ext = path.extname(file.originalname).toLowerCase()
 
-    if (!allowedExtensions.includes(ext)) { // Check file extension
+    if (!config.allowedExtensions?.includes(ext)) { // Check file extension
         return cb(new Error('only jpg, png, webp, files are allowed'), false)
     }
     cb(null, true)

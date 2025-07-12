@@ -1,3 +1,5 @@
+import chalk from "chalk"
+
 const handleAggregatePagination = async (collectionName, aggregation, query) => {
     try {
         const { page = 1, limit = 1 } = query;
@@ -19,7 +21,7 @@ const handleAggregatePagination = async (collectionName, aggregation, query) => 
             collectionData: data.docs,
         }
     } catch (error) {
-        console.log('handelAggregatePagination :' + error.message)
+        console.log(chalk.red('handelAggregatePagination :' + error.message))
     }
 }
 

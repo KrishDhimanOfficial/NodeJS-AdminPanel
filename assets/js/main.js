@@ -20,6 +20,8 @@ Form && (
             let res;
             submitFormBtn.disabled = true;
             submitFormBtn.innerHTML = 'Submitting...';
+            console.log(Form);
+            
 
             const formdata = new FormData(e.target)
             Form.id === 'SubmitForm' // Handle Data Submission To Server

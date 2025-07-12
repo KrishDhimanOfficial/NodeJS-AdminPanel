@@ -7,7 +7,7 @@ import resources from "../lib/resources.lib.js"
 import mongoose from "mongoose"
 import adminPanelController from "../controllers/adminPanel.controller.js"
 import authControllers from "../controllers/auth.controller.js"
-import { handlemulterError } from "../middleware/multer.middleware.js"
+import { handlemulterError, upload } from "../middleware/multer.middleware.js"
 const router = express.Router()
 
 router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
@@ -24,10 +24,11 @@ router.use((req, res, next) => {
 })
 
 router.use(isAuthenticated)
-router.get('/', (req, res) => res.render('dashboard', { layout: 'layout', title: 'Dashboard' }))
-router.get('/profile', adminPanelController.renderAdminProfile)
+router.get('/', (req, res) => res.status(200).render('dashboard', { layout: 'layout', title: 'Dashboard' }))
+router.post('/update/password', adminPanelController.updateAdminPassword)
 router.route('/profile')
-    .post(adminPanelController.updateAdminProfile)
+    .get(adminPanelController.renderAdminProfile)
+    .post(upload('admin').single('profile'), handlemulterError, adminPanelController.updateAdminProfile)
 
 const createCRUDRoutes = async () => {
     const models = await loadModels({ resources })
