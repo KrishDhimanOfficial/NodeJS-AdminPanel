@@ -33,7 +33,14 @@ app.use(cors(
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(compression())
+app.use(compression(
+  {
+    level: 2, // compression level
+    threshold: 0, // Compress all
+    memLevel: 9, // memory usuage
+    filter: (req, res) => compression.filter(req, res)
+  }
+))
 app.use(config.node_env === 'development' ? logger('dev') : logger('combined'))
 app.use(rateLimit(
   {
@@ -47,7 +54,6 @@ app.use(rateLimit(
     },
   }
 ))
-// app.use(cookieParser(config.securityKey))
 app.use(session(
   {
     secret: config.securityKey,
