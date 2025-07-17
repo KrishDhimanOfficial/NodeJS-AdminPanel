@@ -91,7 +91,8 @@ export const createCrudController = (model, options = {}, aggregate) => ({
     async getOne(req, res) {
         try {
             if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
-            const response = await model.findById(req.params.id)
+            const response = await model.findById({ _id: req.params.id })
+
             return res.render(`${req.modelName}/update`, {
                 title: req.modelName,
                 api: `${req.baseUrl}/resources/${req.modelName}`,
@@ -122,6 +123,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             log(chalk.red(`update -> ${model.modelName} : ${error.message}`))
         }
     },
+    
     updateModelStatus: async (req, res) => {
         try {
             if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })

@@ -89,7 +89,7 @@ export const upload = (folderName = '',
             fileSize: Math.max(
                 options.image ? sizeOptions.imageSIZE || DEFAULT_SIZES.image : 0,
                 options.file ? sizeOptions.fileSIZE || DEFAULT_SIZES.file : 0
-            )
+            ) 
         },
         fileFilter: options.image ? imageFilter : fileFilter
     })

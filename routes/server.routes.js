@@ -70,8 +70,8 @@ const createCRUDRoutes = async () => {
                 response
             })
         })
-        router.put(`/resources/${modelName}/:id`, multer(), controller.update)
-        router.patch(`/resources/${modelName}/:id`, multer(), controller.updateModelStatus)
+        router.put(`/resources/${modelName}/:id`, multer(), handlemulterError, controller.update)
+        router.patch(`/resources/${modelName}/:id`, multer(), handlemulterError, controller.updateModelStatus)
         router.delete(`/resources/${modelName}/:id`, controller.remove)
     }
 }
