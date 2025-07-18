@@ -1,12 +1,14 @@
 import '../vendor/jquery/jquery.min.js'
 import '../vendor/bootstrap/js/bootstrap.bundle.min.js'
+import '../vendor/select2/js/select2.full.min.js'
 import '../vendor/pace-progress/pace.min.js'
 import '../vendor/adminlte/adminlte.min.js'
 import Fetch from "./fetch.js"
 import {
     datatable, displayPreviewImage, apiInput,
-    Form, Notify, previewImageInput, openDangerModal
+    Form, Notify, previewImageInput, openDangerModal, setupSelect2
 } from "./variable.js";
+const selector = document.querySelector;
 
 datatable && initializeTabulator()
 previewImageInput && (
@@ -20,8 +22,6 @@ Form && (
             let res;
             submitFormBtn.disabled = true;
             submitFormBtn.innerHTML = 'Submitting...';
-            console.log(Form);
-            
 
             const formdata = new FormData(e.target)
             Form.id === 'SubmitForm' // Handle Data Submission To Server
@@ -48,3 +48,5 @@ datatable && (
         if (e.target.closest('.edit')) getTableRowData(endApi)
     }
 )
+
+setupSelect2('#select', '/admin/resources/select/api/admin', 'Search Admin')

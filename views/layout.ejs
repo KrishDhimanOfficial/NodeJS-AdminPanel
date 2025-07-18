@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="/assets/vendor/notify/notify.css">
     <link rel="stylesheet" href="/assets/vendor/tabulator/css/tabulator.min.css">
     <link rel="stylesheet" href="/assets/vendor/tabulator/css/tabulator_semanticui.min.css">
+    <link rel="stylesheet" href="/assets/vendor/select2/css/select2.min.css">
     <link rel="stylesheet" href="/assets/vendor/adminlte/adminlte.min.css">
     <link rel="stylesheet" href="/assets/css/app.css">
 </head>
@@ -40,21 +41,21 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="/assets/images/user.png" class="user-image img-circle elevation-2" alt="User Image">
-                        <span class="d-none d-md-inline">Alexander Pierce</span>
+                        <img src="/<%= admin.profile %>" class="user-image img-circle elevation-2" alt="User Image">
+                        <span class="d-none d-md-inline"><%= admin.name.toUpperCase() %></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                         <!-- User image -->
-                        <li class="user-header bg-primary">
-                            <img src="/assets/images/user.png" class="img-circle elevation-2" alt="User Image">
+                        <li class="user-header bg-purple">
+                            <img src="/<%= admin.profile %>" class="img-circle elevation-2" alt="User Image">
 
                             <p>
-                                <%# admin.name %>
-                                <small>Member since Nov. 2012</small>
+                                <%= admin.role %>
+                                    <!-- <small>Member since Nov. 2012</small> -->
                             </p>
                         </li>
                         <!-- Menu Body -->
-                        <li class="user-body">
+                        <!-- <li class="user-body">
                             <div class="row">
                                 <div class="col-4 text-center">
                                     <a href="#">Followers</a>
@@ -66,24 +67,13 @@
                                     <a href="#">Friends</a>
                                 </div>
                             </div>
-                            <!-- /.row -->
-                        </li>
+                        </li> -->
                         <!-- Menu Footer-->
                         <li class="user-footer">
                             <a href="/admin/profile" class="btn btn-default btn-flat">Profile</a>
                             <a href="/admin/logout" class="btn btn-default btn-flat float-right">Sign out</a>
                         </li>
                     </ul>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-                        <i class="fas fa-expand-arrows-alt"></i>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
-                        <i class="fas fa-th-large"></i>
-                    </a>
                 </li>
             </ul>
         </nav>

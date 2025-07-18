@@ -23,8 +23,8 @@ router.use((req, res, next) => {
     next()
 })
 
-router.use(isAuthenticated)
-router.get('/', (req, res) => res.status(200).render('dashboard', { layout: 'layout', title: 'Dashboard' }))
+// router.use(isAuthenticated)
+router.get('/', (req, res) => res.status(200).render('dashboard', { layout: 'layout', title: 'Dashboard', admin: req.user }))
 router.post('/update/password', adminPanelController.updateAdminPassword)
 router.route('/profile')
     .get(adminPanelController.renderAdminProfile)
@@ -33,15 +33,17 @@ router.route('/profile')
 const createCRUDRoutes = async () => {
     const models = await loadModels({ resources })
 
-    for await (const { modelName, model, options, aggregate, multer } of models) {
+    for await (const { modelName, model, options, aggregate, multer, select2 } of models) {
 
         const controller = createCrudController(model, options, aggregate)
-        // console.log({ modelName, model, options, aggregate });
+        // console.log({ modelName, model, options, aggregate })
 
+        select2.length > 0 && select2.forEach(option => {
+            router.get(`/resources/select/api/${option.model.modelName}`, (req, res) => controller.getSelectJsonData(req, res, option))
+        })
         router.get(`/resources/api/${modelName}`, controller.getAllJsonData)
-        router.get(`/resources/${modelName}`, async (req, res) => {
-            // const accept = req.get('Accept')
-            return res.render('datatable', {
+        router.get(`/resources/${modelName}`, (req, res) => {
+            return res.status(200).render('datatable', {
                 title: modelName,
                 addURL: `${req.originalUrl}/add`,
                 dataTableAPI: `${req.baseUrl}/resources/api/${modelName}`,
@@ -49,25 +51,28 @@ const createCRUDRoutes = async () => {
                 admin: req.user
             })
         })
+        router.get(`/resources/${modelName}/view/:id`, controller.getViewInfo)
         router.get(`/resources/${modelName}/add`, (req, res) => {
             const userModel = mongoose.model(modelName)
-            const fields = Object.entries(userModel.schema.paths)
-                .filter(([key]) => !['_id', '__v', 'createdAt', 'updatedAt'].includes(key))
-                .map(([key]) => key)  // Get all schema fields 
+            // const fields = Object.entries(userModel.schema.paths)
+            //     .filter(([key]) => !['_id', '__v', 'createdAt', 'updatedAt'].includes(key))
+            //     .map(([key]) => key)  // Get all schema fields 
 
-            return res.render(`${modelName}/create`, {
+            return res.status(200).render(`${modelName}/create`, {
                 title: modelName,
                 api: `${req.baseUrl}/resources/${modelName}`,
-                fields
+                admin: req.user
+                // fields,
             })
         })
         router.post(`/resources/${modelName}`, multer(), handlemulterError, controller.create)
         router.get(`/resources/${modelName}/:id`, async (req, res) => {
             const response = await model.findById(req.params.id)
-            return res.render(`${modelName}/update`, {
+            return res.status(200).render(`${modelName}/update`, {
                 title: modelName,
                 api: `${req.baseUrl}/resources/${modelName}`,
-                response
+                response,
+                admin: req.user
             })
         })
         router.put(`/resources/${modelName}/:id`, multer(), handlemulterError, controller.update)

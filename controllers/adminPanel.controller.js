@@ -14,7 +14,8 @@ const adminPanelController = {
                 admin: response,
                 api: req.originalUrl,
                 active: true ? 'active' : '',
-                updatapassword: `${req.baseUrl}/update/password`
+                updatapassword: `${req.baseUrl}/update/password`,
+                admin: req.user
             })
         } catch (error) {
             console.log('renderAdminProfile : ' + error.message)

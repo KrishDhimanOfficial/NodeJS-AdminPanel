@@ -62,6 +62,38 @@ export const createCrudController = (model, options = {}, aggregate) => ({
         }
     },
 
+    getSelectJsonData: async (req, res, option) => {
+        try {
+            const response = await option.model?.aggregate([
+                {
+                    $match: {
+                        [option.searchField]: { $regex: req.query.search, $options: 'i' }
+                    }
+                },
+                { $project: { [option.searchField]: 1 } }
+            ])
+            return res.status(200).json(response)
+        } catch (error) {
+            log(chalk.red(`getSelectJsonData -> ${option.model?.modelName} : ${error.message}`))
+        }
+    },
+
+    getViewInfo: async (req, res) => {
+        try {
+            if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
+            const response = await model.findById({ _id: req.params.id })
+
+            const name = model.modelName;
+            const responseObj = {}
+            responseObj[name] = response
+            responseObj['admin'] = req.user
+
+            return res.status(200).render(`${model.modelName}/view`, responseObj)
+        } catch (error) {
+            log(chalk.red(`getViewInfo -> ${model.modelName} : ${error.message}`))
+        }
+    },
+
     getAllJsonData: async (req, res) => {
         try {
             const query = { page: req.query.page, limit: req.query.size }
@@ -123,7 +155,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             log(chalk.red(`update -> ${model.modelName} : ${error.message}`))
         }
     },
-    
+
     updateModelStatus: async (req, res) => {
         try {
             if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
