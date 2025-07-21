@@ -38,7 +38,7 @@ const createCRUDRoutes = async () => {
         const controller = createCrudController(model, options, aggregate)
         // console.log({ modelName, model, options, aggregate })
 
-        select2.length > 0 && select2.forEach(option => {
+        select2?.length > 0 && select2.forEach(option => {
             router.get(`/resources/select/api/${option.model.modelName}`, (req, res) => controller.getSelectJsonData(req, res, option))
         })
         router.get(`/resources/api/${modelName}`, controller.getAllJsonData)

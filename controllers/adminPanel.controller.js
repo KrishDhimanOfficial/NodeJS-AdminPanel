@@ -11,11 +11,10 @@ const adminPanelController = {
             const response = await adminModel.findById({ _id: req.user._id })
             return res.render('Admin_profile/profile', {
                 title: 'Admin Profile',
-                admin: response,
                 api: req.originalUrl,
                 active: true ? 'active' : '',
                 updatapassword: `${req.baseUrl}/update/password`,
-                admin: req.user
+                admin: response,
             })
         } catch (error) {
             console.log('renderAdminProfile : ' + error.message)
