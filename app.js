@@ -57,9 +57,7 @@ app.use(session(
       mongoUrl: config.mongodb_URL,
       ttl: 4 * 60 * 60, // 4 hours Auto Remove from DB Sessions
       autoRemove: 'native',
-      crypto: {
-        secret: config.mogo_store_secret_key
-      }
+      crypto: { secret: config.mogo_store_secret_key }
     })
   }
 ))
@@ -101,11 +99,10 @@ app.use('/admin', router)
 
 app.use((err, req, res, next) => {
 
-  res.status(err.status || 500)
-  return res.render('error', {
+  return res.status(err.status || 500).render('error', {
     message: err.message,
     error: config.node_env === 'development' ? err : {},
   })
 })
 
-export default app;
+export default app

@@ -1,16 +1,11 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
 const startTime = Date.now()
 
 import app from '../app.js'
-import debug from 'debug'
-import http from 'http'
 import config from '../config/config.js'
-import cluster from 'cluster'
-import numcpu from 'os'
+import debug from 'debug'
+import http from 'node:http'
+import cluster from 'node:cluster'
+import numcpu from 'node:os'
 import chalk from 'chalk'
 import connectDB from '../config/connectDB.js'
 
@@ -22,9 +17,8 @@ if (cluster.isPrimary) {
   cluster.on('exit', (worker, code, signal) => console.log(`worker ${worker.process.pid} died`))
 } else {
   const port = config.port;
-
-  connectDB()
   app.set('port', port)
+  connectDB()
 
   const server = http.createServer(app)  // Create HTTP server.
 

@@ -96,6 +96,8 @@ export const createCrudController = (model, options = {}, aggregate) => ({
 
     getAllJsonData: async (req, res) => {
         try {
+            const payload = 'helo'
+            // return res.status(200).json(payload.repeat(100000))
             const query = { page: req.query.page, limit: req.query.size }
 
             if (typeof aggregate === 'function') {
@@ -139,9 +141,9 @@ export const createCrudController = (model, options = {}, aggregate) => ({
         try {
             if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
             const { password } = req.body;
-            if (password.length === 0) delete req.body.password;
+            if (password?.length === 0) delete req.body.password;
 
-            const response = await model.findByIdAndUpdate(req.params.id,
+            const response = await model.findByIdAndUpdate({ _id: req.params.id },
                 { $set: req.body },
                 {
                     new: true,
@@ -167,6 +169,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             if (!response) return res.status(400).json({ error: 'Something went wrong, please try again later.' })
             return res.status(200).json({ success: 'updated successfully.' })
         } catch (error) {
+            if (error.name === 'ValidationError') validate(res, error.errors)
             log(chalk.red(`updateModelStatus -> ${model.modelName} : ${error.message}`))
         }
     },
@@ -175,7 +178,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
         try {
             if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
 
-            const response = await model.findByIdAndDelete(req.params.id)
+            const response = await model.findByIdAndDelete({ _id: req.params.id })
             if (!response) return res.status(404).json({ error: 'Not found' })
 
             const containImage = containsImage(response)

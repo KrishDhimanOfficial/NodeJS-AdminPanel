@@ -12,7 +12,7 @@ const createStorage = (dir) => {
     const uploadPath = path.join('uploads', dir)
 
     // Ensure the folder exists
-    if (!fs.existsSync(uploadPath)) fs.promises.mkdir(uploadPath, { recursive: true })
+    fs.promises.mkdir(uploadPath, { recursive: true })
 
     return multer.diskStorage({
         destination: (req, file, cb) => {
@@ -89,7 +89,7 @@ export const upload = (folderName = '',
             fileSize: Math.max(
                 options.image ? sizeOptions.imageSIZE || DEFAULT_SIZES.image : 0,
                 options.file ? sizeOptions.fileSIZE || DEFAULT_SIZES.file : 0
-            ) 
+            )
         },
         fileFilter: options.image ? imageFilter : fileFilter
     })

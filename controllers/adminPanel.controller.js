@@ -71,6 +71,19 @@ const adminPanelController = {
             console.log('updateAdminPassword : ' + error.message)
         }
     },
+
+    renderGenerateCRUD: async (req, res) => {
+        try {
+            return res.status(200).render('generateCRUD',
+                {
+                    title: 'Generate CRUD'
+                }
+            )
+        } catch (error) {
+            if (error.name === 'ValidationError') validate(res, error.errors)
+            console.log('renderGenerateCRUD : ' + error.message)
+        }
+    },
 }
 
 export default adminPanelController

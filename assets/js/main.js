@@ -11,6 +11,7 @@ import {
 const selector = document.querySelector;
 
 datatable && initializeTabulator()
+$('.select2').length && $('.select2').select2({})
 previewImageInput && (
     previewImageInput.onchange = (e) => displayPreviewImage(e) // display image preview
 )

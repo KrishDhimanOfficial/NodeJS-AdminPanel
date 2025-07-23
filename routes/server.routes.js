@@ -8,7 +8,7 @@ import mongoose from "mongoose"
 import adminPanelController from "../controllers/adminPanel.controller.js"
 import authControllers from "../controllers/auth.controller.js"
 import { handlemulterError, upload } from "../middleware/multer.middleware.js"
-const router = express.Router()
+const router = express.Router({})
 
 router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
 router.route('/login')
@@ -17,6 +17,7 @@ router.route('/login')
 
 router.use((req, res, next) => {
     res.locals.baseUrl = req.baseUrl
+    req.user && (res.locals.admin = req.user)
     res.locals.navigation = resources
         .filter(resource => resource.navigation !== undefined)
         .map(resource => resource.navigation)
@@ -25,16 +26,19 @@ router.use((req, res, next) => {
 
 // router.use(isAuthenticated)
 router.get('/', (req, res) => res.status(200).render('dashboard', { layout: 'layout', title: 'Dashboard', admin: req.user }))
+
+// Admin Profile Routes
 router.post('/update/password', adminPanelController.updateAdminPassword)
 router.route('/profile')
     .get(adminPanelController.renderAdminProfile)
     .post(upload('admin').single('profile'), handlemulterError, adminPanelController.updateAdminProfile)
 
+router.get('/generate-crud', adminPanelController.renderGenerateCRUD)
+
 const createCRUDRoutes = async () => {
     const models = await loadModels({ resources })
 
     for await (const { modelName, model, options, aggregate, multer, select2 } of models) {
-
         const controller = createCrudController(model, options, aggregate)
         // console.log({ modelName, model, options, aggregate })
 
@@ -42,16 +46,27 @@ const createCRUDRoutes = async () => {
             router.get(`/resources/select/api/${option.model.modelName}`, (req, res) => controller.getSelectJsonData(req, res, option))
         })
         router.get(`/resources/api/${modelName}`, controller.getAllJsonData)
+        router.get(`/resources/${modelName}/view/:id`, controller.getViewInfo)
+        router.post(`/resources/${modelName}`, multer(), handlemulterError, controller.create)
+        router.put(`/resources/${modelName}/:id`, multer(), handlemulterError, controller.update)
+        router.patch(`/resources/${modelName}/:id`, controller.updateModelStatus)
+        router.delete(`/resources/${modelName}/:id`, controller.remove)
         router.get(`/resources/${modelName}`, (req, res) => {
             return res.status(200).render('datatable', {
                 title: modelName,
                 addURL: `${req.originalUrl}/add`,
                 dataTableAPI: `${req.baseUrl}/resources/api/${modelName}`,
                 api: req.originalUrl,
-                admin: req.user
             })
         })
-        router.get(`/resources/${modelName}/view/:id`, controller.getViewInfo)
+        router.get(`/resources/${modelName}/:id`, async (req, res) => {
+            const response = await model.findById(req.params.id)
+            return res.status(200).render(`${modelName}/update`, {
+                title: modelName,
+                api: `${req.baseUrl}/resources/${modelName}`,
+                response,
+            })
+        })
         router.get(`/resources/${modelName}/add`, (req, res) => {
             const userModel = mongoose.model(modelName)
             // const fields = Object.entries(userModel.schema.paths)
@@ -61,23 +76,9 @@ const createCRUDRoutes = async () => {
             return res.status(200).render(`${modelName}/create`, {
                 title: modelName,
                 api: `${req.baseUrl}/resources/${modelName}`,
-                admin: req.user
                 // fields,
             })
         })
-        router.post(`/resources/${modelName}`, multer(), handlemulterError, controller.create)
-        router.get(`/resources/${modelName}/:id`, async (req, res) => {
-            const response = await model.findById(req.params.id)
-            return res.status(200).render(`${modelName}/update`, {
-                title: modelName,
-                api: `${req.baseUrl}/resources/${modelName}`,
-                response,
-                admin: req.user
-            })
-        })
-        router.put(`/resources/${modelName}/:id`, multer(), handlemulterError, controller.update)
-        router.patch(`/resources/${modelName}/:id`, multer(), handlemulterError, controller.updateModelStatus)
-        router.delete(`/resources/${modelName}/:id`, controller.remove)
     }
 }
 
