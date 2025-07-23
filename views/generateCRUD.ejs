@@ -1,0 +1,65 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-primary">
+                <div class="card-header bg-purple">
+                    <h3 class="card-title">Generate CRUD</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="row mb-3">
+                                <div class="col-12 d-flex gap-2">
+                                    <label for="type" class="form-check-label">Create Collection</label>
+                                    <input type="text" class="form-control" placeholder="Collection name">
+                                </div>
+                            </div>
+                            <h6 class="mb-2">Fields</h6>
+                            <button class="mb-2 btn btn-dark">Add Field</button>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" placeholder="Field name">
+                                </div>
+                                <div class="col-md-4 d-flex gap-2">
+                                    <label for="type" class="form-check-label">Type</label>
+                                    <Select name="type" class="select2 form-control" id="type">
+                                        <option value="string">String</option>
+                                        <option value="number">Number</option>
+                                        <option value="boolean">Boolean</option>
+                                    </Select>
+                                </div>
+                                <div class="col-md-4 d-flex gap-2">
+                                    <label for="type" class="form-check-label">Edit in place</label>
+                                    <Select name="type" class="select2 form-control" id="type">
+                                        <option value="text">Text</option>
+                                        <option value="Select">Select</option>
+                                        <option value="file">file</option>
+                                    </Select>
+                                </div>
+                            </div>
+                            <h6 class="mb-2">Field Relations</h6>
+                            <div class="row">
+                                <div class="col-md-4 d-flex gap-2">
+                                    <label for="type" class="form-check-label">Fields</label>
+                                    <Select name="type" class="select2 form-control" id="type">
+                                        <option value="">CategoryId</option>
+                                        <option value="">UserId</option>
+                                        <option value="">image</option>
+                                    </Select>
+                                </div>
+                                <div class="col-md-4 d-flex gap-2">
+                                    <label for="type" class="form-check-label">Collections</label>
+                                    <Select name="type" class="select2 form-control" id="type">
+                                        <option value="">Users</option>
+                                        <option value="">Category</option>
+                                        <option value="">Products</option>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
