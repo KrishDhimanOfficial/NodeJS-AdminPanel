@@ -28,30 +28,34 @@ export const displayPreviewImage = async (e) => {
 export const displayPreviewImages = (e) => {
     const alert = document.querySelector('#imagesAlert')
     const files = e.target.files;
+    const filesArray = Array.from(files)
+
     if (previewImg) previewImg.style.display = 'none';
     if (Formbtn.id === 'submitForm') previewMultipleImage.innerHTML = '';
 
-    Array.from(files).length > 4
-        ? alert.style.display = 'block'
-        : Array.from(files).forEach(file => {
-            const reader = new FileReader()
-            const div = document.createElement('div')
-            const ImgTag = document.createElement('img')
-            const iTag = document.createElement('i')
+    if (filesArray.length > 4) alert.style.display = 'block'
+    else alert.style.display = 'none'
 
-            div.className = 'position-relative imgbox';
-            iTag.className = 'bi bi-x-lg position-absolute z-2 top-50 start-50 translate-middle cross';
-            div.appendChild(ImgTag)
-            div.appendChild(iTag)
+    filesArray.forEach(file => {
+        const reader = new FileReader()
+        const div = document.createElement('div')
+        const ImgTag = document.createElement('img')
+        const iTag = document.createElement('i')
 
-            reader.onload = () => {
-                ImgTag.src = reader.result;
-                iTag.dataset.image = file.name;
-                ImgTag.classList.add('images')
-            }
-            reader.readAsDataURL(file)
-            previewMultipleImage.appendChild(div)
-        })
+        div.className = 'position-relative imgbox';
+        iTag.className = 'bi bi-x-lg position-absolute z-2 top-50 start-50 translate-middle cross';
+
+        div.appendChild(ImgTag)
+        div.appendChild(iTag)
+
+        reader.onload = () => {
+            ImgTag.src = reader.result;
+            iTag.dataset.image = file.name;
+            ImgTag.classList.add('images')
+        }
+        reader.readAsDataURL(file)
+        previewMultipleImage.appendChild(div)
+    })
 }
 
 export const Notify = (data) => {

@@ -76,7 +76,8 @@ const adminPanelController = {
         try {
             return res.status(200).render('generateCRUD',
                 {
-                    title: 'Generate CRUD'
+                    title: 'Generate CRUD',
+                    api: req.originalUrl
                 }
             )
         } catch (error) {

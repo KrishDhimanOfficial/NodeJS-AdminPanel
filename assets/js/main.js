@@ -50,4 +50,45 @@ datatable && (
     }
 )
 
-setupSelect2('#select', '/admin/resources/select/api/admin', 'Search Admin')
+// setupSelect2('#select', '/admin/resources/select/api/admin', 'Search Admin')
+let counter = 0;
+const btn = document.querySelector('#addFieldBtn')
+btn && (document.querySelector('#addFieldBtn').onclick = () => {
+    const schematypesArray = ["String", "Number", "Boolean", 'Code', 'Integer', "Array", 'ObjectId', "Object", "Date", 'Int32', 'Int64', 'Double128', 'Double', 'BSONRegExp', 'Null', 'Binary Data']
+    const formInputTypeArray = ['text', 'select', 'file', 'email', 'url', 'tel', 'search', 'number', 'range', 'color', 'date', 'time', 'datetime-local', 'month', 'week', 'radio', 'checkbox', 'textarea']
+    const field = Math.round(Math.random() * 10) * 4;
+    const field_type = Math.round(Math.random() * 10) * 5;
+    const form_type = Math.round(Math.random() * 10) * 6;
+    const originalTemplate = `<div class="row mb-3">
+                                <div class="col-md-3">
+                                    <label for="${field}" class="form-label">Field</label>
+                                    <input type="text" class="form-control" name="field[${counter}][field_name]"
+                                        placeholder="eg: name, email, password" id="${field}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="${field_type}" class="form-label">Type</label>
+                                    <Select name="field[${counter}][field_type]" class="form-control" id="${field_type}">
+                                        ${schematypesArray.map(type => `<option value="${type}">${type}</option>`).join('')}
+                                    </Select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="${form_type}" class="form-label">Edit in place</label>
+                                    <Select name="field[${counter}][form_type]" class="form-control" id="${form_type}">
+                                        ${formInputTypeArray.map(type => `<option value="${type}">${type}</option>`).join('')}
+                                    </Select>
+                                </div>
+                                <div class="col-md-1 align-content-end">
+                                    <button type="button" class="deleteField btn btn-danger bg-danger btn-close"></button>
+                                </div>
+                            </div>`;
+    document.querySelector('#addField').insertAdjacentHTML('afterbegin', originalTemplate)
+    counter++
+})
+
+// document.querySelector('.deleteField') && (
+//     document.querySelector('.deleteField').onclick = (e) => {
+//         console.log(e.target.closest('.row').remove());
+
+//         return e.target.closest('.row').remove()
+//     }
+// )

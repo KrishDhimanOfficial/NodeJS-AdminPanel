@@ -39,7 +39,7 @@ a {
   --true: var(--theme-color);
 }
 
-input[type=checkbox] {
+input[type=checkbox]:not(.form-check-input) {
   appearance: none;
   height: 2rem;
   width: 3.5rem;

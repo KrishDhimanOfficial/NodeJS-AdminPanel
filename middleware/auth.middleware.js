@@ -1,6 +1,6 @@
 export const isAuthenticated = (req, res, next) => {
-    if (!req.isAuthenticated()) {
-        return res.status(200).redirect(`${req.baseUrl}/login`)
+    if (!req.isAuthenticated() && req.user?.role !== 'superAdmin') {
+        return res.status(401).redirect(`${req.baseUrl}/login`)
     }
     next()
 }

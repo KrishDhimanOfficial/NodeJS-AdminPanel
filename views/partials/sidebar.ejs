@@ -34,7 +34,7 @@
                         </li>
                     <% } else{ %>
                         <li class="nav-item">
-                            <a href="<%= baseUrl %>/resources/<%= nav.model?.modelName %>" class="nav-link">
+                            <a href="<%= baseUrl %>/resources/<%= nav.name.toLowerCase() %>" class="nav-link">
                                 <i class="nav-icon <%= nav.icon %>"></i>
                                 <p>
                                     <%= nav.name %>

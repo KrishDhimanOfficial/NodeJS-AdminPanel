@@ -3,7 +3,7 @@ import config from "./config.js"
 import chalk from "chalk"
 import { initAdmin } from "../services/initadmin.js"
 
-const options = { serverSelectionTimeoutMS: 10000, dbName: process.env.DB_NAME }
+const options = { serverSelectionTimeoutMS: 10000, dbName: String(process.env.DB_NAME) }
 
 const connectDB = async () => {
     try {

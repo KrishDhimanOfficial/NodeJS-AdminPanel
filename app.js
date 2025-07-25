@@ -35,7 +35,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(compression(
   {
-    level: 2, // compression level
+    level: 4, // compression level
     threshold: 0, // Compress all
     memLevel: 9, // memory usuage
     filter: (req, res) => compression.filter(req, res)
