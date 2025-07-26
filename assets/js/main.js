@@ -2,15 +2,17 @@ import '../vendor/jquery/jquery.min.js'
 import '../vendor/bootstrap/js/bootstrap.bundle.min.js'
 import '../vendor/select2/js/select2.full.min.js'
 import '../vendor/pace-progress/pace.min.js'
+import '../vendor/summernote/summernote.min.js'
 import '../vendor/adminlte/adminlte.min.js'
 import Fetch from "./fetch.js"
 import {
-    datatable, displayPreviewImage, apiInput,
+    datatable, displayPreviewImage, apiInput, updatetableDataStatus,
     Form, Notify, previewImageInput, openDangerModal, setupSelect2
 } from "./variable.js";
 const selector = document.querySelector;
 
 datatable && initializeTabulator()
+$('.summernote').length && $('.summernote').summernote({ height: 300 })
 $('.select2').length && $('.select2').select2({})
 previewImageInput && (
     previewImageInput.onchange = (e) => displayPreviewImage(e) // display image preview
@@ -25,6 +27,7 @@ Form && (
             submitFormBtn.innerHTML = 'Submitting...';
 
             const formdata = new FormData(e.target)
+
             Form.id === 'SubmitForm' // Handle Data Submission To Server
                 ? res = await Fetch.post(apiInput.value.trim(), formdata)
                 : res = await Fetch.put(`${apiInput.value.trim()}/${e.target.dataset?.id}`, formdata)

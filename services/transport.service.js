@@ -29,7 +29,7 @@ const sendEmail = async (senderEMAIL, receiverEMAIL, verifyLink) => {
             html: emailTemplate.replace('{{username}}', name).replace('{{verifyUrl}}', verifyLink).replace('{{year}}', new Date().getFullYear())
         })
     } catch (error) {
-
+        return res.status(400).json({ error: 'Something went wrong, please try again later.' })
     }
 }
 

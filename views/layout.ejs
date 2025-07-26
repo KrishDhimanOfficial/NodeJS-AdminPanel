@@ -7,7 +7,7 @@
     <title>
         <%= locals.title ? title : '' %>
     </title>
-
+    <link rel="shortcut icon" href="/assets/images/user.png" type="image/x-icon">
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -16,8 +16,7 @@
     <link rel="stylesheet" href="/assets/css/all.min.css">
     <link rel="stylesheet" href="/assets/vendor/pace-progress/pace-theme-flat-top.css">
     <link rel="stylesheet" href="/assets/vendor/notify/notify.css">
-    <link rel="stylesheet" href="/assets/vendor/tabulator/css/tabulator.min.css">
-    <link rel="stylesheet" href="/assets/vendor/tabulator/css/tabulator_semanticui.min.css">
+    <link rel="stylesheet" href="/assets/vendor/summernote/summernote.min.css">
     <link rel="stylesheet" href="/assets/vendor/select2/css/select2.min.css">
     <link rel="stylesheet" href="/assets/vendor/adminlte/adminlte.min.css">
     <link rel="stylesheet" href="/assets/css/app.css">
@@ -41,7 +40,8 @@
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="<%= admin.profile ? `/${admin.profile}`: '/assets/images/user.png' %>" class="user-image img-circle elevation-2" alt="User Image">
+                        <img src="<%= admin.profile ? `/${admin.profile}`: '/assets/images/user.png' %>"
+                            class="user-image img-circle elevation-2" alt="User Image">
                         <span class="d-none d-md-inline">
                             <%= admin.name.toUpperCase() %>
                         </span>
@@ -57,19 +57,6 @@
                             </p>
                         </li>
                         <!-- Menu Body -->
-                        <!-- <li class="user-body">
-                            <div class="row">
-                                <div class="col-4 text-center">
-                                    <a href="#">Followers</a>
-                                </div>
-                                <div class="col-4 text-center">
-                                    <a href="#">Sales</a>
-                                </div>
-                                <div class="col-4 text-center">
-                                    <a href="#">Friends</a>
-                                </div>
-                            </div>
-                        </li> -->
                         <!-- Menu Footer-->
                         <li class="user-footer">
                             <a href="/admin/profile" class="btn btn-default btn-flat">Profile</a>
@@ -132,9 +119,9 @@
             <!-- /.content-wrapper -->
 
             <!-- Control Sidebar -->
-            <aside class="control-sidebar control-sidebar-dark">
-                <!-- Control sidebar content goes here -->
-            </aside>
+            <!-- <aside class="control-sidebar control-sidebar-dark"> -->
+            <!-- Control sidebar content goes here -->
+            <!-- </aside> -->
             <!-- /.control-sidebar -->
 
             <!-- Main Footer -->

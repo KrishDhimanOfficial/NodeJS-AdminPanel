@@ -14,7 +14,6 @@ const connectDB = async () => {
     } catch (error) {
         console.error(chalk.error(`connectDB : ${error.message}`))
     }
-
 }
 
 export default connectDB 

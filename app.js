@@ -5,7 +5,6 @@ import helmet from 'helmet'
 import compression from 'compression'
 import rateLimit from 'express-rate-limit'
 import mongoSanitize from 'express-mongo-sanitize'
-import xss from 'xss-clean'
 import expressLayouts from 'express-ejs-layouts'
 import passport from 'passport'
 import session from 'express-session'
@@ -14,14 +13,12 @@ import MongoStore from 'connect-mongo'
 import router from './routes/server.routes.js'
 
 const app = express()
-
 app.use(helmet(
   {
-    crossOriginResourcePolicy: { policy: 'cross-origin' }
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   }
 ))
 app.use(mongoSanitize())
-app.use(xss())
 app.use(cors(
   {
     origin: '*',

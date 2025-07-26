@@ -71,6 +71,15 @@ export const openDangerModal = (api) => { // Handle Open Delete Modal
     modalconfirmdeleteBtn.onclick = () => handleDeleteRequest(api)
 }
 
+export const updatetableDataStatus = async (status, api) => {
+    try {
+        const res = await Fetch.patch(api, { status }, { 'Content-Type': 'application/json' })
+        Notify(res)
+    } catch (error) {
+        console.error(error)
+    }
+}
+
 const handleDeleteRequest = async (api) => {
     const res = await Fetch.delete(api)
     Notify(res)

@@ -5,7 +5,7 @@ export const initAdmin = async () => {
     const existing = await adminModel.findOne({ role: 'superAdmin' });
 
     if (!existing) {
-        const hashedPassword = await bcrypt.hash('123456', 10)
+        const hashedPassword = await bcrypt.hash('admin', 10)
 
         await adminModel.create({
             name: 'admin',

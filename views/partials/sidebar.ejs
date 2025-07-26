@@ -22,10 +22,10 @@
                             <ul class="nav nav-treeview">
                                 <% nav.subMenu?.forEach(submenu=> { %>
                                     <li class="nav-item">
-                                        <a href="<%= baseUrl %>/resources/<%= submenu.model %>" class="nav-link">
+                                        <a href="<%= baseUrl %>/resources/<%= submenu.model?.modelName %>" class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>
-                                                <%= submenu.model %>
+                                                <%= submenu.model?.modelName %>
                                             </p>
                                         </a>
                                     </li>
@@ -34,7 +34,7 @@
                         </li>
                     <% } else{ %>
                         <li class="nav-item">
-                            <a href="<%= baseUrl %>/resources/<%= nav.name.toLowerCase() %>" class="nav-link">
+                            <a href="<%= baseUrl %>/resources/<%= nav.model?.modelName %>" class="nav-link">
                                 <i class="nav-icon <%= nav.icon %>"></i>
                                 <p>
                                     <%= nav.name %>

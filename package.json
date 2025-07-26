@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "captialize": "^1.0.0",
     "chalk": "^5.4.1",
     "compression": "^1.8.0",
     "connect-mongo": "^5.1.0",
@@ -31,8 +32,7 @@
     "multer": "^2.0.1",
     "nodemailer": "^7.0.3",
     "passport": "^0.7.0",
-    "passport-local": "^1.0.0",
-    "xss-clean": "^0.1.4"
+    "passport-local": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

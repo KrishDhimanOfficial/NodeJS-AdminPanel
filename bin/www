@@ -22,7 +22,7 @@ if (cluster.isPrimary) {
 
   const server = http.createServer(app)  // Create HTTP server.
 
-  server.listen(port, () => {
+  server.listen(port, '0.0.0.0', () => {
     const endTime = Date.now(); // ⏱ Record end time
     const duration = endTime - startTime; // Time taken in ms
     console.log(chalk.blue(`🚀 Startup Time: ${duration} ms`))

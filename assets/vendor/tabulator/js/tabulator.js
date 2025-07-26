@@ -3,6 +3,7 @@ const pdfbtn = document.getElementById("download-pdf")
 const xlsxbtn = document.getElementById("download-xlsx")
 const csvbtn = document.getElementById("download-csv")
 const select = document.querySelector('#hide-column-select')
+const tabulator = document.querySelector('#tabulator')
 const dataTableAPI = document.querySelector('#dataTableAPI')
 
 const capitalizeFirstLetter = (str) => {
@@ -112,16 +113,24 @@ const initializeTabulator = async () => {
                 paginationMode: "remote",
                 dataReceiveParams: { last_page: "last_page", data: "data" },
                 paginationDataSent: { page: "page", size: "size" },
-                paginationSizeSelector: [5, 10, 15, 20],
+                paginationSizeSelector: [10, 15, 20, 25, 50, 75, 100],
                 paginationCounter: "rows", //display count of paginated rows in footer
                 ajaxURL: dataTableAPI?.value.trim() || '',
                 ajaxResponse: function (url, params, response) {
                     if (response.data.length == 0) {
                         csvbtn.remove(), pdfbtn.remove(), xlsxbtn.remove()
                         this.destroy()
+                        tabulator.innerHTML = '<div class="text-center my-5"><h2>No Data Found</h2></div>'
                         return []
                     }
-                    response.columns.map(col => select.append(new Option(col.col.replace(/_/g, ' '), col.col)))
+                    select && response.columns?.forEach(obj => {
+                        const value = obj.col;
+                        const label = obj.col.replace(/_/g, ' ')
+
+                        // Check if the option already exists
+                        const exists = Array.from(select.options).some(option => option.value === value)
+                        if (!exists) select.append(new Option(label, value))
+                    })
                     const columns = response.columns.map(column => {
                         return {
                             title: capitalizeFirstLetter(column.col).replace(/_/g, ' '),
@@ -139,7 +148,7 @@ const initializeTabulator = async () => {
                     return response
                 },
                 movableColumns: true,  //allow column order to be changed
-                tableBuilt: () => { resolve() }
+                tableBuilt: () => resolve()
             })
         })
     } catch (error) {

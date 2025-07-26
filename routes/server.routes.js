@@ -2,12 +2,13 @@ import express from "express"
 import adminModel from '../models/admin.model.js'
 import { createCrudController } from "../controllers/crud.controller.js"
 import { isAuthenticated } from "../middleware/auth.middleware.js"
-import loadModels from '../lib/modelLoader.js'
+import loadModels from '../utils/modelLoader.utils.js'
 import resources from "../lib/resources.lib.js"
 import mongoose from "mongoose"
 import adminPanelController from "../controllers/adminPanel.controller.js"
 import authControllers from "../controllers/auth.controller.js"
 import { handlemulterError, upload } from "../middleware/multer.middleware.js"
+import CRUD_GENERATOR from "../utils/crudGenerator.utils.js"
 const router = express.Router({ caseSensitive: true, strict: true })
 
 router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
@@ -37,55 +38,53 @@ router.route('/profile')
 router.route('/generate-crud')
     .all(isAuthenticated)
     .get(adminPanelController.renderGenerateCRUD)
-    .post(upload().none(), createCrudController().createSchema)
+    .post(upload().none(), (req, res) => CRUD_GENERATOR(req, res))
 
-const createCRUDRoutes = async () => {
-    const models = await loadModels({ resources })
+// const createCRUDRoutes = async () => {
+// const models = await loadModels({ resources })
+for await (const { model, options, aggregate, multer, select2 } of resources) {
+    // console.log({ model, options, aggregate, multer, select2 })
+    const modelName = model.modelName;
+    // console.log(modelName);
 
-    for await (const { modelName, model, options, aggregate, multer, select2 } of models) {
-        // console.log({ modelName, model, options, aggregate, multer, select2 });
+    const controller = createCrudController(model, options, aggregate)
 
-        const controller = createCrudController(model, options, aggregate)
-        // console.log({ modelName, model, options, aggregate })
-
-        select2?.length > 0 && select2.forEach(option => {
-            router.get(`/resources/select/api/${option.model.modelName}`, isAuthenticated, (req, res) => controller.getSelectJsonData(req, res, option))
+    select2?.length > 0 && select2.forEach(option => {
+        router.get(`/resources/select/api/${option.model.modelName}`, isAuthenticated, (req, res) => controller.getSelectJsonData(req, res, option))
+    })
+    router.get(`/resources/api/${modelName}`, isAuthenticated, controller.getAllJsonData)
+    router.get(`/resources/${modelName}/view/:id`, isAuthenticated, controller.getViewInfo)
+    router.post(`/resources/${modelName}`, isAuthenticated, multer(), handlemulterError, controller.create)
+    router.put(`/resources/${modelName}/:id`, isAuthenticated, multer(), handlemulterError, controller.update)
+    router.patch(`/resources/${modelName}/:id`, isAuthenticated, controller.updateModelStatus)
+    router.delete(`/resources/${modelName}/:id`, isAuthenticated, controller.remove)
+    router.get(`/resources/${modelName}`, isAuthenticated, (req, res) => {
+        return res.status(200).render('datatable', {
+            title: modelName,
+            addURL: `${req.originalUrl}/add`,
+            dataTableAPI: `${req.baseUrl}/resources/api/${modelName}`,
+            api: req.originalUrl,
         })
-        router.get(`/resources/api/${modelName}`, isAuthenticated, controller.getAllJsonData)
-        router.get(`/resources/${modelName}/view/:id`, isAuthenticated, controller.getViewInfo)
-        router.post(`/resources/${modelName}`, isAuthenticated, multer(), handlemulterError, controller.create)
-        router.put(`/resources/${modelName}/:id`, isAuthenticated, multer(), handlemulterError, controller.update)
-        router.patch(`/resources/${modelName}/:id`, isAuthenticated, controller.updateModelStatus)
-        router.delete(`/resources/${modelName}/:id`, isAuthenticated, controller.remove)
-        router.get(`/resources/${modelName}`, isAuthenticated, (req, res) => {
-            return res.status(200).render('datatable', {
-                title: modelName,
-                addURL: `${req.originalUrl}/add`,
-                dataTableAPI: `${req.baseUrl}/resources/api/${modelName}`,
-                api: req.originalUrl,
-            })
+    })
+    router.get(`/resources/${modelName}/add`, isAuthenticated, (req, res) => {
+        return res.status(200).render(`${modelName}/create`, {
+            title: modelName,
+            api: `${req.baseUrl}/resources/${modelName}`,
         })
-        router.get(`/resources/${modelName}/add`, isAuthenticated, (req, res) => {
-            // const userModel = mongoose.model(modelName)
-            // const fields = Object.entries(userModel.schema.paths)
-            //     .filter(([key]) => !['_id', '__v', 'createdAt', 'updatedAt'].includes(key))
-            //     .map(([key]) => key)  // Get all schema fields 
-
-            return res.status(200).render(`${modelName}/create`, {
-                title: modelName,
-                api: `${req.baseUrl}/resources/${modelName}`,
-            })
+    })
+    router.get(`/resources/${modelName}/:id`, isAuthenticated, async (req, res) => {
+        const response = await model.findById(req.params.id)
+        return res.status(200).render(`${modelName}/update`, {
+            title: modelName,
+            api: `${req.baseUrl}/resources/${modelName}`,
+            response,
         })
-        router.get(`/resources/${modelName}/:id`, isAuthenticated, async (req, res) => {
-            const response = await model.findById(req.params.id)
-            return res.status(200).render(`${modelName}/update`, {
-                title: modelName,
-                api: `${req.baseUrl}/resources/${modelName}`,
-                response,
-            })
-        })
-    }
+    })
 }
+// }
 
-createCRUDRoutes()
+// createCRUDRoutes()
+router.use('/*', (req, res) => {
+    return res.status(404).render('partials/404')
+})
 export default router

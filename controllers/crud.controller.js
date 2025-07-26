@@ -4,21 +4,18 @@
  * @returns {object} CRUD methods
 */
 import mongoose from "mongoose";
-import fs from 'node:fs/promises'
 import validate from "../services/validate.service.js"
 import { deleteFile, containsImage } from '../services/removeFile.service.js'
 import chalk from 'chalk';
 import handleAggregatePagination from "../services/handlepagination.service.js";
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 const log = console.log
 const validateId = mongoose.Types.ObjectId.isValid;
 
 export const createCrudController = (model, options = {}, aggregate) => ({
     create: async (req, res) => {
         try {
+            console.log(req.body);
+
             // console.log(req.files);
             const val = options.check;
             const IsExist = await model.findOne({ val })
@@ -200,91 +197,6 @@ export const createCrudController = (model, options = {}, aggregate) => ({
             log(chalk.red(`remove -> ${model.modelName} : ${error.message}`))
         }
     },
-
-    createSchema: async (req, res) => {
-        const { collection, timeStamp, field } = req.body;
-        const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
-
-        try {
-            if (!collection || !field?.length || !timeStamp) return res.status(400).json({ error: 'All Fields are required.' })
-
-            const schemaFields = field.map(f => `${f.field_name}: { type: ${f.field_type === 'objectId'
-                ? 'mongoose.Schema.Types.ObjectId'
-                : f.field_type === 'date'
-                    ? 'Date'
-                    : f.field_type}, 
-                    }`
-            ).join(',\n')
-
-            const fileSturcture = `
-            import mongoose from "mongoose"
-            import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
-            
-            const ${collection}Schema = new mongoose.Schema({${schemaFields}},{ timestamps: ${timeStamp === 'on'} })
-            
-            ${collection}Schema.plugin(mongooseAggregatePaginate)
-            export default mongoose.model('${collection}', ${collection}Schema)`;
-            await fs.writeFile(filePath, fileSturcture) // Create Schema
-
-            const viewDir = path.join(__dirname, '../views', collection)
-            await fs.mkdir(viewDir, { recursive: true }) // create View Files
-
-            const create = `<div class="container">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="card card-primary">
-                                            <div class="card-header bg-purple">
-                                                <h3 class="card-title">Add Information</h3>
-                                            </div>
-                                            <form id="SubmitForm">
-                                                <div class="card-body">
-                                                    <div class="mb-3">
-                                                    ${field.map(f => `
-                                                        ${
-                                                            f.form_type === 'select' 
-                                                            ? `<label for="${f.field_name}" class="form-label">${f.field_name}</label>
-                                                            <Select name="${f.field_name}" class="form-control" id="${f.field_name}">
-                                                                <option value="" disabled selected>Select</option>
-                                                            </Select>` 
-                                                            : f.form_type === 'textarea'
-                                                            ? `<label for="${f.field_name}" class="form-label">${f.field_name}</label>
-                                                               <textarea name="${f.field_name}" class="form-control" id="${f.field_name}" placeholder="${f.field_name}"></textarea>`
-                                                            : f.form_type === 'checkbox'
-                                                            ? `<label for="${f.field_name}" class="form-label">${f.field_name}
-                                                                    <input type="checkbox" name="${f.field_name}" class="form-check-input" id="${f.field_name}">
-                                                                </label>`
-                                                            : `<label for="${f.field_name}" class="form-label">${f.field_name}</label>
-                                                                <input type="text" name="${f.field_name}" class="form-control" id="${f.field_name}" placeholder="${f.field_name}">`
-                                                        }
-                                                    `).join('')
-                                                    }
-                                                    </div>
-                                                </div>
-                                            <div class="modal-footer justify-content-between">
-                                        <button id="submitFormBtn" class="btn btn-primary">Submit</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            const viewTemplates = { create }
-            for (const [viewName, content] of Object.entries(viewTemplates)) {
-                const filePath = path.join(viewDir, `${viewName}.ejs`)
-                try {
-                    await fs.access(filePath)
-                } catch {
-                    await fs.writeFile(filePath, content)
-                }
-            }
-
-            return res.status(200).json({ success: 'Schema created successfully' })
-        } catch (error) {
-            await fs.rm(path.join(__dirname, '../views', collection), { recursive: true, force: true })
-            chalk.red(console.error('createSchema : ', error.message))
-            return res.status(400).json({ error: 'Internal Server Error. Unable to create schema' })
-        }
-    }
 })
 
 // export default createCrudController

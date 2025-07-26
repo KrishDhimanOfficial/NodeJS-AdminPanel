@@ -48,9 +48,7 @@ const containsImage = (obj) => {
         }
     }
 
-    if (matchedFields.length === 0) {
-        return { hasImage: false }
-    }
+    if (matchedFields.length === 0) return { hasImage: false }
 
     return {
         hasImage: true,

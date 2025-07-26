@@ -1,0 +1,46 @@
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-primary">
+                <div class="card-header bg-purple">
+                    <h3 class="card-title">Add Post Information</h3>
+                </div>
+                <form id="SubmitForm">
+                    <div class="card-body">
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label mb-2">Name</label>
+                            <input type="text" name="name" class="form-control" id="name" placeholder="name">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="slug" class="form-label mb-2">Slug</label>
+                            <input type="text" name="slug" class="form-control" id="slug" placeholder="slug">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label mb-2">Image</label>
+                            <input type="file" name="image" class="form-control" id="image" placeholder="image">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="desc" class="form-label mb-2">Desc</label>
+                            <textarea name="desc" class="form-control" id="desc" placeholder="desc"></textarea>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" name="status" type="checkbox" checked value="true"
+                                id="status" />
+                            <label class="form-check-label" for="status">
+                                status
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button id="submitFormBtn" class="btn btn-dark">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
