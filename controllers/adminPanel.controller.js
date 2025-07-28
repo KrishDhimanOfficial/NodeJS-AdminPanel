@@ -72,9 +72,22 @@ const adminPanelController = {
         }
     },
 
+    renderCRUD: async (req, res) => {
+        try {
+            return res.status(200).render('crud/crudTable',
+                {
+                    title: 'Generate CRUD',
+                    addURL: `${req.baseUrl}/generate-crud`,
+                    // api: req.originalUrl
+                }
+            )
+        } catch (error) {
+            console.log('renderCRUD : ' + error.message)
+        }
+    },
     renderGenerateCRUD: async (req, res) => {
         try {
-            return res.status(200).render('generateCRUD',
+            return res.status(200).render('crud/generateCRUD',
                 {
                     title: 'Generate CRUD',
                     api: req.originalUrl

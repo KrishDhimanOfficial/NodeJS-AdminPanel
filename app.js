@@ -11,6 +11,7 @@ import session from 'express-session'
 import config from './config/config.js'
 import MongoStore from 'connect-mongo'
 import router from './routes/server.routes.js'
+import miniyHTML from 'express-minify-html-terser'
 
 const app = express()
 app.use(helmet(
@@ -69,6 +70,17 @@ passport.deserializeUser((user, done) => {
   return done(null, user)
 })
 
+app.use(miniyHTML({
+  override: true,
+  htmlMinifier: {
+    removeComments: true,
+    collapseWhitespace: true,
+    collapseBooleanAttributes: true,
+    removeAttributeQuotes: true,
+    removeEmptyAttributes: true,
+    minifyJS: true
+  }
+}))
 // View Engine
 app.set('view engine', 'ejs')
 app.set('views', 'views')

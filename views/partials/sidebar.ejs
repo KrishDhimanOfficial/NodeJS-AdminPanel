@@ -22,7 +22,8 @@
                             <ul class="nav nav-treeview">
                                 <% nav.subMenu?.forEach(submenu=> { %>
                                     <li class="nav-item">
-                                        <a href="<%= baseUrl %>/resources/<%= submenu.model?.modelName %>" class="nav-link">
+                                        <a href="<%= baseUrl %>/resources/<%= submenu.model?.modelName %>"
+                                            class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>
                                                 <%= submenu.model?.modelName %>
@@ -32,17 +33,17 @@
                                     <% }) %>
                             </ul>
                         </li>
-                    <% } else{ %>
-                        <li class="nav-item">
-                            <a href="<%= baseUrl %>/resources/<%= nav.model?.modelName %>" class="nav-link">
-                                <i class="nav-icon <%= nav.icon %>"></i>
-                                <p>
-                                    <%= nav.name %>
-                                </p>
-                            </a>
-                        </li>
-                    <% } %>
-                <% }) %>
+                        <% } else{ %>
+                            <li class="nav-item">
+                                <a href="<%= baseUrl %>/resources/<%= nav.model?.modelName %>" class="nav-link">
+                                    <i class="nav-icon <%= nav.icon %>"></i>
+                                    <p>
+                                        <%= nav.name %>
+                                    </p>
+                                </a>
+                            </li>
+                            <% } %>
+                                <% }) %>
                                     <li class="nav-item">
                                         <a href="#" class="nav-link">
                                             <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -58,12 +59,15 @@
                                                     <p>Profile Settings</p>
                                                 </a>
                                             </li>
-                                            <li class="nav-item">
-                                                <a href="/admin/generate-crud" class="nav-link">
-                                                    <i class="far fa-circle nav-icon"></i>
-                                                    <p>Generate CRUD</p>
-                                                </a>
-                                            </li>
+                                            <% console.log(crudURL) %>
+                                                <% if (crudURL) { %>
+                                                    <li class="nav-item">
+                                                        <a href="/admin/crud" class="nav-link">
+                                                            <i class="far fa-circle nav-icon"></i>
+                                                            <p>Generate CRUD</p>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
                                         </ul>
                                     </li>
             </ul>

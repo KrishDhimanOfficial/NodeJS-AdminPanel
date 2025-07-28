@@ -104,3 +104,17 @@ export const setupSelect2 = (selector, url, placeholder) => {
         }
     })
 }
+
+export const deleteCRUDFieldRow = (...selectors) => {
+    selectors.forEach(selector => {
+        const container = document.querySelector(selector)
+        if (!container) return
+
+        container.addEventListener('click', (e) => {
+            if (e.target.classList.contains('deleteFieldRow')) {
+                const row = e.target.closest('.field-group')
+                row?.remove()
+            }
+        })
+    })
+}

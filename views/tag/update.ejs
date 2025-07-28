@@ -3,7 +3,7 @@
             <div class="col-12">
             <div class="card card-primary">
                 <div class="card-header bg-purple">
-                <h3 class="card-title">Update Post Information</h3>
+                <h3 class="card-title">Update Tag Information</h3>
                 </div>
                 <form id="updateForm" data-id="<%= response._id %>">
                     <div class="card-body">
@@ -16,23 +16,6 @@
                 <div class="mb-3">
                     <label for="slug" class="form-label mb-2">Slug</label>
                     <input type="text" name="slug" value="<%= response.slug %>" class="form-control" id="slug" placeholder="slug">
-                </div>
-
-                <div class="mb-3">
-                    <label for="image" class="form-label mb-2">Image</label>
-                    <input type="file" name="image" value="<%= response.image %>" class="form-control" id="image" placeholder="image">
-                </div>
-
-                <div class="mb-3">
-                    <label for="desc" class="form-label mb-2">Desc</label>
-                    <textarea name="desc" class="form-control" id="desc" placeholder="desc"></textarea>
-                </div>
-
-                <div class="form-check mb-3">
-                    <input class="form-check-input" name="status" type="checkbox" checked value="true" id="status" />
-                    <label class="form-check-label" for="status">
-                        status
-                    </label>
                 </div>
                     </div>
                 <div class="modal-footer justify-content-between">

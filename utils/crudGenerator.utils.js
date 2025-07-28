@@ -14,29 +14,31 @@ const __dirname = path.dirname(__filename)
 
 const CRUD_GENERATOR = async (req, res) => {
     const { collection, timeStamp, field } = req.body;
-    const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
-    const viewDir = path.join(__dirname, '../views', collection)
+    console.log(req.body);
+    
+    // const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
+    // const viewDir = path.join(__dirname, '../views', collection)
 
     try {
-        if (!collection || field?.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
+    //     if (!collection || field?.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
 
-        await fs.writeFile(filePath, createModelFile(collection, field, timeStamp)) // Create Schema
-        await fs.mkdir(viewDir, { recursive: true }) // create View Files
+    //     await fs.writeFile(filePath, createModelFile(collection, field, timeStamp)) // Create Schema
+    //     await fs.mkdir(viewDir, { recursive: true }) // create View Files
 
-        const viewTemplates = {
-            create: createAddEJSFile(collection, field),
-            update: createUpdateEJSFile(collection, field),
-            view: createViewEJSFile(collection, field)
-        } // Views Templates
+    //     const viewTemplates = {
+    //         create: createAddEJSFile(collection, field),
+    //         update: createUpdateEJSFile(collection, field),
+    //         view: createViewEJSFile(collection, field)
+    //     } // Views Templates
 
-        for (const [viewName, content] of Object.entries(viewTemplates)) {
-            const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
-            // try {
-            //     await fs.access(ViewsfilePath)
-            // } catch {
-                await fs.writeFile(ViewsfilePath, content)
-            // }
-        }
+    //     for (const [viewName, content] of Object.entries(viewTemplates)) {
+    //         const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
+    //         // try {
+    //         //     await fs.access(ViewsfilePath)
+    //         // } catch {
+    //         await fs.writeFile(ViewsfilePath, content)
+    //         // }
+    //     }
 
         return res.status(200).json({ success: 'Schema created successfully' })
     } catch (error) {
@@ -90,7 +92,7 @@ function createAddEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <select name="${f.field_name}" class="form-control" id="${f.field_name}">
+                    <select name="${f.field_name}" class="form-control select2" id="${f.field_name}">
                         <option value="" disabled selected>Select</option>
                     </select>
                 </div>`
@@ -99,12 +101,12 @@ function createAddEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <textarea name="${f.field_name}" class="form-control" id="${f.field_name}" placeholder="${f.field_name}"></textarea>
+                    <textarea name="${f.field_name}" class="form-control summernote" id="${f.field_name}" placeholder="${f.field_name}"></textarea>
                 </div>`
 
             case 'checkbox':
                 return `
-                <div class="form-check mb-3">
+                <div class="form-check d-flex mb-3">
                     <input class="form-check-input" name="${f.field_name}" type="checkbox" checked value="true" id="${f.field_name}" />
                     <label class="form-check-label" for="${f.field_name}">
                         ${f.field_name}
@@ -165,14 +167,14 @@ function createUpdateEJSFile(collection, fields) {
 
             case 'checkbox':
                 return `
-                <div class="form-check mb-3">
+                <div class="form-check d-flex mb-3">
                     <input class="form-check-input" name="${f.field_name}" type="checkbox" checked value="true" id="${f.field_name}" />
                     <label class="form-check-label" for="${f.field_name}">
                         ${f.field_name}
                     </label>
                 </div>`
 
-            default: 
+            default:
                 return `
                 <div class="mb-3">
                     ${label}
