@@ -3,6 +3,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { capitalizeFirstLetter } from "captialize"
+import sturctureModel from "../models/sturcture.model.js"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -15,32 +16,32 @@ const __dirname = path.dirname(__filename)
 const CRUD_GENERATOR = async (req, res) => {
     const { collection, timeStamp, field } = req.body;
     console.log(req.body);
-    
-    // const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
-    // const viewDir = path.join(__dirname, '../views', collection)
+
+    const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
+    const viewDir = path.join(__dirname, '../views', collection)
 
     try {
-    //     if (!collection || field?.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
+        if (!collection || field?.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
 
-    //     await fs.writeFile(filePath, createModelFile(collection, field, timeStamp)) // Create Schema
-    //     await fs.mkdir(viewDir, { recursive: true }) // create View Files
+        await fs.writeFile(filePath, createModelFile(collection, field, timeStamp)) // Create Schema
+        // await fs.mkdir(viewDir, { recursive: true }) // create View Files
 
-    //     const viewTemplates = {
-    //         create: createAddEJSFile(collection, field),
-    //         update: createUpdateEJSFile(collection, field),
-    //         view: createViewEJSFile(collection, field)
-    //     } // Views Templates
+        //     const viewTemplates = {
+        //         create: createAddEJSFile(collection, field),
+        //         update: createUpdateEJSFile(collection, field),
+        //         view: createViewEJSFile(collection, field)
+        //     } // Views Templates
 
-    //     for (const [viewName, content] of Object.entries(viewTemplates)) {
-    //         const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
-    //         // try {
-    //         //     await fs.access(ViewsfilePath)
-    //         // } catch {
-    //         await fs.writeFile(ViewsfilePath, content)
-    //         // }
-    //     }
+        //     for (const [viewName, content] of Object.entries(viewTemplates)) {
+        //         const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
+        //         // try {
+        //         //     await fs.access(ViewsfilePath)
+        //         // } catch {
+        //         await fs.writeFile(ViewsfilePath, content)
+        //         // }
+        //     }
 
-        return res.status(200).json({ success: 'Schema created successfully' })
+        return res.status(200).json({ success: 'Schema created successfully', body: req.body })
     } catch (error) {
         chalk.red(console.error('createSchema : ', error.message))
         return res.status(400).json({ error: 'Internal Server Error. Unable to create schema' })
@@ -53,10 +54,13 @@ function createModelFile(collection, fields, timeStamp) {
         let fieldType;
 
         switch (f.field_type) {
-            case 'objectId':
+            case 'ObjectId':
                 fieldType = 'mongoose.Schema.Types.ObjectId';
                 break;
-            case 'date':
+            case 'Mixed':
+                fieldType = 'mongoose.Schema.Types.Mixed';
+                break;
+            case 'Date':
                 fieldType = 'Date';
                 break;
             default:
@@ -64,8 +68,13 @@ function createModelFile(collection, fields, timeStamp) {
                 break;
         }
 
-        return `  ${f.field_name}: { type: ${fieldType} }`;
-    }).join(',\n');
+        return `${f.field_name}: { 
+            type: ${fieldType},
+            ${f.required === 'on' ? `required: [true, '${f.field_name} is required.'],` : ''}
+            ${f.unique === 'on' ? `unique: [true, '${f.field_name} is already in use.'],` : ''}
+            ${f.relation !== 'No Relation' ? `ref : '${f.relation}'` : ''}
+        }`;
+    }).join(',\n')
 
     const fileStructure = `
             import mongoose from "mongoose";

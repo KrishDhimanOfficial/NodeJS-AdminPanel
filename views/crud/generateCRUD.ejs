@@ -1,3 +1,10 @@
+<style>
+    .iconpicker-popover.fade {
+        opacity: 1 !important;
+        transition: none !important;
+    }
+</style>
+<link rel="stylesheet" href="/assets/vendor/iconpicker/fontawesome-iconpicker.min.css">
 <div class="container">
     <form id="SubmitForm">
         <div class="row">
@@ -7,13 +14,13 @@
                         <h3 class="card-title">Collection Name</h3>
                     </div>
                     <div class="card-body">
-                        <div class="row">
+                        <div class="row mb-2">
                             <div class="col-12 mb-3">
                                 <label for="collection" class="form-label">Collection Name</label>
                                 <input type="text" class="form-control" name="collection" id="collection"
                                     placeholder="eg: user, category">
                             </div>
-                            <div class="col-4">
+                            <div class="col-md-4">
                                 <label class="form-label">Others options</label>
                                 <div class="d-flex gap-3 flex-wrap">
                                     <div class="form-check">
@@ -23,6 +30,54 @@
                                             TimeStramp
                                         </label>
                                     </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="isSubMenu" type="checkbox" id="isSubMenu">
+                                        <label class="form-check-label" for="isSubMenu">
+                                            Is SubMenu
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="mainIcon" class="form-label">Search Icon</label>
+                                <input type="text" class="form-control iconpicker" name="icon" id="mainIcon"
+                                    placeholder="search Icon" />
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex flex-column">
+                                    <label for="modeldependenices" class="form-label">Model Dependenices</label>
+                                    <select name="modeldependenices" id="modeldependenices" multiple
+                                        class="select2 form-control">
+                                        <% collections.forEach(collection=> { %>
+                                            <option value="<%= collection %> ">
+                                                <%= collection %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row d-none" id="subMenusettings">
+                            <div class="col-md-3">
+                                <label for="navName" class="form-label">Navigation Name</label>
+                                <input type="text" class="form-control" name="name" id="navName"
+                                    placeholder="eg: Peoples, Categories">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="iconpicker" class="form-label">Icon</label>
+                                <input type="text" class="form-control iconpicker" name="icon"
+                                    placeholder="search Icon" />
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group d-flex flex-column">
+                                    <label for="model" class="form-label">Model</label>
+                                    <select name="model" id="model" multiple class="select2 form-control">
+                                        <% collections.forEach(collection=> { %>
+                                            <option value="<%= collection %> ">
+                                                <%= collection %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -42,7 +97,7 @@
                         <div class="row">
                             <div class="col-12">
                                 <button id="addFieldBtn" type="button" class="mb-3 btn btn-dark float-end">
-                                    Add Field
+                                    Add Fields
                                 </button>
                             </div>
                         </div>
@@ -54,13 +109,13 @@
             <div class="col-12">
                 <div class="card card-primary">
                     <div class="card-header bg-purple">
-                        <h3 class="card-title">Add Field Relation</h3>
+                        <h3 class="card-title">Image Settings </h3>
                     </div>
                     <div class="card-body">
-                        <div id="FieldRelation"></div>
+                        <!-- <div id="FieldRelation"></div>
                         <button id="addFieldRelation" type="button" class="mb-3 btn btn-dark float-end">Create
                             Relation
-                        </button>
+                        </button> 
                     </div>
                 </div>
             </div>

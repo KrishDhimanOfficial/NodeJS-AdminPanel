@@ -15,6 +15,7 @@ const filterOptions = { // Tabulator Filter Options
     search: {
         sorter: 'string',
         headerFilter: 'input',
+        type: 'search',
         headerFilterPlaceholder: 'Search'
     },
     boolean: {
@@ -24,7 +25,7 @@ const filterOptions = { // Tabulator Filter Options
         headerFilterParams: { values: { "": "All", "true": "Active", "false": "InActive" } },
         accessorDownload: (value) => value ? "Active" : "Inactive"
     },
-    valueFilter: {
+    groupValueFilter: {
         sorter: 'string',
         editor: "input",
         headerFilter: "list",
@@ -109,31 +110,41 @@ const initializeTabulator = async () => {
                 history: true,        // allow undo and redo actions on the table
                 printAsHtml: true,
                 pagination: true,
-                paginationSize: 10,
+                ajaxFiltering: true,
+                filterMode: "remote",
                 paginationMode: "remote",
                 dataReceiveParams: { last_page: "last_page", data: "data" },
                 paginationDataSent: { page: "page", size: "size" },
+                paginationSize: 10,
                 paginationSizeSelector: [10, 15, 20, 25, 50, 75, 100],
                 paginationCounter: "rows", //display count of paginated rows in footer
                 ajaxURL: dataTableAPI?.value.trim() || '',
+                movableColumns: true,  //allow column order to be changed
                 ajaxResponse: function (url, params, response) {
                     if (response.data.length == 0) {
                         csvbtn.remove(), pdfbtn.remove(), xlsxbtn.remove()
-                        this.destroy()
                         tabulator.innerHTML = '<div class="text-center my-5"><h2>No Data Found</h2></div>'
                         return []
                     }
-                    select && response.columns?.forEach(obj => {
-                        const value = obj.col;
-                        const label = obj.col.replace(/_/g, ' ')
+                    select && response.columns?.forEach(col => {
+                        const value = col.col;
+                        const label = col.col.replace(/_/g, ' ')
 
                         // Check if the option already exists
                         const exists = Array.from(select.options).some(option => option.value === value)
                         if (!exists) select.append(new Option(label, value))
                     })
-                    const columns = response.columns.map(column => {
-                        return {
-                            title: capitalizeFirstLetter(column.col).replace(/_/g, ' '),
+                    // Only set columns once if they haven’t been set yet
+                    if (!this.getColumnDefinitions().length) {
+                        select && response.columns?.forEach(col => {
+                            const value = col.col;
+                            const label = col.col.replace(/_/g, ' ')
+                            const exists = Array.from(select.options).some(option => option.value === value)
+                            if (!exists) select.append(new Option(label, value))
+                        })
+
+                        const columns = response.columns.map(column => ({
+                            title: capitalizeFirstLetter(column.col.replace(/_/g, ' ')),
                             field: column.col,
                             formatter: columnsOptions[column.col] || columnsOptions.default,
                             hozAlign: "left",
@@ -141,13 +152,16 @@ const initializeTabulator = async () => {
                             ...column.actions,
                             ...columnsOptions[column.col],
                             ...filterOptions[column.filter],
-                            ...(!column.filter && ''),
-                        }
-                    })
-                    this.setColumns(columns) // ✅ Set columns after data arrives
+                            ...(!column.filter && '')
+                        }))
+
+                        this.setColumns(columns); // Only if not already set
+                    }
+
+                    // ✅ Debounced row-only update
+                    debounceRefreshTable(response.data, this); // pass `this` as Tabulator instance
                     return response
                 },
-                movableColumns: true,  //allow column order to be changed
                 tableBuilt: () => resolve()
             })
         })
@@ -155,7 +169,16 @@ const initializeTabulator = async () => {
         console.error(error)
     }
 }
+
 initializeTabulator()
+
+let debounceTimer;
+function debounceRefreshTable(data, tableInstance) {
+    clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+        tableInstance.replaceData(data) // refresh rows only
+    }, 300)
+}
 
 if (select) select.addEventListener("change", function () {
     const field = this.value;

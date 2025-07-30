@@ -8,14 +8,13 @@ import validate from "../services/validate.service.js"
 import { deleteFile, containsImage } from '../services/removeFile.service.js'
 import chalk from 'chalk';
 import handleAggregatePagination from "../services/handlepagination.service.js";
-const log = console.log
+const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
-export const createCrudController = (model, options = {}, aggregate) => ({
+const createCrudController = (model, options = {}, aggregate) => ({
     create: async (req, res) => {
         try {
-            console.log(req.body);
-
+            // console.log(req.body);
             // console.log(req.files);
             const val = options.check;
             const IsExist = await model.findOne({ val })
@@ -98,14 +97,15 @@ export const createCrudController = (model, options = {}, aggregate) => ({
 
     getAllJsonData: async (req, res) => {
         try {
-            const payload = 'helo'
-            // return res.status(200).json(payload.repeat(100000))
+            console.log(req.query.filter);
+            
             const query = { page: req.query.page, limit: req.query.size }
 
             if (typeof aggregate === 'function') {
                 const response = await handleAggregatePagination(model, aggregate(req, res), query)
 
                 return res.status(200).json({
+                    last_row: response.totalDocs,
                     last_page: response.totalPages,
                     data: response.collectionData,
                     columns: options.list
@@ -114,6 +114,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
                 const response = await handleAggregatePagination(model, [{ $project: options.isVisible }], query)
 
                 return res.status(200).json({
+                    last_row: response.totalDocs,
                     last_page: response.totalPages,
                     data: response.collectionData.reverse(),
                     columns: options.list
@@ -185,7 +186,7 @@ export const createCrudController = (model, options = {}, aggregate) => ({
 
             const containImage = containsImage(response)
             if (containImage.hasImage) {
-                containImage.fields.forEach(field => {
+                containImage.fields?.forEach(field => {
                     field.type === 'single'
                         ? deleteFile(field.value)
                         : field.value?.forEach(file => deleteFile(file))
@@ -199,4 +200,4 @@ export const createCrudController = (model, options = {}, aggregate) => ({
     },
 })
 
-// export default createCrudController
+export default createCrudController

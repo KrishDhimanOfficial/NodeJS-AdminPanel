@@ -8,7 +8,7 @@ export const isAuthenticated = (req, res, next) => {
 }
 
 export const isAuthWithAccessCRUD = (req, res, next) => {
-    if (!req.isAuthenticated() && !config.crud_url && req.user?.role !== 'superAdmin') {
+    if (!req.isAuthenticated() && config.crud_url && req.user?.role !== 'superAdmin') {
         return res.status(401).redirect(`${req.baseUrl}/login`)
     }
     if (req.isAuthenticated() && !config.crud_url) {

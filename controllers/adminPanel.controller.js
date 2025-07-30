@@ -90,7 +90,8 @@ const adminPanelController = {
             return res.status(200).render('crud/generateCRUD',
                 {
                     title: 'Generate CRUD',
-                    api: req.originalUrl
+                    api: req.originalUrl,
+                    collections: mongoose.modelNames()
                 }
             )
         } catch (error) {

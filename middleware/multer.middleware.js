@@ -26,30 +26,30 @@ const createStorage = (dir) => {
     })
 }
 
-const imageFilter = (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase()
+// const imageFilter = (req, file, cb) => {
+//     const ext = path.extname(file.originalname).toLowerCase()
 
-    if (!config.allowedExtensions?.includes(ext)) { // Check file extension
-        return cb(new Error('only jpg, png, webp, files are allowed'), false)
-    }
-    cb(null, true)
-}
+//     if (!config.allowedExtensions?.includes(ext)) { // Check file extension
+//         return cb(new Error('only jpg, png, webp, files are allowed'), false)
+//     }
+//     cb(null, true)
+// }
 
-const fileFilter = (req, file, cb) => {
-    file.stream?.on('data', chunk => {
-        file._size = (file._size || 0) + chunk.length;
+// const fileFilter = (req, file, cb) => {
+//     file.stream?.on('data', chunk => {
+//         file._size = (file._size || 0) + chunk.length;
 
-        const checkDocs = (file.fieldname === 'image' && file._size > imageMaxSize) ||
-            (file.fieldname === 'resume' && file._size > resumeMaxSize)
-        if (checkDocs) {
-            return cb(
-                new multer.MulterError('LIMIT_FILE_SIZE', `${file.fieldname} exceeds size limit`),
-                false
-            )
-        }
-    })
-    cb(null, true) // Accept initially — we'll check as data streams in
-}
+//         const checkDocs = (file.fieldname === 'image' && file._size > imageMaxSize) ||
+//             (file.fieldname === 'resume' && file._size > resumeMaxSize)
+//         if (checkDocs) {
+//             return cb(
+//                 new multer.MulterError('LIMIT_FILE_SIZE', `${file.fieldname} exceeds size limit`),
+//                 false
+//             )
+//         }
+//     })
+//     cb(null, true) // Accept initially — we'll check as data streams in
+// }
 
 export const handlemulterError = (err, req, res, next) => {
 
@@ -91,6 +91,16 @@ export const upload = (folderName = '',
                 options.file ? sizeOptions.fileSIZE || DEFAULT_SIZES.file : 0
             )
         },
-        fileFilter: options.image ? imageFilter : fileFilter
+        // fileFilter: options.image ? imageFilter : fileFilter
     })
 }
+
+
+// export const upload = (folderName = '', sizeOptions = { },  filefFilter
+// ) => {
+//     return multer({
+//         storage: createStorage(folderName),
+//         limits: { fileSize: sizeOptions },
+//         fileFilter: filefFilter
+//     })
+// }
