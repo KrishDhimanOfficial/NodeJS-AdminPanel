@@ -20,7 +20,7 @@
                                 <input type="text" class="form-control" name="collection" id="collection"
                                     placeholder="eg: user, category">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 mb-2">
                                 <label class="form-label">Others options</label>
                                 <div class="d-flex gap-3 flex-wrap">
                                     <div class="form-check">
@@ -38,42 +38,40 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div id="mainIcon" class="col-md-4 mb-2">
                                 <label for="mainIcon" class="form-label">Search Icon</label>
-                                <input type="text" class="form-control iconpicker" name="icon" id="mainIcon"
+                                <input type="text" class="form-control iconpicker" name="icon"
                                     placeholder="search Icon" />
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group d-flex flex-column">
-                                    <label for="modeldependenices" class="form-label">Model Dependenices</label>
-                                    <select name="modeldependenices" id="modeldependenices" multiple
-                                        class="select2 form-control">
-                                        <% collections.forEach(collection=> { %>
-                                            <option value="<%= collection %> ">
-                                                <%= collection %>
-                                            </option>
-                                            <% }) %>
-                                    </select>
-                                </div>
+                            <div class="col-md-4 mb-2">
+                                <label for="modeldependenices" class="form-label">Model Dependenices</label>
+                                <select name="modeldependenices" id="modeldependenices" multiple
+                                    class="select2 form-control">
+                                    <% collections.forEach(collection=> { %>
+                                        <option value="<%= collection %> ">
+                                            <%= collection %>
+                                        </option>
+                                        <% }) %>
+                                </select>
                             </div>
                         </div>
                         <div class="row d-none" id="subMenusettings">
-                            <div class="col-md-3">
+                            <div class="col-md-4 mb-2">
                                 <label for="navName" class="form-label">Navigation Name</label>
                                 <input type="text" class="form-control" name="name" id="navName"
                                     placeholder="eg: Peoples, Categories">
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4 mb-2">
                                 <label for="iconpicker" class="form-label">Icon</label>
                                 <input type="text" class="form-control iconpicker" name="icon"
                                     placeholder="search Icon" />
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-group d-flex flex-column">
+                            <div class="col-md-4 mb-2">
+                                <div class="d-flex flex-column">
                                     <label for="model" class="form-label">Model</label>
                                     <select name="model" id="model" multiple class="select2 form-control">
                                         <% collections.forEach(collection=> { %>
-                                            <option value="<%= collection %> ">
+                                            <option value="<%= collection %>">
                                                 <%= collection %>
                                             </option>
                                             <% }) %>
@@ -109,17 +107,41 @@
             <div class="col-12">
                 <div class="card card-primary">
                     <div class="card-header bg-purple">
-                        <h3 class="card-title">Image Settings </h3>
+                        <h3 class="card-title">Image uploading Settings </h3>
                     </div>
-                    <div class="card-body">
-                        <!-- <div id="FieldRelation"></div>
-                        <button id="addFieldRelation" type="button" class="mb-3 btn btn-dark float-end">Create
+                    <div id="imageSettings" class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-6 d-flex">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="uploadType"
+                                        id="uploadtype_single" data-upload="single" value="upload[single]" />
+                                    <label class="form-check-label" for="uploadtype_single">Single</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="uploadType"
+                                        id="uploadtype_multiple" data-upload="multiple" value="upload[multiple]" />
+                                    <label class="form-check-label" for="uploadtype_multiple">Multiple</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="uploadType"
+                                        id="uploadtype_fields" data-upload="fields" value="upload[fields]" />
+                                    <label class="form-check-label" for="uploadtype_fields">Fields</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="uploadType"
+                                        id="uploadtype_fields" data-upload="none" value="upload[none]" />
+                                    <label class="form-check-label" for="uploadtype_fields">None</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="imageFields" class="row"></div>
+                     <button id="addFieldRelation" type="button" class="mb-3 btn btn-dark float-end">Create
                             Relation
                         </button> 
-                    </div>
-                </div>
-            </div>
-        </div> -->
+</div>
+</div>
+</div>
+</div> -->
         <div class="row justify-content-center">
             <div class="col-4">
                 <button id="submitFormBtn" class="btn btn-dark mb-3 mx-auto d-block">Generate</button>

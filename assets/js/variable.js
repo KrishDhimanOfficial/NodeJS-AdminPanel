@@ -118,3 +118,85 @@ export const deleteCRUDFieldRow = (...selectors) => {
         })
     })
 }
+
+export function FieldCheckBox(counter) {
+    const content = `<div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="field[${counter}][required]" id="required_${counter}">
+                        <label class="form-check-label" for="required_${counter}">Required</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="field[${counter}][unique]" id="unique_${counter}">
+                        <label class="form-check-label" for="unique_${counter}">Unique</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="field[${counter}][isVisible]" id="visible_${counter}">
+                        <label class="form-check-label" for="visible_${counter}">IsVisible</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" data-counter="${counter}" id="default_value_checkBox_${counter}">
+                        <label class="form-check-label" for="default_value_checkBox_${counter}">Set Default Value</label>
+                    </div>`;
+    return content.trim()
+}
+
+export function setFieldDefaultValue(counter, defaultRow, val) {
+    let input = '';
+
+    switch (val) {
+        case 'String':
+            input = `<div class="col-md-3">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" name="field[${counter}][defaultValue]" id="default_value_${counter}" placeholder="" />
+                        <label for="default_value_${counter}" >Default Value</label>
+                    </div>
+                    </div>`
+            break;
+        case 'Number': // TODO : add more number types
+            input = `<div class="col-md-3">
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control" name="field[${counter}][defaultValue]" id="default_value_${counter}" placeholder="" />
+                        <label for="default_value_${counter}" >Default Value</label>
+                    </div>
+                    </div>`
+            break;
+        default: input = ''
+            break;
+    }
+    defaultRow.innerHTML = input
+}
+
+export function FieldRow(fieldId, formTypeId, typeId, counter) {
+    const schemaTypes = [
+        "String", "Number", "Boolean", "Array", "ObjectId", "Map", "Date",
+        "Double128", "Double", "Null", "Mixed"
+    ]
+
+    const formInputTypes = [
+        "text", "select", "file", "email", "url", "tel", "search", "number", "range",
+        "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"
+    ]
+    const content = `
+    <div class="row mb-2">
+        <div class="col-md-3">
+            <label for="${fieldId}" class="form-label">Field Name</label>
+            <input type="text" class="form-control" name="field[${counter}][field_name]"
+                    placeholder="eg: name, email, password" id="${fieldId}">
+        </div>
+        <div class="col-md-4">
+            <label for="${typeId}" class="form-label">Schema Type</label>
+            <select name="field[${counter}][field_type]" class="select2 form-control" id="${typeId}">
+                ${schemaTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="${formTypeId}" class="form-label">Form Type</label>
+            <select name="field[${counter}][form_type]" data-counter="${counter}" class="select2 form-control" id="${formTypeId}">
+                ${formInputTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+            </select>
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+            <button type="button" class="deleteFieldRow btn btn-danger btn-close"></button>
+        </div>
+    </div>`;
+    return content.trim()
+}

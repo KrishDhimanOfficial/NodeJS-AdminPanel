@@ -14,7 +14,7 @@ const router = express.Router({ caseSensitive: true, strict: true })
 router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
 router.route('/login')
     .get((req, res) => res.render('login', { layout: false, title: 'Login' }))
-    .post(async (req, res, next) => authControllers.localStrategy(req, res, next, adminModel))
+    .post((req, res, next) => authControllers.localStrategy(req, res, next, adminModel))
 
 // Dashboard
 router.get('/', isAuthenticated, setUniversalData, (req, res) => res.status(200).render('dashboard', { title: 'Dashboard' }))
@@ -33,7 +33,7 @@ router.route('/generate-crud')
     .get(adminPanelController.renderGenerateCRUD)
     .post(upload().none(), (req, res) => CRUD_GENERATOR(req, res))
 
-router.get('/collections', isAuthenticated, setUniversalData, (req, res) => res.status(200).json(mongoose.modelNames()))
+router.get('/collections', isAuthenticated, (req, res) => res.status(200).json(mongoose.modelNames()))
 
 for await (const { model, options, aggregate, multer, select2 } of resources) {
     // console.log({modelName, model, options, aggregate, multer, select2 })
@@ -51,14 +51,20 @@ for await (const { model, options, aggregate, multer, select2 } of resources) {
     })
 
     // JSON API routes
-    router.get(apiPath, ...middlewares, controller.getAllJsonData)
-    router.get(`${basePath}/view/:id`, ...middlewares, controller.getViewInfo)
-    router.post(basePath, ...middlewares, multer(), handlemulterError, controller.create)
-    router.put(`${basePath}/:id`, ...middlewares, multer(), handlemulterError, controller.update)
-    router.patch(`${basePath}/:id`, ...middlewares, controller.updateModelStatus)
-    router.delete(`${basePath}/:id`, ...middlewares, controller.remove)
+    router.get(apiPath, isAuthenticated, controller.getAllJsonData)
+    router.post(basePath, isAuthenticated, multer(), handlemulterError, controller.create)
+    router.put(`${basePath}/:id`, isAuthenticated, multer(), handlemulterError, controller.update)
+    router.patch(`${basePath}/:id`, isAuthenticated, controller.updateModelStatus)
+    router.delete(`${basePath}/:id`, isAuthenticated, controller.remove)
 
     // UI routes
+    router.get(`${basePath}/view/:id`, ...middlewares, async (req, res) => {
+        if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
+        const response = await model.findById({ _id: req.params.id })
+
+        return res.status(200).render(`${model.modelName}/view`, { response })
+    }) // View Information Page
+
     router.get(basePath, ...middlewares, (req, res) => {
         return res.status(200).render('datatable', {
             title: modelName,
@@ -66,24 +72,27 @@ for await (const { model, options, aggregate, multer, select2 } of resources) {
             dataTableAPI: `${req.baseUrl}${apiPath}`,
             api: req.originalUrl,
         })
-    })
+    }) // View DataTable Page
 
     router.get(`${basePath}/add`, ...middlewares, (req, res) => {
         return res.status(200).render(`${modelName}/create`, {
             title: modelName,
             api: `${req.baseUrl}${basePath}`,
         })
-    })
+    }) // View Create Page
 
     router.get(`${basePath}/:id`, ...middlewares, async (req, res) => {
+        if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
         const response = await model.findById(req.params.id)
+
         return res.status(200).render(`${modelName}/update`, {
             title: modelName,
             api: `${req.baseUrl}${basePath}`,
             response,
         })
-    })
+    }) // View Update page
 }
 
+router.use('/404', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
 router.use('/*', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
 export default router

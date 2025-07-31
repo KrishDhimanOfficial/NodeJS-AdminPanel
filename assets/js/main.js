@@ -8,7 +8,8 @@ import '../vendor/iconpicker/fontawesome-iconpicker.min.js'
 import Fetch from "./fetch.js"
 import {
     datatable, displayPreviewImage, apiInput, updatetableDataStatus,
-    Form, Notify, previewImageInput, openDangerModal, setupSelect2, deleteCRUDFieldRow
+    Form, Notify, previewImageInput, openDangerModal, setupSelect2, deleteCRUDFieldRow,
+    FieldCheckBox, setFieldDefaultValue, FieldRow
 } from "./variable.js";
 
 datatable && initializeTabulator()
@@ -61,110 +62,122 @@ datatable && (
 // setupSelect2('#select', '/admin/resources/select/api/admin', 'Search Admin')
 let counter = 0;
 let collections = null;
+
 const addFieldBtn = document.querySelector('#addFieldBtn');
 const fieldsContainer = document.querySelector('#addField');
-(async () => collections = await Fetch.get('/admin/collections'))()
+
+// Fetch collections asynchronously and store them
+(async () => {
+    collections = await Fetch.get('/admin/collections')
+})();
+
+// Delete field row logic (assumed to be defined elsewhere)
 deleteCRUDFieldRow('#addField')
 
-addFieldBtn && (addFieldBtn.onclick = () => {
-    const filters = ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number']
+// Handle Add Field button click
+addFieldBtn?.addEventListener('click', () => {
+    const filters = ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number'];
+
+    // Dynamic IDs based on counter
     const fieldId = `field_${counter}`;
     const typeId = `type_${counter}`;
     const formTypeId = `form_type_${counter}`;
     const collectionId = `relation_collection_${counter}`;
-    const searchFilterId = `search_filter_${counter}`
+    const searchFilterId = `search_filter_${counter}`;
 
+    // Template for new field block
     const fieldTemplate = `
     <div class="field-group">
-    <h3>Field ${counter + 1}</h3>
-        ${FieldRow(fieldId, formTypeId, typeId, counter)}
-        <div class="row mb-2">
-            <div class="col-md-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="field[${counter}][required]" id="required_${counter}">
-                        <label class="form-check-label" for="required_${counter}">Required</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="field[${counter}][unique]" id="unique_${counter}">
-                        <label class="form-check-label" for="unique_${counter}">Unique</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="field[${counter}][isVisible]" id="visible_${counter}">
-                        <label class="form-check-label" for="visible_${counter}">IsVisible</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" data-counter="${counter}" id="default_value_${counter}">
-                        <label class="form-check-label" for="default_value_${counter}">Set Default Value</label>
-                    </div>
-            </div>
-            <div class="col-md-4">
-                <label for="${searchFilterId}" class="form-label">Search Filter</label>
-                <select name="field[${counter}][searchFilter]" class="select2 form-control" id="${searchFilterId}">
-                 <option disabled selected>Select Search Filter</option>
-                    ${filters.map(name => `<option value="${name}">${name}</option>`).join('')}
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label for="${collectionId}" class="form-label">Field Relation</label>
-                <select name="field[${counter}][relation]" class="select2 form-control" id="${collectionId}">
-                    <option selected>No Relation</option>
-                    ${collections.map(name => `<option value="${name}">${name}</option>`).join('')}
-                </select>
-            </div>
+      <h3>Field ${counter + 1}</h3>
+      ${FieldRow(fieldId, formTypeId, typeId, counter)}
+
+      <div id="imageSettings_${counter}" class="row mb-2 d-none">h12</div>
+
+      <div class="row mb-2">
+        <div class="col-md-3">${FieldCheckBox(counter)}</div>
+        <div class="col-md-4">
+          <label for="${searchFilterId}" class="form-label">Search Filter</label>
+          <select name="field[${counter}][searchFilter]" class="select2 form-control" id="${searchFilterId}">
+            <option disabled selected>Select Search Filter</option>
+            ${filters.map(name => `<option value="${name}">${name}</option>`).join('')}
+          </select>
         </div>
-        <hr style="border-top:1px solid rgba(0,0,0,0.4);">
+        <div class="col-md-4">
+          <label for="${collectionId}" class="form-label">Field Relation</label>
+          <select name="field[${counter}][relation]" class="select2 form-control" id="${collectionId}">
+            <option selected>No Relation</option>
+            ${collections.map(name => `<option value="${name}">${name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div id="defaultValueRow_${counter}" class="row mb-2 d-none">
+        <div class="col-md-3"></div>
+      </div>
+
+      <hr style="border-top:1px solid rgba(0,0,0,0.4);">
     </div>`;
 
+    // Append to DOM
     fieldsContainer.insertAdjacentHTML('beforeend', fieldTemplate)
-    counter++;
+
+    // Reinitialize select2 for dynamic elements
     $('.select2').select2()
+    counter++;
 })
 
+// Listen for select[type] changes dynamically
+$(document).on('change', 'select[data-counter]', function (e) {
+    const counter = $(this).data('counter')
+    const selectedValue = $(this).val()
+    const imageSettingsEl = document.querySelector(`#imageSettings_${counter}`)
+
+    if (selectedValue === 'file') {
+        imageSettingsEl.classList.remove('d-none')
+        imageSettingsEl.innerHTML = `
+      <div class="col-md-5 offset-md-6">
+        <div class="d-flex gap-2 justify-content-center">
+          <div class="form-floating mb-3">
+            <input type="number" class="form-control" name="field[${counter}][file][length]" min="0" id="formId2" />
+            <label for="formId2">Length</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="number" class="form-control" name="field[${counter}][file][size]" id="formId1" min="0" />
+            <label for="formId1">Size (eg: 2 * 1024 = 2KB)</label>
+          </div>
+        </div>
+      </div>`;
+    } else {
+        imageSettingsEl.classList.add('d-none')
+    }
+
+    console.log('Counter:', counter, 'Selected Value:', selectedValue)
+})
+
+// Toggle default value row and attach onchange to type select
 fieldsContainer.onclick = (e) => {
-    console.log(e.target);
+    const counter = e.target.dataset.counter;
+    if (!counter) return;
 
-    console.log(e.target.dataset.counter);
+    const typeSelect = document.querySelector(`#type_${counter}`)
+    const defaultRow = document.querySelector(`#defaultValueRow_${counter}`)
 
+    if (defaultRow) {
+        defaultRow.classList.toggle('d-none');
+        setFieldDefaultValue(counter, defaultRow, typeSelect?.value)
+    }
+
+    // Attach onchange to type selector
+    if (typeSelect) {
+        typeSelect.onchange = (e) => {
+            setFieldDefaultValue(counter, defaultRow, e.target.value)
+        }
+    }
 }
 
-function FieldRow(fieldId, formTypeId, typeId, counter) {
-    const schemaTypes = [
-        "String", "Number", "Boolean", "Array", "ObjectId", "Map", "Date",
-        "Double128", "Double", "Null", "Mixed"
-    ]
-
-    const formInputTypes = [
-        "text", "select", "file", "email", "url", "tel", "search", "number", "range",
-        "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"
-    ]
-    const content = `
-    <div class="row mb-2">
-        <div class="col-md-3">
-            <label for="${fieldId}" class="form-label">Field Name</label>
-            <input type="text" class="form-control" name="field[${counter}][field_name]"
-                    placeholder="eg: name, email, password" id="${fieldId}">
-        </div>
-        <div class="col-md-4">
-            <label for="${typeId}" class="form-label">Schema Type</label>
-            <select name="field[${counter}][field_type]" class="select2 form-control" id="${typeId}">
-                ${schemaTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label for="${formTypeId}" class="form-label">Form Type</label>
-            <select name="field[${counter}][form_type]" class="select2 form-control" id="${formTypeId}">
-                ${formInputTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
-            </select>
-        </div>
-        <div class="col-md-1 d-flex align-items-end">
-            <button type="button" class="deleteFieldRow btn btn-danger btn-close"></button>
-        </div>
-    </div>`;
-    return content.trim()
-}
-
+// Submenu checkbox toggle
 const subMenuCheck = document.querySelector('#isSubMenu')
-subMenuCheck && (subMenuCheck.onchange = () => {
-    document.querySelector('#subMenusettings').classList.toggle('d-none')
-    document.querySelector('#mainIcon').classList.toggle('d-none')
+subMenuCheck?.addEventListener('change', () => {
+    document.querySelector('#subMenusettings')?.classList.toggle('d-none')
+    document.querySelector('#mainIcon')?.classList.toggle('d-none')
 })

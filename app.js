@@ -1,6 +1,7 @@
 import express from 'express'
 import logger from 'morgan'
 import cors from 'cors'
+import chalk from 'chalk'
 import helmet from 'helmet'
 import compression from 'compression'
 import rateLimit from 'express-rate-limit'
@@ -10,8 +11,24 @@ import passport from 'passport'
 import session from 'express-session'
 import config from './config/config.js'
 import MongoStore from 'connect-mongo'
-import router from './routes/server.routes.js'
 import miniyHTML from 'express-minify-html-terser'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+import router from './routes/server.routes.js'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+// function formatBytes(bytes) {
+//   const units = ['B', 'KB', 'MB', 'GB', 'TB']
+//   if (bytes === 0) return '0 B'
+//   const i = Math.floor(Math.log(bytes) / Math.log(1024))
+//   const value = bytes / Math.pow(1024, i)
+//   return `${value.toFixed(2)} ${units[i]}`
+// }
+
+// console.log('Memory Usage:')
+// Object.entries(process.memoryUsage()).forEach(([key, value]) => {
+//   console.log(`${key}: ${formatBytes(value)}`)
+// })
 
 const app = express()
 app.use(helmet(
@@ -29,7 +46,7 @@ app.use(cors(
   }
 ))
 
-app.use(express.json())
+app.use(express.json({ limit: '10kb' }))
 app.use(express.urlencoded({ extended: true }))
 app.use(compression(
   {
@@ -90,19 +107,18 @@ app.use(expressLayouts)
 // folder setup
 app.use('/uploads', express.static('uploads'))
 app.use('/assets', express.static('assets'))
-
-app.use(rateLimit(
-  {
-    windowMs: 15 * 1000, // 15 seconds
-    max: 20, // max requests per IP
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res, next, options) => {
-      console.error(chalk.magenta('Rate Limit Exceeded!'))
-      return res.status(429).sendFile(path.join(__dirname, 'views ', 'rate-limit.html'))
-    },
-  }
-))
+// app.use(rateLimit(
+//   {
+//     windowMs: 15 * 1000, // 15 seconds
+//     max: 20, // max requests per IP
+//     standardHeaders: true,
+//     legacyHeaders: false,
+//     handler: (req, res, next, options) => {
+//       console.error(chalk.magenta('Rate Limit Exceeded!'))
+//       return res.status(429).sendFile(path.join(__dirname, 'views ', 'rate-limit.html'))
+//     },
+//   }
+// )) Not Working Error: admin is not defined
 
 app.use('/admin', router)
 
