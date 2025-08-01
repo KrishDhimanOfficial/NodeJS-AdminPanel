@@ -98,6 +98,7 @@ app.use(miniyHTML({
     minifyJS: true
   }
 }))
+
 // View Engine
 app.set('view engine', 'ejs')
 app.set('views', 'views')

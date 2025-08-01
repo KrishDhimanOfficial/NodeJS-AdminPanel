@@ -1,14 +1,18 @@
 import express from "express"
 import mongoose from "mongoose"
-import resources from "../lib/resources.lib.js"
+import fs from 'fs'
+// import path from 'node:path'
+// import resources from "../lib/resources.lib.js"
 import adminModel from '../models/admin.model.js'
 import CRUD_GENERATOR from "../utils/crudGenerator.utils.js"
 import authControllers from "../controllers/auth.controller.js"
-import createCrudController from "../controllers/crud.controller.js"
+// import createCrudController from "../controllers/crud.controller.js"
 import adminPanelController from "../controllers/adminPanel.controller.js"
 import setUniversalData from "../middleware/setUniversalData.middleware.js"
 import { handlemulterError, upload } from "../middleware/multer.middleware.js"
 import { isAuthenticated, isAuthWithAccessCRUD } from "../middleware/auth.middleware.js"
+// import sturctureModel from "../models/sturcture.model.js"
+import GenerateCRUDRoutes from "../utils/generateRoutes.utils.js"
 const router = express.Router({ caseSensitive: true, strict: true })
 
 router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
@@ -35,64 +39,8 @@ router.route('/generate-crud')
 
 router.get('/collections', isAuthenticated, (req, res) => res.status(200).json(mongoose.modelNames()))
 
-for await (const { model, options, aggregate, multer, select2 } of resources) {
-    // console.log({modelName, model, options, aggregate, multer, select2 })
-    const modelName = model.modelName;
-    const controller = createCrudController(model, options, aggregate)
-    const middlewares = [isAuthenticated, setUniversalData]
-    const basePath = `/resources/${modelName}`;
-    const apiPath = `/resources/api/${modelName}`;
+GenerateCRUDRoutes(router)
 
-    select2?.length > 0 && select2.forEach(option => {
-        router.get(`/resources/select/api/${option.model.modelName}`,
-            ...middlewares,
-            (req, res) => controller.getSelectJsonData(req, res, option)
-        )
-    })
-
-    // JSON API routes
-    router.get(apiPath, isAuthenticated, controller.getAllJsonData)
-    router.post(basePath, isAuthenticated, multer(), handlemulterError, controller.create)
-    router.put(`${basePath}/:id`, isAuthenticated, multer(), handlemulterError, controller.update)
-    router.patch(`${basePath}/:id`, isAuthenticated, controller.updateModelStatus)
-    router.delete(`${basePath}/:id`, isAuthenticated, controller.remove)
-
-    // UI routes
-    router.get(`${basePath}/view/:id`, ...middlewares, async (req, res) => {
-        if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
-        const response = await model.findById({ _id: req.params.id })
-
-        return res.status(200).render(`${model.modelName}/view`, { response })
-    }) // View Information Page
-
-    router.get(basePath, ...middlewares, (req, res) => {
-        return res.status(200).render('datatable', {
-            title: modelName,
-            addURL: `${req.originalUrl}/add`,
-            dataTableAPI: `${req.baseUrl}${apiPath}`,
-            api: req.originalUrl,
-        })
-    }) // View DataTable Page
-
-    router.get(`${basePath}/add`, ...middlewares, (req, res) => {
-        return res.status(200).render(`${modelName}/create`, {
-            title: modelName,
-            api: `${req.baseUrl}${basePath}`,
-        })
-    }) // View Create Page
-
-    router.get(`${basePath}/:id`, ...middlewares, async (req, res) => {
-        if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
-        const response = await model.findById(req.params.id)
-
-        return res.status(200).render(`${modelName}/update`, {
-            title: modelName,
-            api: `${req.baseUrl}${basePath}`,
-            response,
-        })
-    }) // View Update page
-}
-
-router.use('/404', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
-router.use('/*', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
+// router.use('/404', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
+// router.use('/*', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
 export default router

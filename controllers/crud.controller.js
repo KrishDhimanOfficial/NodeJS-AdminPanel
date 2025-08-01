@@ -96,8 +96,6 @@ const createCrudController = (model, options = {}, aggregate) => ({
 
     getAllJsonData: async (req, res) => {
         try {
-            console.log(req.query.filter);
-
             const query = { page: req.query.page, limit: req.query.size }
 
             if (typeof aggregate === 'function') {

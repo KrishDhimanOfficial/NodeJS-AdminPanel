@@ -30,7 +30,7 @@ const createStorage = (dir) => {
 //     const ext = path.extname(file.originalname).toLowerCase()
 
 //     if (!config.allowedExtensions?.includes(ext)) { // Check file extension
-//         return cb(new Error('only jpg, png, webp, files are allowed'), false)
+//         return cb(new Error('only images are Allowed! Inavlid File'), false)
 //     }
 //     cb(null, true)
 // }

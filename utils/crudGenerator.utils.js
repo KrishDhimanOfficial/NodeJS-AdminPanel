@@ -4,6 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { capitalizeFirstLetter } from "captialize"
 import sturctureModel from "../models/sturcture.model.js"
+import mongoose from "mongoose"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -14,8 +15,10 @@ const __dirname = path.dirname(__filename)
  */
 
 const CRUD_GENERATOR = async (req, res) => {
-    const { collection, timeStamp, field } = req.body;
-    console.log(req.body);
+    const { collection, timeStamp, field, isSubMenu, icon, modeldependenices, name, model } = req.body;
+    const navigation = { isSubMenu, icon, modeldependenices, name, model }
+    // console.log(req.body);
+    // console.log(req.body.field);
 
     const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
     const viewDir = path.join(__dirname, '../views', collection)
@@ -23,28 +26,78 @@ const CRUD_GENERATOR = async (req, res) => {
     try {
         if (!collection || field?.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
 
-        await fs.writeFile(filePath, createModelFile(collection, field, timeStamp)) // Create Schema
+        const response = await SaveData(collection, timeStamp, field, navigation)
+        if (!response.success) return res.status(400).json({ error: 'Internal Server Error. Unable to create schema' })
+
+        // await fs.writeFile(filePath, createModelFile(collection, field, timeStamp)) // Create Schema
         // await fs.mkdir(viewDir, { recursive: true }) // create View Files
 
-        //     const viewTemplates = {
-        //         create: createAddEJSFile(collection, field),
-        //         update: createUpdateEJSFile(collection, field),
-        //         view: createViewEJSFile(collection, field)
-        //     } // Views Templates
+        // const viewTemplates = {
+        //     create: createAddEJSFile(collection, field),
+        //     update: createUpdateEJSFile(collection, field),
+        //     view: createViewEJSFile(collection, field)
+        // } // Views Templates
 
-        //     for (const [viewName, content] of Object.entries(viewTemplates)) {
-        //         const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
-        //         // try {
-        //         //     await fs.access(ViewsfilePath)
-        //         // } catch {
-        //         await fs.writeFile(ViewsfilePath, content)
-        //         // }
-        //     }
+        // for (const [viewName, content] of Object.entries(viewTemplates)) {
+        //     const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
+        //     await fs.writeFile(ViewsfilePath, content)
+        // }
 
-        return res.status(200).json({ success: 'Schema created successfully', body: req.body })
+        return res.status(200).json({ success: 'Schema created successfully', })
     } catch (error) {
         chalk.red(console.error('createSchema : ', error.message))
         return res.status(400).json({ error: 'Internal Server Error. Unable to create schema' })
+    }
+}
+
+async function SaveData(collection, timeStamp, field, nav) {
+    try {
+        const isVisible = Object.fromEntries(field.map(key => {
+            const field_name = key.field_name.replace(/\s+/g, '_').toLowerCase().trim()
+            return key.isVisible === 'on'
+                ? [field_name, true]
+                : [field_name, false]
+        }))
+
+        const list = field.map(f => ({
+            col: f.field_name.toLowerCase().trim(),
+            ...(f.searchFilter && {
+                searchFilter: f.searchFilter
+            })
+        }))
+
+        const isSubMenu = nav.isSubMenu === 'on';
+        const navigation = {
+            name: isSubMenu ? capitalizeFirstLetter(nav.name) : capitalizeFirstLetter(collection),
+            icon: isSubMenu ? nav.icon[1] : nav.icon[0],
+            ...(isSubMenu && {
+                subMenu: Array.isArray(nav.model) ? nav.model : [nav.model]
+            })
+        }
+
+        const fields = field.map(f => ({
+            field_name: f.field_name,
+            field_type: f.field_type,
+            form_type: f.form_type,
+            required: f.required === 'on',
+            unique: f.unique === 'on',
+            default: f.defaultValue,
+            ...(f.relation && { relation: f.relation }),
+        }))
+
+        const res = await sturctureModel.create({
+            model: collection, timeStamp, navigation, fields,
+            options: { isVisible, list },
+            modeldependenices: Array.isArray(nav.modeldependenices)
+                ? nav.modeldependenices
+                : [nav.modeldependenices]
+        })
+
+        if (!res) return { success: false }
+        return { success: true }
+    } catch (error) {
+        chalk.red(console.error('SaveData : ', error.message))
+        return { success: false }
     }
 }
 
