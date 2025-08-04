@@ -108,13 +108,25 @@ const createCrudController = (model, options = {}, aggregate) => ({
                     columns: options.list
                 })
             } else {
-                const response = await handleAggregatePagination(model, [{ $project: options.isVisible }], query)
+                const visibleFields = Object.fromEntries(options.isVisible
+                    .filter(col => col.isVisible && col.col !== 'actions')
+                    .map(col => [col.col, 1])
+                )
 
+                const columns = options.isVisible
+                    .filter(col => col.isVisible)
+                    .map(col => ({
+                        col: col.col,
+                        ...(col.actions && { actions: col.actions }),
+                        ...(col.searchFilter && { filter: col.searchFilter })
+                    }))
+
+                const response = await handleAggregatePagination(model, [{ $project: visibleFields }], query)
                 return res.status(200).json({
                     last_row: response.totalDocs,
                     last_page: response.totalPages,
                     data: response.collectionData.reverse(),
-                    columns: options.list
+                    columns
                 })
             }
         } catch (error) {

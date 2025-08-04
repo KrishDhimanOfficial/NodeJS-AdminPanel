@@ -1,18 +1,14 @@
 import express from "express"
 import mongoose from "mongoose"
-import fs from 'fs'
-// import path from 'node:path'
-// import resources from "../lib/resources.lib.js"
 import adminModel from '../models/admin.model.js'
 import CRUD_GENERATOR from "../utils/crudGenerator.utils.js"
 import authControllers from "../controllers/auth.controller.js"
-// import createCrudController from "../controllers/crud.controller.js"
 import adminPanelController from "../controllers/adminPanel.controller.js"
 import setUniversalData from "../middleware/setUniversalData.middleware.js"
 import { handlemulterError, upload } from "../middleware/multer.middleware.js"
 import { isAuthenticated, isAuthWithAccessCRUD } from "../middleware/auth.middleware.js"
-// import sturctureModel from "../models/sturcture.model.js"
 import GenerateCRUDRoutes from "../utils/generateRoutes.utils.js"
+import config from "../config/config.js"
 const router = express.Router({ caseSensitive: true, strict: true })
 
 router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
@@ -37,10 +33,16 @@ router.route('/generate-crud')
     .get(adminPanelController.renderGenerateCRUD)
     .post(upload().none(), (req, res) => CRUD_GENERATOR(req, res))
 
-router.get('/collections', isAuthenticated, (req, res) => res.status(200).json(mongoose.modelNames()))
+router.get('/collections', isAuthenticated, (req, res) => res.status(200).json(mongoose.modelNames()));
 
-GenerateCRUDRoutes(router)
+(
+    async () => {
+        await mongoose.connect(config.mongodb_URL, { dbName: config.db_name })
+        const crudRouter = await GenerateCRUDRoutes()
+        router.use('/', crudRouter)
+        router.use('/404', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
+        router.use('/*', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
+    }
+)(); // IIFE
 
-// router.use('/404', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
-// router.use('/*', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
 export default router

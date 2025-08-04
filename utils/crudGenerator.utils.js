@@ -1,6 +1,6 @@
 import chalk from "chalk"
 import fs from 'node:fs/promises'
-import path from 'node:path'
+import path, { parse } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { capitalizeFirstLetter } from "captialize"
 import sturctureModel from "../models/sturcture.model.js"
@@ -18,7 +18,8 @@ const CRUD_GENERATOR = async (req, res) => {
     const { collection, timeStamp, field, isSubMenu, icon, modeldependenices, name, model } = req.body;
     const navigation = { isSubMenu, icon, modeldependenices, name, model }
     // console.log(req.body);
-    // console.log(req.body.field);
+    console.log(req.body.field);
+    uploader(collection, field.filter(Boolean))
 
     const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
     const viewDir = path.join(__dirname, '../views', collection)
@@ -26,22 +27,22 @@ const CRUD_GENERATOR = async (req, res) => {
     try {
         if (!collection || field?.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
 
-        const response = await SaveData(collection, timeStamp, field, navigation)
+        const response = await SaveData(collection, timeStamp, field.filter(Boolean), navigation)
         if (!response.success) return res.status(400).json({ error: 'Internal Server Error. Unable to create schema' })
 
-        // await fs.writeFile(filePath, createModelFile(collection, field, timeStamp)) // Create Schema
-        // await fs.mkdir(viewDir, { recursive: true }) // create View Files
+        await fs.writeFile(filePath, createModelFile(collection, field.filter(Boolean), timeStamp)) // Create Schema
+        await fs.mkdir(viewDir, { recursive: true }) // create View Files
 
-        // const viewTemplates = {
-        //     create: createAddEJSFile(collection, field),
-        //     update: createUpdateEJSFile(collection, field),
-        //     view: createViewEJSFile(collection, field)
-        // } // Views Templates
+        const viewTemplates = {
+            create: createAddEJSFile(collection, field.filter(Boolean)),
+            update: createUpdateEJSFile(collection, field.filter(Boolean)),
+            view: createViewEJSFile(collection, field.filter(Boolean))
+        } // Views Templates
 
-        // for (const [viewName, content] of Object.entries(viewTemplates)) {
-        //     const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
-        //     await fs.writeFile(ViewsfilePath, content)
-        // }
+        for (const [viewName, content] of Object.entries(viewTemplates)) {
+            const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
+            await fs.writeFile(ViewsfilePath, content)
+        }
 
         return res.status(200).json({ success: 'Schema created successfully', })
     } catch (error) {
@@ -52,19 +53,18 @@ const CRUD_GENERATOR = async (req, res) => {
 
 async function SaveData(collection, timeStamp, field, nav) {
     try {
-        const isVisible = Object.fromEntries(field.map(key => {
-            const field_name = key.field_name.replace(/\s+/g, '_').toLowerCase().trim()
-            return key.isVisible === 'on'
-                ? [field_name, true]
-                : [field_name, false]
-        }))
-
-        const list = field.map(f => ({
-            col: f.field_name.toLowerCase().trim(),
+        const isVisible = field.map(f => ({
+            col: f.field_name.replace(/\s+/g, '_').toLowerCase().trim(),
+            isVisible: f.isVisible === 'on',
             ...(f.searchFilter && {
                 searchFilter: f.searchFilter
             })
         }))
+
+        isVisible.push({
+            col: 'actions', isVisible: true,
+            actions: { view: true, edit: true, del: true }
+        })
 
         const isSubMenu = nav.isSubMenu === 'on';
         const navigation = {
@@ -87,7 +87,8 @@ async function SaveData(collection, timeStamp, field, nav) {
 
         const res = await sturctureModel.create({
             model: collection, timeStamp, navigation, fields,
-            options: { isVisible, list },
+            options: { isVisible },
+            uploader: uploader(collection, field),
             modeldependenices: Array.isArray(nav.modeldependenices)
                 ? nav.modeldependenices
                 : [nav.modeldependenices]
@@ -98,6 +99,45 @@ async function SaveData(collection, timeStamp, field, nav) {
     } catch (error) {
         chalk.red(console.error('SaveData : ', error.message))
         return { success: false }
+    }
+}
+
+// Function That's set multer Config
+const uploader = (collection, field) => {
+    const files = field.filter(f => f.form_type === 'file')
+
+    switch (true) {
+        case files.length > 1:
+            return {
+                type: 'fields',
+                folder: collection,
+                fields: field.map(f => ({
+                    field_name: f.field_name,
+                    count: parseInt(f.file?.length || 0),
+                    size: parseInt(f.file?.size || 0)
+                }))
+            }
+
+        case files.length === 1 && parseInt(files[0].file?.length) === 1 || '':
+            return {
+                type: 'single',
+                folder: collection,
+                field_name: files[0].field_name,
+                count: parseInt(files[0].file?.length || 0),
+                size: parseInt(files[0].file?.size || 0)
+            }
+
+        case files.length === 1 && parseInt(files[0].file?.length) > 1:
+            return {
+                type: 'multi',
+                folder: collection,
+                field_name: files[0].field_name,
+                count: parseInt(files[0].file?.length || 0),
+                size: parseInt(files[0].file?.size || 0)
+            }
+
+        default:
+            return { type: 'none' }
     }
 }
 

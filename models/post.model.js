@@ -1,15 +1,21 @@
 import mongoose from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+            import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-const postSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: [true, 'title is required.'],
-        unique: [true, 'title is already in use.'],
+            const postSchema = new mongoose.Schema({
+                title: { 
+            type: String,
+            required: [true, 'title is required.'],
+            
+            
+        },
+image: { 
+            type: String,
+            required: [true, 'image is required.'],
+            
+            
+        }
+            },
+            { timestamps: true })
 
-    }
-},
-    { timestamps: true })
-
-postSchema.plugin(mongooseAggregatePaginate)
-export default mongoose.model('post', postSchema)
+            postSchema.plugin(mongooseAggregatePaginate)
+            export default mongoose.model('post', postSchema)

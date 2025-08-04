@@ -35,21 +35,37 @@ const createStorage = (dir) => {
 //     cb(null, true)
 // }
 
-// const fileFilter = (req, file, cb) => {
-//     file.stream?.on('data', chunk => {
-//         file._size = (file._size || 0) + chunk.length;
+const fileFilter = ({ field, size, count, fields } = {}) => {
+    return (req, file, cb) => {
+        if (fields?.length > 0) {
+            file.stream?.on('data', chunk => {
+                file._size = (file._size || 0) + chunk.length;
 
-//         const checkDocs = (file.fieldname === 'image' && file._size > imageMaxSize) ||
-//             (file.fieldname === 'resume' && file._size > resumeMaxSize)
-//         if (checkDocs) {
-//             return cb(
-//                 new multer.MulterError('LIMIT_FILE_SIZE', `${file.fieldname} exceeds size limit`),
-//                 false
-//             )
-//         }
-//     })
-//     cb(null, true) // Accept initially — we'll check as data streams in
-// }
+                const checkDocs = fields.some(f => f.field_name === file.fieldname && file._size > f.size * 1024)
+                if (checkDocs) {
+                    return cb(
+                        new multer.MulterError('LIMIT_FILE_SIZE', `${file.fieldname} exceeds size limit`),
+                        false
+                    )
+                }
+            })
+            cb(null, true) // Accept initially — we'll check as data streams in
+        } else {
+            file.stream?.on('data', chunk => {
+                file._size = (file._size || 0) + chunk.length;
+
+                const checkDocs = file.fieldname === field && file._size > size * 1024
+                if (checkDocs) {
+                    return cb(
+                        new multer.MulterError('LIMIT_FILE_SIZE', `${file.fieldname} exceeds size limit`),
+                        false
+                    )
+                }
+            })
+            cb(null, true) // Accept initially — we'll check as data streams in
+        }
+    }
+}
 
 export const handlemulterError = (err, req, res, next) => {
 
@@ -79,22 +95,24 @@ export const rendermulterError = (err, req, res, next) => {
     }
 } // Error handling middleware
 
-export const upload = (folderName = '',
-    options = { image: true, file: false },
-    sizeOptions = { imageSIZE: DEFAULT_SIZES.image, fileSIZE: DEFAULT_SIZES.file },
+export const upload = (folder = '',
+    { field, size, count, fields } = {},
+    // options = { image: true, file: false },
+    // sizeOptions = { imageSIZE: DEFAULT_SIZES.image, fileSIZE: DEFAULT_SIZES.file },
 ) => {
     return multer({
-        storage: createStorage(folderName),
-        limits: {
-            fileSize: Math.max(
-                options.image ? sizeOptions.imageSIZE || DEFAULT_SIZES.image : 0,
-                options.file ? sizeOptions.fileSIZE || DEFAULT_SIZES.file : 0
-            )
-        },
-        // fileFilter: options.image ? imageFilter : fileFilter
+        storage: createStorage(folder),
+        limits: { fileSize: size * 1024, },
+        fileFilter: fileFilter({ field, size, count, fields })
     })
 }
 
+//  limits: {
+//             fileSize: Math.max(
+//                 options.image ? sizeOptions.imageSIZE || DEFAULT_SIZES.image : 0,
+//                 options.file ? sizeOptions.fileSIZE || DEFAULT_SIZES.file : 0
+//             )
+//         },
 
 // export const upload = (folderName = '', sizeOptions = { },  filefFilter
 // ) => {

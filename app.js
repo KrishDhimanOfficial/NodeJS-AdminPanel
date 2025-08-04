@@ -15,6 +15,8 @@ import miniyHTML from 'express-minify-html-terser'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import router from './routes/server.routes.js'
+import mongoose from 'mongoose'
+import GenerateCRUDRoutes from './utils/generateRoutes.utils.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 // function formatBytes(bytes) {
@@ -124,7 +126,6 @@ app.use('/assets', express.static('assets'))
 app.use('/admin', router)
 
 app.use((err, req, res, next) => {
-
   return res.status(err.status || 500).render('error', {
     message: err.message,
     error: config.node_env === 'development' ? err : {},

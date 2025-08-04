@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,18 +14,7 @@ const navigationSchema = new mongoose.Schema({
 }, { _id: false })
 
 const optionsSchema = new mongoose.Schema({
-    isVisible: { type: Object },
-    list: [
-        {
-            _id: false,
-            col: { type: String },
-            searchFilter: { type: String },
-            actions: {
-                type: Object,
-                default: { view: true, update: true, delete: true, }
-            }
-        }
-    ]
+    isVisible: { type: Array },
 }, { _id: false })
 
 const fieldSchema = new mongoose.Schema({
@@ -45,31 +35,11 @@ const structureSchema = new mongoose.Schema({
     modeldependenices: { type: [String] },
     options: optionsSchema,
     fields: { type: [fieldSchema] },
+    uploader: { type: Object },
     status: { type: Boolean, default: true }
 },
     { timestamps: true }
 )
 
-// structureSchema.pre('save', async function (next) {
-//     const FILE_PATH = path.join(__dirname, '../utils', `resources.json`)
-//     let data = [];
-
-//     if (fs.access(FILE_PATH)) {
-//         const fileContents = await fs.readFile(FILE_PATH, 'utf-8');
-//         try {
-//             data = JSON.parse(fileContents)
-//         } catch (err) {
-//             console.error('⚠️ Error parsing JSON, starting fresh');
-//             data = [];
-//         }
-//     }
-
-//     // Step 2: Append new structure
-//     data.push(this)
-
-//     // Step 3: Write back to file
-//     await fs.writeFile(FILE_PATH, JSON.stringify(data, null, 2), 'utf-8');
-//     next()
-// })
-
+structureSchema.plugin(mongooseAggregatePaginate)
 export default mongoose.model('Structure', structureSchema)
