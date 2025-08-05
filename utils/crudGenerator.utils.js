@@ -111,11 +111,12 @@ const uploader = (collection, field) => {
             return {
                 type: 'fields',
                 folder: collection,
-                fields: field.map(f => ({
-                    field_name: f.field_name,
-                    count: parseInt(f.file?.length || 0),
-                    size: parseInt(f.file?.size || 0)
-                }))
+                fields: field.filter(f => f.form_type === 'file')
+                    .map(f => ({
+                        field_name: f.field_name,
+                        count: parseInt(f.file?.length || 0),
+                        size: parseInt(f.file?.size || 0)
+                    }))
             }
 
         case files.length === 1 && parseInt(files[0].file?.length) === 1 || '':
@@ -186,6 +187,7 @@ function createModelFile(collection, fields, timeStamp) {
 
 // That's Create EJS File
 function createAddEJSFile(collection, fields) {
+    const checkInputfile = fields.filter(f => f.form_type === 'file' && f.file?.length > 1)
     const formFields = fields.map(f => {
         const label = `<label for="${f.field_name}" class="form-label mb-2">${capitalizeFirstLetter(f.field_name)}</label>`;
 
@@ -219,7 +221,7 @@ function createAddEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <input type="${f.form_type}" name="${f.field_name}" class="form-control" id="${f.field_name}" placeholder="${f.field_name}">
+                    <input type="${f.form_type}" name="${f.field_name}" ${checkInputfile.includes(f) ? 'multiple' : ''} class="form-control" id="${f.field_name}" placeholder="${f.field_name}">
                 </div>`
         }
     }).join('\n')

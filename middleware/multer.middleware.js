@@ -2,11 +2,7 @@ import multer from 'multer'
 import path from 'node:path'
 import fs from 'node:fs'
 import config from '../config/config.js'
-
-const DEFAULT_SIZES = {
-    image: 1 * 1024 * 1024, // 1MB
-    file: 5 * 1024 * 1024  // 5MB
-}
+import { deleteFile } from '../services/removeFile.service.js'
 
 const createStorage = (dir) => {
     const uploadPath = path.join('uploads', dir)
@@ -15,9 +11,7 @@ const createStorage = (dir) => {
     fs.promises.mkdir(uploadPath, { recursive: true })
 
     return multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, uploadPath)
-        },
+        destination: (req, file, cb) => { cb(null, uploadPath) },
         filename: (req, file, cb) => {
             const randomNo = Math.round(Math.random() * 10)
             const newFileName = `${Date.now()}${randomNo}${path.extname(file.originalname)}`;
@@ -26,54 +20,63 @@ const createStorage = (dir) => {
     })
 }
 
-// const imageFilter = (req, file, cb) => {
-//     const ext = path.extname(file.originalname).toLowerCase()
+const fileFilter = (req, file, cb) => {
+    if (!file || !file.originalname) {
+        return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', 'Missing file name'), false);
+    }
 
-//     if (!config.allowedExtensions?.includes(ext)) { // Check file extension
-//         return cb(new Error('only images are Allowed! Inavlid File'), false)
-//     }
-//     cb(null, true)
-// }
+    const ext = path.extname(file.originalname);
+    if (!config.allowedExtensions?.includes(ext)) { // Check file extension
+        return cb(new Error('Invalid File Format'), false)
+    }
+    cb(null, true)
+}
 
-const fileFilter = ({ field, size, count, fields } = {}) => {
-    return (req, file, cb) => {
-        if (fields?.length > 0) {
-            file.stream?.on('data', chunk => {
-                file._size = (file._size || 0) + chunk.length;
+export const checkSizeLimits = (fieldRules) => async (req, res, next) => {
+    try {
+        const rules = Array.isArray(fieldRules) ? fieldRules : [fieldRules]
 
-                const checkDocs = fields.some(f => f.field_name === file.fieldname && file._size > f.size * 1024)
-                if (checkDocs) {
-                    return cb(
-                        new multer.MulterError('LIMIT_FILE_SIZE', `${file.fieldname} exceeds size limit`),
-                        false
-                    )
+        for (const rule of rules) {
+            const files = getFilesByField(rule.field_name, req)
+
+            for (const file of files) {
+                const limitInBytes = rule.size * 1024;
+                if (file.size > limitInBytes) {
+                    files.forEach(async file => await deleteFile(file.path))
+                    return res.status(400).json({
+                        error: `${rule.field_name} exceeds ${rule.size}KB size limit`
+                    })
                 }
-            })
-            cb(null, true) // Accept initially — we'll check as data streams in
-        } else {
-            file.stream?.on('data', chunk => {
-                file._size = (file._size || 0) + chunk.length;
-
-                const checkDocs = file.fieldname === field && file._size > size * 1024
-                if (checkDocs) {
-                    return cb(
-                        new multer.MulterError('LIMIT_FILE_SIZE', `${file.fieldname} exceeds size limit`),
-                        false
-                    )
-                }
-            })
-            cb(null, true) // Accept initially — we'll check as data streams in
+            }
         }
+
+        return next()
+    } catch (error) {
+        console.error('checkSizeLimits:', error.message)
+        return res.status(500).json({ error: 'Internal server error during file size check' })
     }
 }
 
-export const handlemulterError = (err, req, res, next) => {
+// 🔹 Helper: Get matching files by field name
+function getFilesByField(fieldName, req) {
+    if (req.files?.[fieldName]) return req.files[fieldName]
+    if (req.file?.fieldname === fieldName) return [req.file]
+    if (Array.isArray(req.files)) {
+        return req.files.filter(file => file.fieldname === fieldName)
+    }
+    return []
+}
 
-    if (err instanceof multer.MulterError) {
+export const handlemulterError = (err, req, res, next) => {
+    if (err instanceof multer.MulterError && err.code === 'LIMIT_UNEXPECTED_FILE') {
         // A Multer error occurred when uploading.
-        return res.status(400).json({ error: err.message })
+        return res.status(400).json({ error: 'Too many files.' })
     } else if (err) {
         // Custom error occurred when uploading.
+        return res.status(400).json({ error: err.message })
+    }
+    else if (err instanceof multer.MulterError) {
+        // A Multer error occurred when uploading.
         return res.status(400).json({ error: err.message })
     } else {
         next()
@@ -81,7 +84,6 @@ export const handlemulterError = (err, req, res, next) => {
 } // Error handling middleware
 
 export const rendermulterError = (err, req, res, next) => {
-
     if (err instanceof multer.MulterError) {
         // A Multer error occurred when uploading.
         req.session.errors = { image: { message: err.message } }
@@ -95,30 +97,23 @@ export const rendermulterError = (err, req, res, next) => {
     }
 } // Error handling middleware
 
-export const upload = (folder = '',
-    { field, size, count, fields } = {},
-    // options = { image: true, file: false },
-    // sizeOptions = { imageSIZE: DEFAULT_SIZES.image, fileSIZE: DEFAULT_SIZES.file },
-) => {
+export const upload = (folder = '') => {
     return multer({
         storage: createStorage(folder),
-        limits: { fileSize: size * 1024, },
-        fileFilter: fileFilter({ field, size, count, fields })
+        fileFilter
     })
 }
 
-//  limits: {
-//             fileSize: Math.max(
-//                 options.image ? sizeOptions.imageSIZE || DEFAULT_SIZES.image : 0,
-//                 options.file ? sizeOptions.fileSIZE || DEFAULT_SIZES.file : 0
-//             )
-//         },
-
-// export const upload = (folderName = '', sizeOptions = { },  filefFilter
-// ) => {
-//     return multer({
-//         storage: createStorage(folderName),
-//         limits: { fileSize: sizeOptions },
-//         fileFilter: filefFilter
-//     })
-// }
+export const multerUploader = (config) => {
+    switch (config.type) {
+        case 'single':
+            return upload(config.folder).single(config.field_name)
+        case 'fields':
+            return upload(config.folder)
+                .fields(config.fields?.map(item => ({ name: item.field_name, maxCount: item.count })))
+        case 'multi':
+            return upload(config.folder).array(config.field_name, config.count)
+        default:
+            return upload().none()
+    }
+}

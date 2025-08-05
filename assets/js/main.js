@@ -59,6 +59,10 @@ datatable && (
   }
 )
 
+$(document).on('click', 'select', function (e) {
+  const $el = $(this);
+  console.log(e);
+})
 // setupSelect2('#select', '/admin/resources/select/api/admin', 'Search Admin')
 let counter = 0;
 let collections = null;
@@ -150,8 +154,6 @@ $(document).on('change', 'select[data-counter]', function (e) {
   } else {
     imageSettingsEl.classList.add('d-none')
   }
-
-  console.log('Counter:', counter, 'Selected Value:', selectedValue)
 })
 
 // Toggle default value row and attach onchange to type select

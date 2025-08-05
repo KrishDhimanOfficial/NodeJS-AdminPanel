@@ -3,10 +3,10 @@ import createCrudController from "../controllers/crud.controller.js"
 import path from 'node:path'
 import mongoose from "mongoose"
 import setUniversalData from "../middleware/setUniversalData.middleware.js"
-import { handlemulterError, upload } from "../middleware/multer.middleware.js"
+import { handlemulterError, checkSizeLimits, multerUploader } from "../middleware/multer.middleware.js"
 import { isAuthenticated } from "../middleware/auth.middleware.js"
-import multerUploader from "../utils/multerUploader.utils.js"
 // import resources from "../lib/resources.lib.js"
+import registerModel from "./registerModel.utils.js"
 import { capitalizeFirstLetter } from "captialize"
 import express from "express"
 const router = express.Router({ caseSensitive: true, strict: true })
@@ -17,25 +17,26 @@ const GenerateCRUDRoutes = async () => {
 
     const resources = await sturctureModel.find({}).lean()
 
-    for await (const { model, options, aggregate, uploader, select2 } of resources) {
+    for await (const { model, options, aggregate, uploader, navigation, modeldependenices } of resources) {
         // console.log({ model, options, uploader })
         const modelInstance = await registerModel(model)
         const modelName = modelInstance.modelName;
         const controller = createCrudController(modelInstance, options, aggregate)
         const middlewares = [isAuthenticated, setUniversalData]
+        const fileMiddlewares = [isAuthenticated, multerUploader(uploader), handlemulterError, checkSizeLimits(uploader)]
         const basePath = `/resources/${modelName}`;
         const apiPath = `/resources/api/${modelName}`;
 
-        select2?.length > 0 && select2.forEach(option => {
-            router.get(`/resources/select/api/${option.model.modelName}`,
+        modeldependenices?.length > 0 && modeldependenices.forEach(modelName => {
+            router.get(`/resources/select/api/${modelName}`,
                 ...middlewares,
-                (req, res) => controller.getSelectJsonData(req, res, option)
+                (req, res) => controller.getSelectJsonData(req, res, modelName)
             )
         })
 
         // // JSON API routes
         router.get(apiPath, isAuthenticated, controller.getAllJsonData)
-        router.post(basePath, isAuthenticated, multerUploader(uploader), handlemulterError, controller.create)
+        router.post(basePath, ...fileMiddlewares, controller.create)
         router.put(`${basePath}/:id`, isAuthenticated, handlemulterError, controller.update)
         router.patch(`${basePath}/:id`, isAuthenticated, controller.updateModelStatus)
         router.delete(`${basePath}/:id`, isAuthenticated, controller.remove)
@@ -76,24 +77,6 @@ const GenerateCRUDRoutes = async () => {
         }) // View Update page
     }
     return router
-}
-
-async function registerModel(modelName) {
-    // ✅ Check if the model is already registered
-    let mongooseModel;
-    if (mongoose.models[modelName]) {
-        mongooseModel = mongoose.model(modelName);
-    } else {
-        // Attempt to load the model file dynamically if not yet registered
-        try {
-            const modelPath = path.resolve(`./models/${modelName}.model.js`)
-            await import(modelPath) // This should register the model
-            mongooseModel = mongoose.model(modelName)
-        } catch (err) {
-            console.error(`❌ Model "${modelName}" could not be loaded:`, err.message)
-        }
-    }
-    return mongooseModel
 }
 
 export default GenerateCRUDRoutes

@@ -15,22 +15,8 @@ import miniyHTML from 'express-minify-html-terser'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import router from './routes/server.routes.js'
-import mongoose from 'mongoose'
-import GenerateCRUDRoutes from './utils/generateRoutes.utils.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-// function formatBytes(bytes) {
-//   const units = ['B', 'KB', 'MB', 'GB', 'TB']
-//   if (bytes === 0) return '0 B'
-//   const i = Math.floor(Math.log(bytes) / Math.log(1024))
-//   const value = bytes / Math.pow(1024, i)
-//   return `${value.toFixed(2)} ${units[i]}`
-// }
-
-// console.log('Memory Usage:')
-// Object.entries(process.memoryUsage()).forEach(([key, value]) => {
-//   console.log(`${key}: ${formatBytes(value)}`)
-// })
 
 const app = express()
 app.use(helmet(

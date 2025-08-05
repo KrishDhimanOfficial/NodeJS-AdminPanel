@@ -1,8 +1,10 @@
-import mongoose from "mongoose"
+import mongoose, { model } from "mongoose"
 import bcrypt from 'bcrypt'
 import adminModel from "../models/admin.model.js"
 import validate from "../services/validate.service.js";
 import { deleteFile } from "../services/removeFile.service.js";
+import sturctureModel from "../models/sturcture.model.js";
+import handleAggregatePagination from "../services/handlepagination.service.js";
 const validateId = mongoose.Types.ObjectId.isValid;
 
 const adminPanelController = {
@@ -69,34 +71,6 @@ const adminPanelController = {
             return res.status(200).redirect(`${req.baseUrl}/profile`)
         } catch (error) {
             console.log('updateAdminPassword : ' + error.message)
-        }
-    },
-
-    renderCRUD: async (req, res) => {
-        try {
-            return res.status(200).render('crud/crudTable',
-                {
-                    title: 'Generate CRUD',
-                    addURL: `${req.baseUrl}/generate-crud`,
-                    // api: req.originalUrl
-                }
-            )
-        } catch (error) {
-            console.log('renderCRUD : ' + error.message)
-        }
-    },
-    renderGenerateCRUD: async (req, res) => {
-        try {
-            return res.status(200).render('crud/generateCRUD',
-                {
-                    title: 'Generate CRUD',
-                    api: req.originalUrl,
-                    collections: mongoose.modelNames()
-                }
-            )
-        } catch (error) {
-            if (error.name === 'ValidationError') validate(res, error.errors)
-            console.log('renderGenerateCRUD : ' + error.message)
         }
     },
 }

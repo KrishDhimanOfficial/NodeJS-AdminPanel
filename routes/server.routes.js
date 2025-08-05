@@ -9,6 +9,7 @@ import { handlemulterError, upload } from "../middleware/multer.middleware.js"
 import { isAuthenticated, isAuthWithAccessCRUD } from "../middleware/auth.middleware.js"
 import GenerateCRUDRoutes from "../utils/generateRoutes.utils.js"
 import config from "../config/config.js"
+import createCrudController from "../controllers/crud.controller.js"
 const router = express.Router({ caseSensitive: true, strict: true })
 
 router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
@@ -27,10 +28,11 @@ router.route('/profile')
     .post(upload('admin').single('profile'), handlemulterError, adminPanelController.updateAdminProfile)
 
 // Generate CRUD Routes
-router.get('/crud', isAuthWithAccessCRUD, setUniversalData, adminPanelController.renderCRUD)
+router.get('/crud', isAuthWithAccessCRUD, setUniversalData, createCrudController().renderCRUD)
+router.get('/crud/api', isAuthWithAccessCRUD, createCrudController().getCRUDJsonData)
 router.route('/generate-crud')
     .all(isAuthWithAccessCRUD, setUniversalData)
-    .get(adminPanelController.renderGenerateCRUD)
+    .get(createCrudController().renderGenerateCRUD)
     .post(upload().none(), (req, res) => CRUD_GENERATOR(req, res))
 
 router.get('/collections', isAuthenticated, (req, res) => res.status(200).json(mongoose.modelNames()));

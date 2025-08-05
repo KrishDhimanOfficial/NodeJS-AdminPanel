@@ -8,6 +8,8 @@ import validate from "../services/validate.service.js"
 import { deleteFile, containsImage } from '../services/removeFile.service.js'
 import chalk from 'chalk';
 import handleAggregatePagination from "../services/handlepagination.service.js";
+import sturctureModel from "../models/sturcture.model.js";
+import registerModel from "../utils/registerModel.utils.js";
 const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
@@ -16,9 +18,9 @@ const createCrudController = (model, options = {}, aggregate) => ({
         try {
             // console.log(req.body);
             // console.log(req.files);
-            const val = options.check;
-            const IsExist = await model.findOne({ val })
-            if (IsExist) res.status(400).json({ info: `${options.check} Already Exist.` })
+            // const val = options.check;
+            // const IsExist = await model.findOne({ val })
+            // if (IsExist) res.status(400).json({ info: `${options.check} Already Exist.` })
 
             if (req.file?.fieldname && req.file?.path) {
                 req.body[req.file.fieldname] = req.file.path;
@@ -47,6 +49,7 @@ const createCrudController = (model, options = {}, aggregate) => ({
             } // Delete single file (upload.single)
 
             if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
+
                 for (const [fieldName, files] of Object.entries(req.files)) {
                     for (const file of files) {
                         if (file?.path) await deleteFile(file.path);
@@ -63,19 +66,19 @@ const createCrudController = (model, options = {}, aggregate) => ({
         }
     },
 
-    getSelectJsonData: async (req, res, option) => {
+    getSelectJsonData: async (req, res, modelName) => {
         try {
-            const response = await option.model?.aggregate([
+            const response = await registerModel(modelName).aggregate([
                 {
                     $match: {
-                        [option.searchField]: { $regex: req.query.search, $options: 'i' }
+                        [modelName]: { $regex: req.query.search, $options: 'i' }
                     }
                 },
-                { $project: { [option.searchField]: 1 } }
+                { $project: { [modelName]: 1 } }
             ])
             return res.status(200).json(response)
         } catch (error) {
-            log(chalk.red(`getSelectJsonData -> ${option.model?.modelName} : ${error.message}`))
+            log(chalk.red(`getSelectJsonData -> ${modelName} : ${error.message}`))
         }
     },
 
@@ -205,6 +208,63 @@ const createCrudController = (model, options = {}, aggregate) => ({
             return res.status(200).json({ success: 'Deleted successfully' })
         } catch (error) {
             log(chalk.red(`remove -> ${model.modelName} : ${error.message}`))
+        }
+    },
+
+    renderCRUD: async (req, res) => {
+        try {
+            return res.status(200).render('crud/crudTable',
+                {
+                    title: 'Generate CRUD',
+                    addURL: `${req.baseUrl}/generate-crud`,
+                    // api: req.originalUrl
+                    dataTableAPI: `${req.originalUrl}/api`,
+                }
+            )
+        } catch (error) {
+            console.log('renderCRUD : ' + error.message)
+        }
+    },
+    renderGenerateCRUD: async (req, res) => {
+        try {
+            return res.status(200).render('crud/generateCRUD',
+                {
+                    title: 'Generate CRUD',
+                    api: req.originalUrl,
+                    collections: mongoose.modelNames()
+                }
+            )
+        } catch (error) {
+            if (error.name === 'ValidationError') validate(res, error.errors)
+            console.log('renderGenerateCRUD : ' + error.message)
+        }
+    },
+    getCRUDJsonData: async (req, res) => {
+        try {
+            const query = { page: req.query.page, limit: req.query.size }
+            const pipeline = [{ $project: { model: 1 } }]
+
+            if (req.query?.filter) {
+                req.query.filter.forEach(item => {
+                    if (item.field === 'model') {
+                        pipeline.push({ $match: { [item.field]: { $regex: item.value, $options: 'i' } } })
+                    }
+                })
+            }
+
+            const response = await handleAggregatePagination(sturctureModel, pipeline, query)
+            const columns = [
+                { col: 'model', filter: 'search' },
+                { col: 'actions', actions: { del: true } },
+            ]
+            return res.status(200).json({
+                last_row: response.totalDocs,
+                last_page: response.totalPages,
+                data: response.collectionData,
+                columns
+            })
+        } catch (error) {
+            console.log('getCRUDJsonData : ' + error.message)
         }
     },
 })
