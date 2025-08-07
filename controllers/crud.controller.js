@@ -10,10 +10,11 @@ import chalk from 'chalk';
 import handleAggregatePagination from "../services/handlepagination.service.js";
 import sturctureModel from "../models/sturcture.model.js";
 import registerModel from "../utils/registerModel.utils.js";
+import { capitalizeFirstLetter } from "captialize";
 const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
-const createCrudController = (model, options = {}, aggregate) => ({
+const createCrudController = (model, fields = []) => ({
     create: async (req, res) => {
         try {
             // console.log(req.body);
@@ -97,41 +98,20 @@ const createCrudController = (model, options = {}, aggregate) => ({
     },
 
     getAllJsonData: async (req, res) => {
+        const query = { page: req.query.page, limit: req.query.size }
+
         try {
-            const query = { page: req.query.page, limit: req.query.size }
+            const visibleFields = Object.fromEntries(fields.filter(col => col.isVisible).map(col => [col.col, 1]))
+            const columns = fields.filter(col => col.isVisible).map(col => ({ col: col.col, ...(col.filter && { filter: col.filter }) }))
+            columns.push({ col: 'actions', actions: { edit: true, del: true, view: true } })
 
-            if (typeof aggregate === 'function') {
-                const response = await handleAggregatePagination(model, aggregate(req, res), query)
-
-                return res.status(200).json({
-                    last_row: response.totalDocs,
-                    last_page: response.totalPages,
-                    data: response.collectionData,
-                    columns: options.list
-                })
-            } else {
-                const visibleFields = Object.fromEntries(options.isVisible
-                    .filter(col => col.isVisible && col.col !== 'actions')
-                    .map(col => [col.col, 1])
-                )
-
-                const columns = options.isVisible
-                    .filter(col => col.isVisible)
-                    .map(col => ({
-                        col: col.col,
-                        ...(col.actions && { actions: col.actions }),
-                        ...(col.searchFilter && { filter: col.searchFilter })
-                    }))
-
-                const response = await handleAggregatePagination(model, [{ $project: visibleFields }], query)
-
-                return res.status(200).json({
-                    last_row: response.totalDocs,
-                    last_page: response.totalPages,
-                    data: response.collectionData.reverse(),
-                    columns
-                })
-            }
+            const response = await handleAggregatePagination(model, [{ $project: visibleFields }], query)
+            return res.status(200).json({
+                last_row: response.totalDocs,
+                last_page: response.totalPages,
+                data: response.collectionData.reverse(),
+                columns
+            })
         } catch (error) {
             log(chalk.red(`getAllJsonData -> ${model.modelName} : ${error.message}`))
         }
@@ -139,13 +119,20 @@ const createCrudController = (model, options = {}, aggregate) => ({
 
     async getOne(req, res) {
         try {
-            if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
-            const response = await model.findById({ _id: req.params.id })
+            if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
+            const response = await model.findById(req.params.id)
 
-            return res.render(`${req.modelName}/update`, {
-                title: req.modelName,
-                api: `${req.baseUrl}/resources/${req.modelName}`,
-                response
+            for (const f of fields) {
+                if (f.field_type === 'ObjectId') {
+                    await response.populate(f.field_name)
+                }
+            }
+            // console.log(response);
+
+            return res.status(200).render(`${model.modelName}/update`, {
+                title: capitalizeFirstLetter(model.modelName),
+                api: `${req.originalUrl}`,
+                response,
             })
         } catch (error) {
             log(chalk.red(`getOne -> ${model.modelName} : ${error.message}`))
@@ -217,7 +204,7 @@ const createCrudController = (model, options = {}, aggregate) => ({
                 {
                     title: 'Generate CRUD',
                     addURL: `${req.baseUrl}/generate-crud`,
-                    // api: req.originalUrl
+                    api: req.originalUrl,
                     dataTableAPI: `${req.originalUrl}/api`,
                 }
             )
@@ -270,10 +257,11 @@ const createCrudController = (model, options = {}, aggregate) => ({
     renderEditCRUD: async (req, res) => {
         try {
             const response = await sturctureModel.findById({ _id: req.params.id })
+            if (!response) return res.status(404).redirect(`${req.baseUrl}/404`)
             return res.status(200).render('crud/editCRUD',
                 {
                     title: 'Edit CRUD',
-                    api: req.originalUrl,
+                    api: '/admin/crud',
                     collections: mongoose.modelNames(),
                     response,
                     schemaTypes: ["String", "Number", "Boolean", "Array", "ObjectId", "Map", "Date", "Double128", "Double", "Null", "Mixed"],
@@ -283,6 +271,16 @@ const createCrudController = (model, options = {}, aggregate) => ({
             )
         } catch (error) {
             console.log('renderEditCRUD : ' + error.message)
+        }
+    },
+    removeCRUD: async (req, res) => {
+        try {
+            if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
+            const response = await sturctureModel.findByIdAndDelete({ _id: req.params.id })
+            if (!response) return res.status(400).json({ error: 'Something went wrong, please try again later.' })
+            return res.status(200).json({ success: 'created successfully.' })
+        } catch (error) {
+            console.log('removeCRUD : ' + error.message)
         }
     },
 })

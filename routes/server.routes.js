@@ -32,7 +32,8 @@ router.get('/crud', isAuthWithAccessCRUD, setUniversalData, createCrudController
 router.get('/crud/api', isAuthWithAccessCRUD, createCrudController().getCRUDJsonData)
 router.route('/crud/:id?')
     .get(isAuthWithAccessCRUD, setUniversalData, createCrudController().renderEditCRUD)
-    .post(isAuthWithAccessCRUD, upload().none(), (req, res) => CRUD_GENERATOR(req, res))
+    .put(isAuthWithAccessCRUD, upload().none(), (req, res) => CRUD_GENERATOR(req, res))
+    .delete(isAuthWithAccessCRUD, createCrudController().removeCRUD)
 
 router.route('/generate-crud/:id?')
     .all(isAuthWithAccessCRUD, setUniversalData)

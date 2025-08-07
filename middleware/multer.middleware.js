@@ -40,8 +40,8 @@ export const checkSizeLimits = (fieldRules) => async (req, res, next) => {
             const files = getFilesByField(rule.field_name, req)
 
             for (const file of files) {
-                const limitInBytes = rule.size * 1024;
-                if (file.size > limitInBytes) {
+                const limitInBytes = rule?.size * 1024;
+                if (file?.size > limitInBytes) {
                     files.forEach(async file => await deleteFile(file.path))
                     return res.status(400).json({
                         error: `${rule.field_name} exceeds ${rule.size}KB size limit`

@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="/assets/vendor/iconpicker/fontawesome-iconpicker.min.css">
 <div class="container">
     <input type="text" hidden id="counter" value="<%= response.fields?.length %>">
-    <form id="SubmitForm">
+    <form id="updateForm" data-id="<%= response._id %>">
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary">
@@ -202,7 +202,7 @@
                                                                 && 'selected' %> >
                                                                 <%= filter %>
                                                             </option>
-                                                        <% }) %>
+                                                            <% }) %>
                                             </select>
                                         </div>
                                         <div class="col-md-4">

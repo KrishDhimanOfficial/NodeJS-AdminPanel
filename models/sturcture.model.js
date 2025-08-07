@@ -13,10 +13,6 @@ const navigationSchema = new mongoose.Schema({
     subMenu: []
 }, { _id: false })
 
-const optionsSchema = new mongoose.Schema({
-    isVisible: { type: Array },
-}, { _id: false })
-
 const fieldSchema = new mongoose.Schema({
     field_name: { type: String },
     field_type: { type: String },
@@ -25,7 +21,8 @@ const fieldSchema = new mongoose.Schema({
     unique: { type: Boolean },
     isVisible: { type: Boolean },
     filter: { type: String },
-    relation: { type: String},
+    col: { type: String },
+    relation: { type: String },
     default: { type: String }
 }, { _id: false })
 
@@ -35,7 +32,6 @@ const structureSchema = new mongoose.Schema({
     timestamps: { type: Boolean, default: true },
     navigation: navigationSchema,
     modeldependenices: { type: [String] },
-    options: optionsSchema,
     fields: { type: [fieldSchema] },
     uploader: { type: Object },
 },

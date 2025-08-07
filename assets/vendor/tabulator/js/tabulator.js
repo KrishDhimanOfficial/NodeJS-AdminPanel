@@ -60,7 +60,7 @@ const filterOptions = { // Tabulator Filter Options
 const columnsOptions = { // Tabulator Column Options
     image: (cell) => {
         const { image } = cell.getRow().getData()
-        return `<img src="/${image}" alt=""  width="120" height="120">`
+        return `<img src="/${image}" alt="" loading="lazy"  width="120" height="120">`
     },
     status: (cell) => {
         const { _id, status } = cell.getRow().getData();

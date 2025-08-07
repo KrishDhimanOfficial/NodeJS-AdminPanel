@@ -17,11 +17,11 @@ const GenerateCRUDRoutes = async () => {
 
     const resources = await sturctureModel.find({}).lean()
 
-    for await (const { model, options, aggregate, uploader, navigation, modeldependenices } of resources) {
+    for await (const { model, fields, uploader, navigation, modeldependenices } of resources) {
         // console.log({ model, options, uploader })
         const modelInstance = await registerModel(model)
         const modelName = modelInstance.modelName;
-        const controller = createCrudController(modelInstance, options, aggregate)
+        const controller = createCrudController(modelInstance, fields)
         const middlewares = [isAuthenticated, setUniversalData]
         const fileMiddlewares = [isAuthenticated, multerUploader(uploader), handlemulterError, checkSizeLimits(uploader)]
         const basePath = `/resources/${modelName}`;
@@ -65,16 +65,7 @@ const GenerateCRUDRoutes = async () => {
             return res.status(200).render(`${model.modelName}/view`, { response })
         }) // View Information Page
 
-        router.get(`${basePath}/:id`, ...middlewares, async (req, res) => {
-            if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
-            const response = await modelInstance.findById(req.params.id)
-
-            return res.status(200).render(`${modelName}/update`, {
-                title: capitalizeFirstLetter(modelName),
-                api: `${req.baseUrl}${basePath}`,
-                response,
-            })
-        }) // View Update page
+        router.get(`${basePath}/:id`, ...middlewares, controller.getOne) // View Update page
     }
     return router
 }

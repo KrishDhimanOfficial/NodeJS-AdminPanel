@@ -58,19 +58,17 @@ datatable && (
 )
 
 // Handle Select2 functionality
-document.onload = () => {
-  document.querySelectorAll('select[id]').forEach((select) => {
-    const id = select.id;
-    const resource = id.includes('s') ? id.split('s')[0] : null;
-    if (resource) {
-      const selector = `#${id}`;
-      const url = `/admin/resources/select/api/${resource}`;
-      setupSelect2(selector, url, `Search ${id}`)
-    }
-  })
-}
+document.querySelectorAll('select[id]').forEach((select) => {
+  const id = select.id;
+  const resource = id.includes('s') ? id.split('s')[0] : id;
+  if (resource) {
+    const selector = `#${id}`;
+    const url = `/admin/resources/select/api/${resource}`;
+    setupSelect2(selector, url, `Search ${id}`)
+  }
+})
 
-let counter = parseInt(document.querySelector('#counter').value) ||  0;
+let counter = parseInt(document.querySelector('#counter')?.value) || 0;
 let collections = null;
 
 const addFieldBtn = document.querySelector('#addFieldBtn');

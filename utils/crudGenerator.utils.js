@@ -1,10 +1,12 @@
 import chalk from "chalk"
 import fs from 'node:fs/promises'
-import path, { parse } from 'node:path'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { capitalizeFirstLetter } from "captialize"
 import sturctureModel from "../models/sturcture.model.js"
 import mongoose from "mongoose"
+import { response } from "express"
+import { request } from "node:http"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const validateId = mongoose.Types.ObjectId.isValid;
@@ -16,66 +18,66 @@ const validateId = mongoose.Types.ObjectId.isValid;
  */
 
 const CRUD_GENERATOR = async (req, res) => {
-    const { collection, timeStamp, field, isSubMenu, icon, modeldependenices, name, model } = req.body;
-    const navigation = { isSubMenu, icon, modeldependenices, name, model }
+    const {
+        collection,
+        timeStamp,
+        field = [],
+        isSubMenu,
+        icon,
+        modeldependenices,
+        name,
+        model
+    } = req.body;
     console.log(req.body);
-    // console.log(req.body.field);
-    // console.log(field.filter(Boolean));
-
-    uploader(collection, field.filter(Boolean))
 
 
+    const filteredFields = field.filter(Boolean)
+    const navigation = { isSubMenu, icon, modeldependenices, name, model }
     const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
     const viewDir = path.join(__dirname, '../views', collection)
 
+    // Input Validation
+    if (!collection || filteredFields.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
+
     try {
-        if (!collection || field?.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
+        // Check if collection already exists
+        const existingCollection = await sturctureModel.findOne({ model: collection })
+        if (existingCollection && !req.params.id) return res.status(400).json({ error: `${collection} Collection already exists.` })
 
-        const IsCollectionExist = await sturctureModel.findOne({ model: collection })
-        if (IsCollectionExist && !req.params.id) return res.status(400).json({ error: `${collection} Collection already exist.` })
+        // Save metadata and upload required files
+        const response = await SaveData(collection, timeStamp, filteredFields, navigation, req.method, req.params.id)
+        if (!response.success) return res.status(500).json({ error: 'Unable to save schema metadata.' })
 
-        if (IsCollectionExist && validateId(req.params.id)) await sturctureModel.findOneAndDelete({ _id: req.params.id })
-        else return res.status(400).json({ error: 'Invalid Request.' })
+        // Generate and write model file
+        const modelContent = createModelFile(collection, filteredFields, timeStamp)
+        await fs.writeFile(filePath, modelContent)
 
-        const response = await SaveData(collection, timeStamp, field.filter(Boolean), navigation)
-        if (!response.success) return res.status(400).json({ error: 'Internal Server Error. Unable to create schema' })
+        // Create view directory
+        await fs.mkdir(viewDir, { recursive: true })
 
-        await fs.writeFile(filePath, createModelFile(collection, field.filter(Boolean), timeStamp)) // Create Schema
-        await fs.mkdir(viewDir, { recursive: true }) // create View Files
-
-        const viewTemplates = {
-            create: createAddEJSFile(collection, field.filter(Boolean)),
-            update: createUpdateEJSFile(collection, field.filter(Boolean)),
-            view: createViewEJSFile(collection, field.filter(Boolean))
-        } // Views Templates
-
-        for (const [viewName, content] of Object.entries(viewTemplates)) {
-            const ViewsfilePath = path.join(viewDir, `${viewName}.ejs`)
-            await fs.writeFile(ViewsfilePath, content)
+        // Generate and write EJS view files
+        const views = {
+            create: createAddEJSFile(collection, filteredFields),
+            update: createUpdateEJSFile(collection, filteredFields),
+            view: createViewEJSFile(collection, filteredFields)
         }
 
-        return res.status(200).json({ success: 'Schema created successfully', })
+        await Promise.all(
+            Object.entries(views).map(([name, content]) => {
+                const viewPath = path.join(viewDir, `${name}.ejs`)
+                return fs.writeFile(viewPath, content)
+            })
+        )
+
+        return res.status(200).json({ success: 'Schema created successfully.' })
     } catch (error) {
-        chalk.red(console.error('createSchema : ', error.message))
-        return res.status(400).json({ error: 'Internal Server Error. Unable to create schema' })
+        console.error('createSchema:', error.message);
+        return res.status(500).json({ error: 'Internal Server Error. Unable to create schema.' })
     }
 }
 
-async function SaveData(collection, timeStamp, field, nav) {
+async function SaveData(collection, timeStamp, field, nav, requestMethod, id) {
     try {
-        const isVisible = field.map(f => ({
-            col: f.field_name.replace(/\s+/g, '_').toLowerCase().trim(),
-            isVisible: f.isVisible === 'on',
-            ...(f.searchFilter && {
-                searchFilter: f.searchFilter
-            })
-        }))
-
-        isVisible.push({
-            col: 'actions', isVisible: true,
-            actions: { view: true, edit: true, del: true }
-        })
-
         const isSubMenu = nav.isSubMenu === 'on';
         const navigation = {
             name: isSubMenu ? capitalizeFirstLetter(nav.name) : capitalizeFirstLetter(collection),
@@ -94,20 +96,24 @@ async function SaveData(collection, timeStamp, field, nav) {
             filter: f.searchFilter,
             unique: f.unique === 'on',
             default: f.defaultValue,
+            col: f.field_name?.replace(/\s+/g, '_').toLowerCase().trim(),
             ...(f.relation && { relation: f.relation }),
         }))
 
-        const res = await sturctureModel.create({
+        const data = {
             model: collection, timeStamp, navigation, fields,
-            options: { isVisible },
             uploader: uploader(collection, field),
             modeldependenices: Array.isArray(nav.modeldependenices)
                 ? nav.modeldependenices
                 : [nav.modeldependenices]
-        })
+        }
+
+        const res = requestMethod === 'PUT'
+            ? await sturctureModel.findByIdAndUpdate({ _id: id }, data)
+            : await sturctureModel.create(data)
 
         if (!res) return { success: false }
-        return { success: true }
+        return { success: true, _id: res._id }
     } catch (error) {
         chalk.red(console.error('SaveData : ', error.message))
         return { success: false }
@@ -186,9 +192,7 @@ function createModelFile(collection, fields, timeStamp) {
             import mongoose from "mongoose";
             import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-            const ${collection}Schema = new mongoose.Schema({
-                ${schemaFields}
-            },
+            const ${collection}Schema = new mongoose.Schema({${schemaFields}},
             { timestamps: ${timeStamp === 'on'} })
 
             ${collection}Schema.plugin(mongooseAggregatePaginate)
@@ -272,6 +276,12 @@ function createUpdateEJSFile(collection, fields) {
                     <select name="${f.field_name}" class="form-control" id="${f.field_name}">
                         <option value="" disabled selected>Select</option>
                     </select>
+                </div>`
+            case 'date':
+                return `
+                <div class="mb-3">
+                    ${label}
+                      <input type="${f.form_type}" name="${f.field_name}" value="<%= response.${f.field_name}.toISOString().split('T')[0] %>" class="form-control" id="${f.field_name}" placeholder="${f.field_name}">
                 </div>`
 
             case 'textarea':
