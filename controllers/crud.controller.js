@@ -68,14 +68,13 @@ const createCrudController = (model, options = {}, aggregate) => ({
 
     getSelectJsonData: async (req, res, modelName) => {
         try {
-            const response = await registerModel(modelName).aggregate([
-                {
-                    $match: {
-                        [modelName]: { $regex: req.query.search, $options: 'i' }
-                    }
-                },
-                { $project: { [modelName]: 1 } }
-            ])
+            const model = await registerModel(modelName)
+            const response = await model.find({
+                name: {
+                    $regex: req.query.search, $options: 'i'
+                }
+            }, { _id: 1, name: 1 })
+
             return res.status(200).json(response)
         } catch (error) {
             log(chalk.red(`getSelectJsonData -> ${modelName} : ${error.message}`))
@@ -125,6 +124,7 @@ const createCrudController = (model, options = {}, aggregate) => ({
                     }))
 
                 const response = await handleAggregatePagination(model, [{ $project: visibleFields }], query)
+
                 return res.status(200).json({
                     last_row: response.totalDocs,
                     last_page: response.totalPages,
@@ -255,7 +255,7 @@ const createCrudController = (model, options = {}, aggregate) => ({
             const response = await handleAggregatePagination(sturctureModel, pipeline, query)
             const columns = [
                 { col: 'model', filter: 'search' },
-                { col: 'actions', actions: { del: true } },
+                { col: 'actions', actions: { edit: true, del: true } },
             ]
             return res.status(200).json({
                 last_row: response.totalDocs,
@@ -265,6 +265,24 @@ const createCrudController = (model, options = {}, aggregate) => ({
             })
         } catch (error) {
             console.log('getCRUDJsonData : ' + error.message)
+        }
+    },
+    renderEditCRUD: async (req, res) => {
+        try {
+            const response = await sturctureModel.findById({ _id: req.params.id })
+            return res.status(200).render('crud/editCRUD',
+                {
+                    title: 'Edit CRUD',
+                    api: req.originalUrl,
+                    collections: mongoose.modelNames(),
+                    response,
+                    schemaTypes: ["String", "Number", "Boolean", "Array", "ObjectId", "Map", "Date", "Double128", "Double", "Null", "Mixed"],
+                    formTypes: ["text", "select", "file", "email", "url", "tel", "search", "number", "range", "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"],
+                    filters: ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number'],
+                }
+            )
+        } catch (error) {
+            console.log('renderEditCRUD : ' + error.message)
         }
     },
 })

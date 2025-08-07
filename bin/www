@@ -8,13 +8,16 @@ import cluster from 'node:cluster'
 import numcpu from 'node:os'
 import chalk from 'chalk'
 import connectDB from '../config/connectDB.js'
-
 const log = debug('backend:server')
 
 if (cluster.isPrimary) {
-  for (let i = 0; i < numcpu.availableParallelism(); ++i)  cluster.fork()
+  for (let i = 0; i < numcpu.cpus().length; ++i)  cluster.fork()
   console.log(`Primary ${process.pid} is running`)
-  cluster.on('exit', (worker, code, signal) => console.log(`worker ${worker.process.pid} died`))
+
+  cluster.on('exit', (worker, code, signal) => {
+    cluster.fork()
+    console.log(`Worker ${worker.process.pid} died. Starting a new one...`)
+  })
 } else {
   const port = config.port;
   app.set('port', port)

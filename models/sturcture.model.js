@@ -21,9 +21,11 @@ const fieldSchema = new mongoose.Schema({
     field_name: { type: String },
     field_type: { type: String },
     form_type: { type: String },
-    required: { type: String },
-    unique: { type: String },
-    relation: { type: String },
+    required: { type: Boolean },
+    unique: { type: Boolean },
+    isVisible: { type: Boolean },
+    filter: { type: String },
+    relation: { type: String},
     default: { type: String }
 }, { _id: false })
 
@@ -36,7 +38,6 @@ const structureSchema = new mongoose.Schema({
     options: optionsSchema,
     fields: { type: [fieldSchema] },
     uploader: { type: Object },
-    status: { type: Boolean, default: true }
 },
     { timestamps: true }
 )

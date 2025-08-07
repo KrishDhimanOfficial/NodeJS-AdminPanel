@@ -30,7 +30,11 @@ router.route('/profile')
 // Generate CRUD Routes
 router.get('/crud', isAuthWithAccessCRUD, setUniversalData, createCrudController().renderCRUD)
 router.get('/crud/api', isAuthWithAccessCRUD, createCrudController().getCRUDJsonData)
-router.route('/generate-crud')
+router.route('/crud/:id?')
+    .get(isAuthWithAccessCRUD, setUniversalData, createCrudController().renderEditCRUD)
+    .post(isAuthWithAccessCRUD, upload().none(), (req, res) => CRUD_GENERATOR(req, res))
+
+router.route('/generate-crud/:id?')
     .all(isAuthWithAccessCRUD, setUniversalData)
     .get(createCrudController().renderGenerateCRUD)
     .post(upload().none(), (req, res) => CRUD_GENERATOR(req, res))

@@ -35,9 +35,9 @@ const GenerateCRUDRoutes = async () => {
         })
 
         // // JSON API routes
-        router.get(apiPath, isAuthenticated, controller.getAllJsonData)
+        router.get(apiPath, controller.getAllJsonData)
         router.post(basePath, ...fileMiddlewares, controller.create)
-        router.put(`${basePath}/:id`, isAuthenticated, handlemulterError, controller.update)
+        router.put(`${basePath}/:id`, ...fileMiddlewares, controller.update)
         router.patch(`${basePath}/:id`, isAuthenticated, controller.updateModelStatus)
         router.delete(`${basePath}/:id`, isAuthenticated, controller.remove)
 
@@ -60,14 +60,14 @@ const GenerateCRUDRoutes = async () => {
 
         router.get(`${basePath}/view/:id`, ...middlewares, async (req, res) => {
             if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
-            const response = await model.findById({ _id: req.params.id })
+            const response = await modelInstance.findById({ _id: req.params.id })
 
             return res.status(200).render(`${model.modelName}/view`, { response })
         }) // View Information Page
 
         router.get(`${basePath}/:id`, ...middlewares, async (req, res) => {
             if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
-            const response = await model.findById(req.params.id)
+            const response = await modelInstance.findById(req.params.id)
 
             return res.status(200).render(`${modelName}/update`, {
                 title: capitalizeFirstLetter(modelName),

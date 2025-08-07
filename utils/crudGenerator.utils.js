@@ -7,6 +7,7 @@ import sturctureModel from "../models/sturcture.model.js"
 import mongoose from "mongoose"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+const validateId = mongoose.Types.ObjectId.isValid;
 
 /**
  * FN : CRUD_GENERATOR => Create Mongoose Schema, views File
@@ -17,15 +18,24 @@ const __dirname = path.dirname(__filename)
 const CRUD_GENERATOR = async (req, res) => {
     const { collection, timeStamp, field, isSubMenu, icon, modeldependenices, name, model } = req.body;
     const navigation = { isSubMenu, icon, modeldependenices, name, model }
-    // console.log(req.body);
-    console.log(req.body.field);
+    console.log(req.body);
+    // console.log(req.body.field);
+    // console.log(field.filter(Boolean));
+
     uploader(collection, field.filter(Boolean))
+
 
     const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
     const viewDir = path.join(__dirname, '../views', collection)
 
     try {
         if (!collection || field?.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
+
+        const IsCollectionExist = await sturctureModel.findOne({ model: collection })
+        if (IsCollectionExist && !req.params.id) return res.status(400).json({ error: `${collection} Collection already exist.` })
+
+        if (IsCollectionExist && validateId(req.params.id)) await sturctureModel.findOneAndDelete({ _id: req.params.id })
+        else return res.status(400).json({ error: 'Invalid Request.' })
 
         const response = await SaveData(collection, timeStamp, field.filter(Boolean), navigation)
         if (!response.success) return res.status(400).json({ error: 'Internal Server Error. Unable to create schema' })
@@ -80,6 +90,8 @@ async function SaveData(collection, timeStamp, field, nav) {
             field_type: f.field_type,
             form_type: f.form_type,
             required: f.required === 'on',
+            isVisible: f.isVisible === 'on',
+            filter: f.searchFilter,
             unique: f.unique === 'on',
             default: f.defaultValue,
             ...(f.relation && { relation: f.relation }),

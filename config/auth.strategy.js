@@ -16,7 +16,7 @@ export const Login_Auth = async (model, field1 = 'email', field2 = 'password') =
             async (email, password, done) => {
                 try {
                     const user = await model.findOne({ email })
-                    if (!user) return done(null, false, { error: 'User not found' });
+                    if (!user) return done(null, false, { error: 'User not found' })
 
                     const match = await bcrypt.compare(password, user.password);
                     if (!match) return done(null, false, { error: 'Incorrect password' })

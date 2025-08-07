@@ -14,9 +14,7 @@ import {
 
 datatable && initializeTabulator()
 $('.iconpicker').length && $('.iconpicker').iconpicker({
-  fullClassFormatter: function (val) {
-    return 'fa ' + val;
-  }
+  fullClassFormatter: function (val) { return 'fa ' + val }
 })
 $('.summernote').length && $('.summernote').summernote({ height: 300 })
 $('.select2').length && $('.select2').select2()
@@ -59,12 +57,20 @@ datatable && (
   }
 )
 
-$(document).on('click', 'select', function (e) {
-  const $el = $(this);
-  console.log(e);
-})
-// setupSelect2('#select', '/admin/resources/select/api/admin', 'Search Admin')
-let counter = 0;
+// Handle Select2 functionality
+document.onload = () => {
+  document.querySelectorAll('select[id]').forEach((select) => {
+    const id = select.id;
+    const resource = id.includes('s') ? id.split('s')[0] : null;
+    if (resource) {
+      const selector = `#${id}`;
+      const url = `/admin/resources/select/api/${resource}`;
+      setupSelect2(selector, url, `Search ${id}`)
+    }
+  })
+}
+
+let counter = parseInt(document.querySelector('#counter').value) ||  0;
 let collections = null;
 
 const addFieldBtn = document.querySelector('#addFieldBtn');
@@ -95,7 +101,7 @@ addFieldBtn?.addEventListener('click', () => {
       <h3>Field ${counter + 1}</h3>
       ${FieldRow(fieldId, formTypeId, typeId, counter)}
 
-      <div id="imageSettings_${counter}" class="row mb-2 d-none">h12</div>
+      <div id="imageSettings_${counter}" class="row mb-2 d-none"></div>
 
       <div class="row mb-2">
         <div class="col-md-3">${FieldCheckBox(counter)}</div>
@@ -142,12 +148,12 @@ $(document).on('change', 'select[data-counter]', function (e) {
       <div class="col-md-5 offset-md-6">
         <div class="d-flex gap-2 justify-content-center">
           <div class="form-floating mb-3">
-            <input type="number" class="form-control" name="field[${counter}][file][length]" min="0" id="formId2" />
-            <label for="formId2">Length</label>
+            <input type="number" class="form-control" name="field[${counter}][file][length]" min="0" id="formId${counter}" />
+            <label for="formId${counter}">Length</label>
           </div>
           <div class="form-floating mb-3">
-            <input type="number" class="form-control" name="field[${counter}][file][size]" id="formId1" min="0" />
-            <label for="formId1">Size (eg: 2 * 1024 = 2KB)</label>
+            <input type="number" class="form-control" name="field[${counter}][file][size]" id="formId${counter}" min="0" />
+            <label for="formId${counter}">Size (eg: 2 * 1024 = 2KB)</label>
           </div>
         </div>
       </div>`;
