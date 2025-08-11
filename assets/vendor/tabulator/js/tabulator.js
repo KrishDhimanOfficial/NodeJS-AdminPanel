@@ -104,6 +104,7 @@ const columnsOptions = { // Tabulator Column Options
 }
 
 let table = null;
+let filterColumns = [];
 const initializeTabulator = async () => {
     try {
         return new Promise(async (resolve) => {
@@ -123,24 +124,26 @@ const initializeTabulator = async () => {
                 paginationCounter: "rows", //display count of paginated rows in footer
                 ajaxURL: dataTableAPI?.value.trim() || '',
                 movableColumns: true,  //allow column order to be changed
+                ajaxRequesting: function (url, params) {
+                    if (params.filter && Array.isArray(params.filter)) {
+                        params.filter = params.filter.map(f => {
+                            const match = filterColumns.find(c => c.col.trim() === f.field.trim())
+                            return {
+                                field: f.field,
+                                type: match.col === f.field && match.filter,
+                                value: f.value
+                            }
+                        })
+                    }
+                    return true; // continue request
+                },
                 ajaxResponse: function (url, params, response) {
+                    filterColumns = response.columns.filter(col => !col.actions)
                     if (response.data.length == 0) {
                         csvbtn.remove(), pdfbtn.remove(), xlsxbtn.remove()
-                        tabulator.innerHTML = '<div class="text-center my-5"><h2>No Data Found</h2></div>'
+                        // tabulator.innerHTML = '<div class="text-center my-5"><h2>No Data Found</h2></div>'
                         return []
                     }
-                    // console.log(response.columns);
-                    // table.setFilter(response.columns?.map(col => {
-                    //     // const filterVal = table && table.getColumn(col.col).getHeaderFilterValue()
-                    //     // console.log(filterVal);
-
-                    //     return {
-                    //         field: col.col,
-                    //         type: col.filter,
-                    //         // value: filterVal || ''
-                    //     }
-                    // }))
-
                     select && response.columns?.forEach(col => {
                         const value = col.col;
                         const label = col.col.replace(/_/g, ' ')
@@ -165,6 +168,7 @@ const initializeTabulator = async () => {
                             hozAlign: "left",
                             vertAlign: "middle",
                             ...column.actions,
+                            ...column.maxWidth && { maxWidth: column.maxWidth },
                             ...columnsOptions[column.col],
                             ...filterOptions[column.filter],
                             ...(!column.filter && '')

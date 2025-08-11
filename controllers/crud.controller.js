@@ -12,6 +12,7 @@ import sturctureModel from "../models/sturcture.model.js";
 import registerModel from "../utils/registerModel.utils.js";
 import { capitalizeFirstLetter } from "captialize";
 import { populate } from "dotenv";
+import handleFilteration from "../services/handleFilteration.service.js";
 const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
@@ -100,8 +101,6 @@ const createCrudController = (model, fields = []) => ({
 
     getAllJsonData: async (req, res) => {
         const query = { page: req.query.page, limit: req.query.size }
-        // console.log(req.query?.filter);
-
         try {
             const visibleFields = Object.fromEntries(
                 fields
@@ -160,27 +159,8 @@ const createCrudController = (model, fields = []) => ({
                 })
             pipeline.push({ $project: visibleFields })
 
-            console.log(req.query?.filter);
-
-            if (req.query?.filter) {
-                req.query?.filter.forEach((item, i) => {
-                    if (item.type === '>=') {
-                        pipeline.push({ [item.field]: { $gte: parseInt(item.value) } })
-                    }
-                    if (item.field === 'function') {
-                        pipeline.push({
-                            [item.field]: { $gte: parseInt(item.start), $lte: parseInt(item.end) }
-                        })
-                    }
-                    if (item.field === 'returnDate') {
-                        pipeline.push(
-                            { $addFields: { returnDateStr: { $dateToString: { format: "%Y-%m-%d", date: '$returnDate' } } } },
-                            { $match: { returnDateStr: { $regex: item.value, $options: 'i' } } }
-                        )
-                    }
-                })
-            }
-            const response = await handleAggregatePagination(model, pipeline.filter(Boolean), query)
+            const updatedPipeline = handleFilteration(req.query?.filter, pipeline.filter(Boolean))
+            const response = await handleAggregatePagination(model, updatedPipeline, query)
 
             return res.status(200).json({
                 last_row: response.totalDocs,
