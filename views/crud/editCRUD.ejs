@@ -137,26 +137,39 @@
                                     </div>
 
 
-                                    <div id="imageSettings_<%= i %>"
-                                        class="row mb-2 <%= f.form_type == 'file' ? '' : 'd-none' %>">
-                                        <div class="col-md-5 offset-md-6">
-                                            <div class="d-flex gap-2 justify-content-center">
+                                    <div id="selectBox_form_type_<%= i %>"
+                                        class="row mb-2 <%= f.form_type == 'file' || 'select' ? '' : 'd-none' %>">
+                                        <% if (f.form_type=='select' ) { %>
+                                            <div class="col-md-5 offset-md-6">
                                                 <div class="form-floating mb-3">
-                                                    <input type="number" class="form-control"
-                                                        value="<%= f.form_type == 'file' ? response.uploader?.count : '' %>"
-                                                        name="field[<%= i %>][file][length]" min="0"
-                                                        id="formlengthId<%= i %>" />
-                                                    <label for="formlengthId<%= i %>">Length</label>
-                                                </div>
-                                                <div class="form-floating mb-3">
-                                                    <input type="number" class="form-control"
-                                                        name="field[<%= i %>][file][size]" id="formsizeId<%= i %>"
-                                                        min="0"
-                                                        value="<%= f.form_type == 'file' ? response.uploader?.size : '' %>" />
-                                                    <label for="formsizeId<%= i %>">Size (eg: 2 * 1024 = 2KB)</label>
+                                                    <input type="text" class="form-control"
+                                                        name="field[<%= i %>][display_key]"
+                                                        id="formId<%= i %>_display" value="<%= f.display_key %>" />
+                                                    <label for="formId<%= i %>_display">Display_key</label>
                                                 </div>
                                             </div>
-                                        </div>
+                                            <% } %>
+                                                <% if (f.form_type=='file' ) { %>
+                                                    <div class="col-md-5 offset-md-6">
+                                                        <div class="d-flex gap-2 justify-content-center">
+                                                            <div class="form-floating mb-3">
+                                                                <input type="number" class="form-control"
+                                                                    value="<%= f.form_type == 'file' ? response.uploader?.count : '' %>"
+                                                                    name="field[<%= i %>][file][length]" min="0"
+                                                                    id="formlengthId<%= i %>" />
+                                                                <label for="formlengthId<%= i %>">Length</label>
+                                                            </div>
+                                                            <div class="form-floating mb-3">
+                                                                <input type="number" class="form-control"
+                                                                    name="field[<%= i %>][file][size]"
+                                                                    id="formsizeId<%= i %>" min="0"
+                                                                    value="<%= f.form_type == 'file' ? response.uploader?.size : '' %>" />
+                                                                <label for="formsizeId<%= i %>">Size (eg: 2 * 1024 =
+                                                                    2KB)</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% } %>
                                     </div>
 
                                     <div class="row mb-2">
@@ -244,6 +257,17 @@
                                 <button id="addFieldBtn" type="button" class="mb-3 btn btn-dark float-end">
                                     Add Fields
                                 </button>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check float-end">
+                                    <input class="form-check-input" name="rewrite_files" type="checkbox" checked
+                                        id="makerewritefiles" />
+                                    <label class="form-check-label" for="makerewritefiles">
+                                        <b>
+                                            Rewrite Files
+                                        </b>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>

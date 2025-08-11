@@ -9,24 +9,24 @@
     <div class="sidebar">
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                <% locals.navigation && navigation.forEach(nav=> { %>
-                    <% if (nav.subMenu) { %>
+                <% locals.navigation && navigation?.forEach(nav=> { %>
+                    <% if (nav.navigation?.subMenu.length> 0) { %>
                         <li class="nav-item">
                             <a href="#" class="nav-link <%= locals.activePage && 'active'  %>">
-                                <i class="nav-icon <%= nav.icon %>"></i>
+                                <i class="nav-icon <%= nav.navigation?.icon %>"></i>
                                 <p>
-                                    <%= nav.name %>
+                                    <%= nav.navigation?.name %>
                                         <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
-                                <% nav.subMenu?.forEach(submenu=> { %>
+                                <% nav.navigation?.subMenu?.forEach(submenu=> { %>
                                     <li class="nav-item">
-                                        <a href="<%= baseUrl %>/resources/<%= submenu.model?.modelName %>"
+                                        <a href="<%= baseUrl %>/resources/<%= submenu.toLowerCase() %>"
                                             class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>
-                                                <%= submenu.model?.modelName %>
+                                                <%= submenu.toLowerCase() %>
                                             </p>
                                         </a>
                                     </li>
@@ -35,10 +35,11 @@
                         </li>
                         <% } else{ %>
                             <li class="nav-item">
-                                <a href="<%= baseUrl %>/resources/<%= nav.model?.modelName %>" class="nav-link">
-                                    <i class="nav-icon <%= nav.icon %>"></i>
+                                <a href="<%= baseUrl %>/resources/<%= nav.navigation?.name.toLowerCase() %>"
+                                    class="nav-link">
+                                    <i class="nav-icon <%= nav.navigation?.icon %>"></i>
                                     <p>
-                                        <%= nav.name %>
+                                        <%= nav.navigation?.name %>
                                     </p>
                                 </a>
                             </li>

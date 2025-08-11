@@ -151,7 +151,7 @@ export function setFieldDefaultValue(counter, defaultRow, val) {
                     </div>
                     </div>`
             break;
-        case 'Number': // TODO : add more number types
+        case 'Number':
             input = `<div class="col-md-3">
                     <div class="form-floating mb-3">
                         <input type="number" class="form-control" name="field[${counter}][defaultValue]" id="default_value_${counter}" placeholder="" />

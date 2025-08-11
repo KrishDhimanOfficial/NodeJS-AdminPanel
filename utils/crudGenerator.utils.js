@@ -19,6 +19,7 @@ const validateId = mongoose.Types.ObjectId.isValid;
 
 const CRUD_GENERATOR = async (req, res) => {
     const {
+        rewrite_files,
         collection,
         timeStamp,
         field = [],
@@ -45,29 +46,31 @@ const CRUD_GENERATOR = async (req, res) => {
         if (existingCollection && !req.params.id) return res.status(400).json({ error: `${collection} Collection already exists.` })
 
         // Save metadata and upload required files
-        const response = await SaveData(collection, timeStamp, filteredFields, navigation, req.method, req.params.id)
+        const response = await SaveData(collection, timeStamp, filteredFields, navigation, req.method, req.params.id, rewrite_files)
         if (!response.success) return res.status(500).json({ error: 'Unable to save schema metadata.' })
 
         // Generate and write model file
         const modelContent = createModelFile(collection, filteredFields, timeStamp)
         await fs.writeFile(filePath, modelContent)
 
-        // Create view directory
-        await fs.mkdir(viewDir, { recursive: true })
+        if (rewrite_files === 'on' || existingCollection.rewrite_files) {
+            // Create view directory
+            await fs.mkdir(viewDir, { recursive: true })
 
-        // Generate and write EJS view files
-        const views = {
-            create: createAddEJSFile(collection, filteredFields),
-            update: createUpdateEJSFile(collection, filteredFields),
-            view: createViewEJSFile(collection, filteredFields)
+            // Generate and write EJS view files
+            const views = {
+                create: createAddEJSFile(collection, filteredFields),
+                update: createUpdateEJSFile(collection, filteredFields),
+                view: createViewEJSFile(collection, filteredFields)
+            }
+
+            await Promise.all(
+                Object.entries(views).map(([name, content]) => {
+                    const viewPath = path.join(viewDir, `${name}.ejs`)
+                    return fs.writeFile(viewPath, content)
+                })
+            )
         }
-
-        await Promise.all(
-            Object.entries(views).map(([name, content]) => {
-                const viewPath = path.join(viewDir, `${name}.ejs`)
-                return fs.writeFile(viewPath, content)
-            })
-        )
 
         return res.status(200).json({ success: 'Schema created successfully.' })
     } catch (error) {
@@ -76,7 +79,7 @@ const CRUD_GENERATOR = async (req, res) => {
     }
 }
 
-async function SaveData(collection, timeStamp, field, nav, requestMethod, id) {
+async function SaveData(collection, timeStamp, field, nav, requestMethod, id, rewrite_files) {
     try {
         const isSubMenu = nav.isSubMenu === 'on';
         const navigation = {
@@ -98,11 +101,13 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id) {
             default: f.defaultValue,
             col: f.field_name?.replace(/\s+/g, '_').toLowerCase().trim(),
             ...(f.relation && { relation: f.relation }),
+            ...(f.display_key && { display_key: f.display_key }),
         }))
 
         const data = {
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
+            rewrite_files: rewrite_files === 'on',
             modeldependenices: Array.isArray(nav.modeldependenices)
                 ? nav.modeldependenices
                 : [nav.modeldependenices]
@@ -212,7 +217,7 @@ function createAddEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <select name="${f.field_name}" class="form-control select2" id="${f.field_name}">
+                    <select name="${f.field_name}" data-select2="true" class="form-control select2" id="${f.field_name}">
                         <option value="" disabled selected>Select</option>
                     </select>
                 </div>`
@@ -273,8 +278,10 @@ function createUpdateEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <select name="${f.field_name}" class="form-control" id="${f.field_name}">
-                        <option value="" disabled selected>Select</option>
+                    <select name="${f.field_name}" data-select2="true" class="form-control" id="${f.field_name}">
+                        <option value="<%= response.${f.field_name}._id %>" selected>
+                            <%= response.${f.field_name}.${f.display_key} %>
+                            </option>
                     </select>
                 </div>`
             case 'date':

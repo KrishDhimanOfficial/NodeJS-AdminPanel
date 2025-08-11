@@ -11,6 +11,7 @@ import handleAggregatePagination from "../services/handlepagination.service.js";
 import sturctureModel from "../models/sturcture.model.js";
 import registerModel from "../utils/registerModel.utils.js";
 import { capitalizeFirstLetter } from "captialize";
+import { populate } from "dotenv";
 const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
@@ -99,13 +100,88 @@ const createCrudController = (model, fields = []) => ({
 
     getAllJsonData: async (req, res) => {
         const query = { page: req.query.page, limit: req.query.size }
+        // console.log(req.query?.filter);
 
         try {
-            const visibleFields = Object.fromEntries(fields.filter(col => col.isVisible).map(col => [col.col, 1]))
-            const columns = fields.filter(col => col.isVisible).map(col => ({ col: col.col, ...(col.filter && { filter: col.filter }) }))
+            const visibleFields = Object.fromEntries(
+                fields
+                    .filter(col => col.isVisible)
+                    .map(col => [col.col, 1])
+            )
+
+            const columns = fields.filter(col => col.isVisible)
+                .map(col => ({ col: col.col, ...(col.filter && { filter: col.filter }) }))
             columns.push({ col: 'actions', actions: { edit: true, del: true, view: true } })
 
-            const response = await handleAggregatePagination(model, [{ $project: visibleFields }], query)
+            const pipeline = fields
+                .filter(col => col.isVisible)
+                .flatMap(f => {
+                    if (f.relation && f.relation !== 'No Relation') {
+                        return [
+                            {
+                                $lookup: {
+                                    from: `${f.relation}s`, // adjust pluralization as needed
+                                    localField: f.field_name,
+                                    foreignField: '_id',
+                                    as: f.field_name
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: `$${f.field_name}`,
+                                    preserveNullAndEmptyArrays: true
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    [f.field_name]: {
+                                        $ifNull: [`$${f.field_name}.${f.display_key}`, 'N/A']
+                                    }
+                                }
+                            }
+                        ]
+                    }
+
+                    if (f.field_type === 'Date') {
+                        return [
+                            {
+                                $addFields: {
+                                    [f.col]: {
+                                        $dateToString: {
+                                            format: "%Y-%m-%d",
+                                            date: `$${f.field_name}`
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                    return []
+                })
+            pipeline.push({ $project: visibleFields })
+
+            console.log(req.query?.filter);
+
+            if (req.query?.filter) {
+                req.query?.filter.forEach((item, i) => {
+                    if (item.type === '>=') {
+                        pipeline.push({ [item.field]: { $gte: parseInt(item.value) } })
+                    }
+                    if (item.field === 'function') {
+                        pipeline.push({
+                            [item.field]: { $gte: parseInt(item.start), $lte: parseInt(item.end) }
+                        })
+                    }
+                    if (item.field === 'returnDate') {
+                        pipeline.push(
+                            { $addFields: { returnDateStr: { $dateToString: { format: "%Y-%m-%d", date: '$returnDate' } } } },
+                            { $match: { returnDateStr: { $regex: item.value, $options: 'i' } } }
+                        )
+                    }
+                })
+            }
+            const response = await handleAggregatePagination(model, pipeline.filter(Boolean), query)
+
             return res.status(200).json({
                 last_row: response.totalDocs,
                 last_page: response.totalPages,
@@ -117,7 +193,7 @@ const createCrudController = (model, fields = []) => ({
         }
     },
 
-    async getOne(req, res) {
+    renderEditPage: async (req, res) => {
         try {
             if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
             const response = await model.findById(req.params.id)
@@ -135,7 +211,7 @@ const createCrudController = (model, fields = []) => ({
                 response,
             })
         } catch (error) {
-            log(chalk.red(`getOne -> ${model.modelName} : ${error.message}`))
+            log(chalk.red(`renderEditPage -> ${model.modelName} : ${error.message}`))
         }
     },
 

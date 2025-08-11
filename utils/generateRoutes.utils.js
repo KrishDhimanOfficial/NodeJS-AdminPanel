@@ -65,7 +65,7 @@ const GenerateCRUDRoutes = async () => {
             return res.status(200).render(`${model.modelName}/view`, { response })
         }) // View Information Page
 
-        router.get(`${basePath}/:id`, ...middlewares, controller.getOne) // View Update page
+        router.get(`${basePath}/:id`, ...middlewares, controller.renderEditPage) // View Update page
     }
     return router
 }

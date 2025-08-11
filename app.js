@@ -96,18 +96,19 @@ app.use(expressLayouts)
 // folder setup
 app.use('/uploads', express.static('uploads'))
 app.use('/assets', express.static('assets'))
-// app.use(rateLimit(
-//   {
-//     windowMs: 15 * 1000, // 15 seconds
-//     max: 20, // max requests per IP
-//     standardHeaders: true,
-//     legacyHeaders: false,
-//     handler: (req, res, next, options) => {
-//       console.error(chalk.magenta('Rate Limit Exceeded!'))
-//       return res.status(429).sendFile(path.join(__dirname, 'views ', 'rate-limit.html'))
-//     },
-//   }
-// )) Not Working Error: admin is not defined
+
+app.use(rateLimit(
+  {
+    windowMs: 15 * 1000, // 15 seconds
+    max: 20, // max requests per IP
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next, options) => {
+      console.error(chalk.magenta('Rate Limit Exceeded!'))
+      return res.status(429).sendFile(path.join(__dirname, 'views', 'rate-limit.html'))
+    },
+  }
+))
 
 app.use('/admin', router)
 

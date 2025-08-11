@@ -15,8 +15,7 @@ const filterOptions = { // Tabulator Filter Options
     search: {
         sorter: 'string',
         headerFilter: 'input',
-        type: 'search',
-        headerFilterPlaceholder: 'Search'
+        headerFilterPlaceholder: 'Search',
     },
     boolean: {
         sorter: "boolean",
@@ -130,6 +129,18 @@ const initializeTabulator = async () => {
                         tabulator.innerHTML = '<div class="text-center my-5"><h2>No Data Found</h2></div>'
                         return []
                     }
+                    // console.log(response.columns);
+                    // table.setFilter(response.columns?.map(col => {
+                    //     // const filterVal = table && table.getColumn(col.col).getHeaderFilterValue()
+                    //     // console.log(filterVal);
+
+                    //     return {
+                    //         field: col.col,
+                    //         type: col.filter,
+                    //         // value: filterVal || ''
+                    //     }
+                    // }))
+
                     select && response.columns?.forEach(col => {
                         const value = col.col;
                         const label = col.col.replace(/_/g, ' ')
@@ -147,7 +158,7 @@ const initializeTabulator = async () => {
                             if (!exists) select.append(new Option(label, value))
                         })
 
-                        const columns = response.columns.map(column => ({
+                        const columns = response.columns?.map(column => ({
                             title: capitalizeFirstLetter(column.col.replace(/_/g, ' ')),
                             field: column.col,
                             formatter: columnsOptions[column.col] || columnsOptions.default,
@@ -232,8 +243,8 @@ function minMaxFilterEditor(cell, onRendered, success, cancel, editorParams) {
 
     function buildValues() { success({ start: start.value, end: end.value }) }
     function keypress(e) {
-        if (e.keyCode == 13) { buildValues() }
-        if (e.keyCode == 27) { cancel() }
+        if (e.keyCode == 13) buildValues()
+        if (e.keyCode == 27) cancel()
     }
 
     end = start.cloneNode()
@@ -254,11 +265,6 @@ function minMaxFilterEditor(cell, onRendered, success, cancel, editorParams) {
 }
 
 function minMaxFilterFunction(headerValue, rowValue, rowData, filterParams) {
-    //headerValue - the value of the header filter element
-    //rowValue - the value of the column in this row
-    //rowData - the data for the row being filtered
-    //filterParams - params object passed to the headerFilterFuncParams property
-
     if (rowValue) {
         if (headerValue.start != "") {
             if (headerValue.end != "") {

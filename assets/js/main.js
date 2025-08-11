@@ -61,7 +61,7 @@ datatable && (
 document.querySelectorAll('select[id]').forEach((select) => {
   const id = select.id;
   const resource = id.includes('s') ? id.split('s')[0] : id;
-  if (resource) {
+  if (resource && select.dataset.select2 === 'true') {
     const selector = `#${id}`;
     const url = `/admin/resources/select/api/${resource}`;
     setupSelect2(selector, url, `Search ${id}`)
@@ -99,7 +99,7 @@ addFieldBtn?.addEventListener('click', () => {
       <h3>Field ${counter + 1}</h3>
       ${FieldRow(fieldId, formTypeId, typeId, counter)}
 
-      <div id="imageSettings_${counter}" class="row mb-2 d-none"></div>
+      <div id="selectBox_form_type_${counter}" class="row mb-2 d-none"></div>
 
       <div class="row mb-2">
         <div class="col-md-3">${FieldCheckBox(counter)}</div>
@@ -135,28 +135,43 @@ addFieldBtn?.addEventListener('click', () => {
 })
 
 // Listen for select[type] changes dynamically
-$(document).on('change', 'select[data-counter]', function (e) {
+$(document).on('change', 'select[data-counter]', function () {
   const counter = $(this).data('counter')
   const selectedValue = $(this).val()
-  const imageSettingsEl = document.querySelector(`#imageSettings_${counter}`)
+  const imageSettingsEl = document.querySelector(`#selectBox_form_type_${counter}`)
 
-  if (selectedValue === 'file') {
-    imageSettingsEl.classList.remove('d-none')
-    imageSettingsEl.innerHTML = `
+  const templates = {
+    file: `
       <div class="col-md-5 offset-md-6">
         <div class="d-flex gap-2 justify-content-center">
           <div class="form-floating mb-3">
-            <input type="number" class="form-control" name="field[${counter}][file][length]" min="0" id="formId${counter}" />
-            <label for="formId${counter}">Length</label>
+            <input type="number" class="form-control" name="field[${counter}][file][length]" min="0" id="formId${counter}_length" />
+            <label for="formId${counter}_length">Length</label>
           </div>
           <div class="form-floating mb-3">
-            <input type="number" class="form-control" name="field[${counter}][file][size]" id="formId${counter}" min="0" />
-            <label for="formId${counter}">Size (eg: 2 * 1024 = 2KB)</label>
+            <input type="number" class="form-control" name="field[${counter}][file][size]" id="formId${counter}_size" min="0" />
+            <label for="formId${counter}_size">Size (eg: 2 * 1024 = 2KB)</label>
           </div>
         </div>
-      </div>`;
+      </div>
+    `,
+    select: `
+      <div class="col-md-5 offset-md-6">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" name="field[${counter}][display_key]" id="formId${counter}_display" />
+            <label for="formId${counter}_display">Display_key</label>
+          </div>
+      </div>
+    `
+  }
+
+  // Toggle visibility and insert template
+  if (templates[selectedValue]) {
+    imageSettingsEl.classList.remove('d-none')
+    imageSettingsEl.innerHTML = templates[selectedValue]
   } else {
     imageSettingsEl.classList.add('d-none')
+    imageSettingsEl.innerHTML = '';
   }
 })
 
