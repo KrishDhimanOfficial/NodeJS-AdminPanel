@@ -140,9 +140,11 @@ const initializeTabulator = async () => {
                 ajaxResponse: function (url, params, response) {
                     filterColumns = response.columns.filter(col => !col.actions)
                     if (response.data.length == 0) {
-                        csvbtn.remove(), pdfbtn.remove(), xlsxbtn.remove()
+                        csvbtn.classList.add('d-none'), pdfbtn.classList.add('d-none'), xlsxbtn.classList.add('d-none')
                         // tabulator.innerHTML = '<div class="text-center my-5"><h2>No Data Found</h2></div>'
                         return []
+                    } else {
+                        csvbtn.classList.remove('d-none'), pdfbtn.classList.remove('d-none'), xlsxbtn.classList.remove('d-none')
                     }
                     select && response.columns?.forEach(col => {
                         const value = col.col;

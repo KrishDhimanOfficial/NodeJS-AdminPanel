@@ -6,9 +6,9 @@
 */
 
 const handleFilteration = (filters, pipeline) => {
-    if (filters?.length === 0) return pipeline;
+    if (!filters?.length || filters?.length === 0) return pipeline;
 
-    filters.forEach((item) => {
+    filters?.forEach((item) => {
         switch (item.type) {
             case 'search':
                 pipeline.push({

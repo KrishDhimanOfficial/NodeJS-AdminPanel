@@ -110,7 +110,17 @@ const createCrudController = (model, fields = []) => ({
 
             const columns = fields.filter(col => col.isVisible)
                 .map(col => ({ col: col.col, ...(col.filter && { filter: col.filter }) }))
-            columns.push({ col: 'actions', actions: { edit: true, del: true, view: true } })
+            columns.push({
+                col: 'actions',
+                maxWidth: 150,
+                actions: {
+                    edit: true,
+                    view: true,
+                    del: () => {
+                        return true
+                    },
+                }
+            })
 
             const pipeline = fields
                 .filter(col => col.isVisible)
