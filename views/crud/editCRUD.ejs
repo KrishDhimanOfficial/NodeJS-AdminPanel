@@ -42,22 +42,22 @@
                             </div>
                             <div id="mainIcon"
                                 class="col-md-4 mb-2 <%= response.navigation?.subMenu.length> 0 ? 'd-none' : ' ' %>">
-                                <label for="mainIcon" class="form-label">Search Icon</label>
+                                <label for="mainIcon" class="form-label">Icon</label>
                                 <input type="text" id="mainIcon" class="form-control iconpicker" name="icon"
                                     placeholder="search Icon" value="<%= response.navigation?.icon %>" />
                             </div>
-                            <div class="col-md-4 mb-2">
+                            <!-- <div class="col-md-4 mb-2">
                                 <label for="modeldependenices" class="form-label">Model Dependenices</label>
                                 <select name="modeldependenices" id="modeldependenices" multiple
                                     class="select2 form-control">
-                                    <% collections.forEach(collection=> { %>
-                                        <option value="<%= collection %>"
-                                            <%=response.modeldependenices.includes(collection) && 'selected' %>>
-                                            <%= collection %>
+                                    <%# collections.forEach(collection=> { %>
+                                        <option value="<%# collection %>"
+                                            <%# response.modeldependenices.includes(collection) && 'selected' %>>
+                                            <%# collection %>
                                         </option>
-                                        <% }) %>
+                                        <%# }) %>
                                 </select>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="row <%= response.navigation?.subMenu.length> 0 ? ' ' : 'd-none' %>"
                             id="subMenusettings">

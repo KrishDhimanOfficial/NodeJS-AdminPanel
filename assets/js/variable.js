@@ -97,8 +97,8 @@ export const setupSelect2 = (selector, url, placeholder) => {
             data: params => ({ search: params.term }),
             processResults: data => ({
                 results: data.map(item => ({
-                    id: item._id,
-                    text: item.name
+                    id: item.value,
+                    text: item.label
                 }))
             })
         }

@@ -193,14 +193,14 @@ function createModelFile(collection, fields, timeStamp) {
     }).join(',\n')
 
     const fileStructure = `
-            import mongoose from "mongoose";
-            import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+            import mongoose from "mongoose"
+            import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 
             const ${collection}Schema = new mongoose.Schema({${schemaFields}},
             { timestamps: ${timeStamp === 'on'} })
 
             ${collection}Schema.plugin(mongooseAggregatePaginate)
-            export default mongoose.model('${collection}', ${collection}Schema)`;
+            export default mongoose.model('${collection}', ${collection}Schema)`
     return fileStructure.trim()
 }
 
@@ -216,7 +216,7 @@ function createAddEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <select name="${f.field_name}" data-select2="true" class="form-control select2" id="${f.field_name}">
+                    <select name="${f.field_name}" data-selectbox="true" class="form-control select2" id="${f.relation}">
                         <option value="" disabled selected>Select</option>
                     </select>
                 </div>`
@@ -277,7 +277,7 @@ function createUpdateEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <select name="${f.field_name}" data-select2="true" class="form-control" id="${f.field_name}">
+                    <select name="${f.field_name}" data-selectbox="true" class="form-control" id="${f.relation}">
                         <option value="<%= response.${f.field_name}._id %>" selected>
                             <%= response.${f.field_name}.${f.display_key} %>
                             </option>

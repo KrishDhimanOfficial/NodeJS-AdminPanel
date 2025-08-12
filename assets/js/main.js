@@ -61,7 +61,7 @@ datatable && (
 document.querySelectorAll('select[id]').forEach((select) => {
   const id = select.id;
   const resource = id.includes('s') ? id.split('s')[0] : id;
-  if (resource && select.dataset.select2 === 'true') {
+  if (resource && select.dataset.selectbox === 'true') {
     const selector = `#${id}`;
     const url = `/admin/resources/select/api/${resource}`;
     setupSelect2(selector, url, `Search ${id}`)

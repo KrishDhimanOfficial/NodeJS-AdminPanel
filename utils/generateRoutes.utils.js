@@ -13,12 +13,10 @@ const router = express.Router({ caseSensitive: true, strict: true })
 const validateId = mongoose.Types.ObjectId.isValid;
 
 const GenerateCRUDRoutes = async () => {
-    if (mongoose.connection.readyState !== 1) throw new Error("Mongoose is not connected")
-
     const resources = await sturctureModel.find({}).lean()
 
-    for await (const { model, fields, uploader, navigation, modeldependenices } of resources) {
-        // console.log({ model, options, uploader })
+    for await (const { model, fields, uploader } of resources) {
+        // console.log({ model, uploader })
         const modelInstance = await registerModel(model)
         const modelName = modelInstance.modelName;
         const controller = createCrudController(modelInstance, fields)
@@ -27,12 +25,14 @@ const GenerateCRUDRoutes = async () => {
         const basePath = `/resources/${modelName}`;
         const apiPath = `/resources/api/${modelName}`;
 
-        modeldependenices?.length > 0 && modeldependenices.forEach(modelName => {
-            router.get(`/resources/select/api/${modelName}`,
-                ...middlewares,
-                (req, res) => controller.getSelectJsonData(req, res, modelName)
-            )
-        })
+        fields?.length > 0 && fields
+            .filter(f => f.display_key && f.form_type === 'select')
+            .forEach(({ relation, display_key }) => {
+                router.get(`/resources/select/api/${relation}`, // relation : author, category
+                    ...middlewares,
+                    (req, res) => controller.getSelectJsonData(req, res, relation, display_key)
+                )
+            })
 
         // // JSON API routes
         router.get(apiPath, controller.getAllJsonData)

@@ -69,14 +69,14 @@ const createCrudController = (model, fields = []) => ({
         }
     },
 
-    getSelectJsonData: async (req, res, modelName) => {
+    getSelectJsonData: async (req, res, modelName, display_key) => {
         try {
             const model = await registerModel(modelName)
-            const response = await model.find({
-                name: {
-                    $regex: req.query.search, $options: 'i'
-                }
-            }, { _id: 1, name: 1 })
+            const response = await model.aggregate([
+                { $match: { [display_key]: { $regex: req.query.search, $options: 'i' } } },
+                { $addFields: { label: `$${display_key}`, value: '$_id' } },
+                { $project: { label: 1, value: 1 } }
+            ])
 
             return res.status(200).json(response)
         } catch (error) {
@@ -197,7 +197,7 @@ const createCrudController = (model, fields = []) => ({
 
             return res.status(200).render(`${model.modelName}/update`, {
                 title: capitalizeFirstLetter(model.modelName),
-                api: `${req.originalUrl}`,
+                api: `${req.baseUrl}/resoureces/${model.modelName}`,
                 response,
             })
         } catch (error) {
