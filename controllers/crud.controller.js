@@ -122,12 +122,13 @@ const createCrudController = (model, fields = []) => ({
 
             const pipeline = fields
                 .filter(col => col.isVisible)
-                .flatMap(f => {
+                .flatMap((f) => {
                     if (f.relation && f.relation !== 'No Relation') {
+                        const collectionName = mongoose.model(f.relation).collection.name;
                         return [
                             {
                                 $lookup: {
-                                    from: `${f.relation}s`, // adjust pluralization as needed
+                                    from: collectionName, // adjust pluralization as needed
                                     localField: f.field_name,
                                     foreignField: '_id',
                                     as: f.field_name
@@ -168,6 +169,7 @@ const createCrudController = (model, fields = []) => ({
             pipeline.push({ $project: visibleFields })
 
             const updatedPipeline = handleFilteration(req.query?.filter, pipeline.filter(Boolean))
+
             const response = await handleAggregatePagination(model, updatedPipeline, query)
 
             return res.status(200).json({

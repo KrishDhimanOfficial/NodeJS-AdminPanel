@@ -6,6 +6,7 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: [true, 'title is required.'],
         unique: [true, 'title is already in use.'],
+
     },
     image: {
         type: String,
@@ -17,14 +18,17 @@ const postSchema = new mongoose.Schema({
     comments: {
         type: Number,
     },
-    author: {
+    author_id: {
         type: mongoose.Schema.Types.ObjectId,
-        required: [true, 'author is required.'],
+        required: [true, 'author id is required.'],
+
         ref: 'author'
     },
     desc: {
         type: String,
         required: [true, 'desc is required.'],
+
+
     }
 },
     { timestamps: true })

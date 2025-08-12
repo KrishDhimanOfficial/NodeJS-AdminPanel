@@ -4,11 +4,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { capitalizeFirstLetter } from "captialize"
 import sturctureModel from "../models/sturcture.model.js"
-import mongoose from "mongoose"
 import validate from '../services/validate.service.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const validateId = mongoose.Types.ObjectId.isValid;
 
 /**
  * FN : CRUD_GENERATOR => Create Mongoose Schema, views File
@@ -48,8 +46,8 @@ const CRUD_GENERATOR = async (req, res) => {
         if (!response.success) return validate(res, response.error.errors)
 
         // Generate and write model file
-        const modelContent = createModelFile(collection, filteredFields, timeStamp)
-        await fs.writeFile(filePath, modelContent)
+        createModelFile(filePath, collection, filteredFields, timeStamp)
+        // await fs.writeFile(filePath, modelContent)
 
         if (rewrite_files === 'on' || existingCollection.rewrite_files) {
             // Create view directory
@@ -90,7 +88,7 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
         }
 
         const fields = field.map(f => ({
-            field_name: f.field_name,
+            field_name: f.field_name?.replace(/\s+/g, '_').trim(),
             field_type: f.field_type,
             form_type: f.form_type,
             required: f.required === 'on',
@@ -98,7 +96,7 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
             filter: f.searchFilter,
             unique: f.unique === 'on',
             default: f.defaultValue,
-            col: f.field_name?.replace(/\s+/g, '_').toLowerCase().trim(),
+            col: f.field_name?.replace(/\s+/g, '_').trim(),
             ...(f.relation && { relation: f.relation }),
             ...(f.display_key && { display_key: f.display_key }),
         }))
@@ -165,10 +163,18 @@ const uploader = (collection, field) => {
 }
 
 // Function That's Create Mongoose Schema File
-function createModelFile(collection, fields, timeStamp) {
-    const schemaFields = fields.map(f => {
-        let fieldType;
+async function createModelFile(filePath, collection, fields, timeStamp) {
+    let fileContent = '';
 
+    try {
+        fileContent = await fs.readFile(filePath, 'utf8')
+    } catch {
+        fileContent = ''; // file doesn't exist yet
+    }
+
+    // Helper to build field definition string
+    const buildField = (f) => {
+        let fieldType;
         switch (f.field_type) {
             case 'ObjectId':
                 fieldType = 'mongoose.Schema.Types.ObjectId';
@@ -184,24 +190,62 @@ function createModelFile(collection, fields, timeStamp) {
                 break;
         }
 
-        return `${f.field_name}: { 
-            type: ${fieldType},
-            ${f.required === 'on' ? `required: [true, '${f.field_name} is required.'],` : ''}
-            ${f.unique === 'on' ? `unique: [true, '${f.field_name} is already in use.'],` : ''}
-            ${f.relation !== 'No Relation' ? `ref : '${f.relation}'` : ''}
-        }`;
-    }).join(',\n')
+        return `${f.field_name.replace(/\s+/g, '_').trim()}: { 
+                    type: ${fieldType},
+                    ${f.required === 'on' ? `required: [true, '${f.field_name} is required.'],` : ''}
+                    ${f.unique === 'on' ? `unique: [true, '${f.field_name} is already in use.'],` : ''}
+                    ${f.relation !== 'No Relation' ? `ref: '${f.relation}'` : ''}
+                }`;
+    }
 
-    const fileStructure = `
-            import mongoose from "mongoose"
-            import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
+    // If file does not exist → create new structure
+    if (!fileContent) {
+        const schemaFields = fields.map(buildField).join(',\n')
+        const fileStructure = `
+                import mongoose from "mongoose"
+                import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 
-            const ${collection}Schema = new mongoose.Schema({${schemaFields}},
-            { timestamps: ${timeStamp === 'on'} })
+                const ${collection}Schema = new mongoose.Schema({
+                ${schemaFields}
+                }, { timestamps: ${timeStamp === 'on'} })
 
-            ${collection}Schema.plugin(mongooseAggregatePaginate)
-            export default mongoose.model('${collection}', ${collection}Schema)`
-    return fileStructure.trim()
+                ${collection}Schema.plugin(mongooseAggregatePaginate)
+                export default mongoose.model('${collection}', ${collection}Schema)
+                `;
+        await fs.writeFile(filePath, fileStructure.trim(), 'utf8')
+        return;
+    }
+
+    // If file exists → only insert new fields
+    const match = fileContent.match(/new mongoose\.Schema\s*\(\{\s*([\s\S]*?)\}\s*,\s*\{\s*timestamps/)
+    if (!match) {
+        console.log('⚠️ Could not find schema body in existing file.')
+        return;
+    }
+
+    const schemaBody = match[1]
+    const existingFields = schemaBody
+        .split(',')
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => line.split(':')[0].trim())
+
+    const newFields = fields
+        .filter(f => !existingFields.includes(f.field_name.replace(/\s+/g, '_').trim()))
+        .map(buildField)
+
+    if (newFields.length === 0) {
+        console.log('✅ No new fields found. Skipping file update.');
+        return;
+    }
+
+    const updatedSchemaBody = schemaBody.trim().endsWith(',')
+        ? schemaBody + '\n' + newFields.join(',\n')
+        : schemaBody + ',\n' + newFields.join(',\n');
+
+    const updatedFileContent = fileContent.replace(schemaBody, updatedSchemaBody);
+
+    return await fs.writeFile(filePath, updatedFileContent, 'utf8')
 }
 
 
@@ -216,8 +260,11 @@ function createAddEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <select name="${f.field_name}" data-selectbox="true" class="form-control select2" id="${f.relation}">
-                        <option value="" disabled selected>Select</option>
+                    <select name="${f.field_name}" ${f.field_type === 'Array' ? 'multiple' : ' '} data-selectbox="true" class="form-control select2" id="${f.relation}">
+                       ${f.field_type === 'Array'
+                        ? ''
+                        : '<option value="" disabled selected>Select</option>'
+                    }
                     </select>
                 </div>`
 

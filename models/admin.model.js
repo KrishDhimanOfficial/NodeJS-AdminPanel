@@ -25,6 +25,7 @@ const adminSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
+        maxLength: [10, 'Phone number must be 10 digits long'],
         default: null,
     },
     password: {
