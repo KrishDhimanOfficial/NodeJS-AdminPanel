@@ -116,9 +116,7 @@ const createCrudController = (model, fields = []) => ({
                 actions: {
                     edit: true,
                     view: true,
-                    del: () => {
-                        return true
-                    },
+                    del: true,
                 }
             })
 
