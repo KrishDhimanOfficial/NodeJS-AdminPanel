@@ -5,8 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { capitalizeFirstLetter } from "captialize"
 import sturctureModel from "../models/sturcture.model.js"
 import mongoose from "mongoose"
-import { response } from "express"
-import { request } from "node:http"
+import validate from '../services/validate.service.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const validateId = mongoose.Types.ObjectId.isValid;
@@ -31,7 +30,6 @@ const CRUD_GENERATOR = async (req, res) => {
     } = req.body;
     console.log(req.body);
 
-
     const filteredFields = field.filter(Boolean)
     const navigation = { isSubMenu, icon, modeldependenices, name, model }
     const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
@@ -47,7 +45,7 @@ const CRUD_GENERATOR = async (req, res) => {
 
         // Save metadata and upload required files
         const response = await SaveData(collection, timeStamp, filteredFields, navigation, req.method, req.params.id, rewrite_files)
-        if (!response.success) return res.status(500).json({ error: 'Unable to save schema metadata.' })
+        if (!response.success) return validate(res, response.error.errors)
 
         // Generate and write model file
         const modelContent = createModelFile(collection, filteredFields, timeStamp)
@@ -80,6 +78,7 @@ const CRUD_GENERATOR = async (req, res) => {
 }
 
 async function SaveData(collection, timeStamp, field, nav, requestMethod, id, rewrite_files) {
+
     try {
         const isSubMenu = nav.isSubMenu === 'on';
         const navigation = {
@@ -107,7 +106,7 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
         const data = {
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
-            rewrite_files: rewrite_files === 'on',
+            rewrite_files: rewrite_files && rewrite_files === 'on',
             modeldependenices: Array.isArray(nav.modeldependenices)
                 ? nav.modeldependenices
                 : [nav.modeldependenices]
@@ -121,7 +120,7 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
         return { success: true, _id: res._id }
     } catch (error) {
         chalk.red(console.error('SaveData : ', error.message))
-        return { success: false }
+        return { success: false, error }
     }
 }
 

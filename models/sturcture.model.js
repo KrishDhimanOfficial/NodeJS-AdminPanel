@@ -14,7 +14,6 @@ const fieldSchema = new mongoose.Schema({
     field_name: {
         type: String,
         required: [true, 'Field Name is required.'],
-        unique: [true, 'Field Name is already in use.'],
         match: [
             /^[a-zA-Z0-9_]+$/,
             'Field Name must be alphanumeric and underscores only.'
@@ -64,7 +63,7 @@ const structureSchema = new mongoose.Schema({
     modeldependenices: { type: [String] },
     fields: { type: [fieldSchema] },
     uploader: { type: Object },
-    rewrite_files: { type: Boolean, default: false }
+    rewrite_files: { type: Boolean, default: true }
 },
     { timestamps: true }
 )
