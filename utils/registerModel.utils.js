@@ -21,7 +21,7 @@
 //     return mongooseModel
 // }
 
-import mongoose from "mongoose"
+import mongoose from 'mongoose'
 import path from 'node:path'
 import chalk from 'chalk'
 

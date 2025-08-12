@@ -16,7 +16,7 @@ datatable && initializeTabulator()
 $('.iconpicker').length && $('.iconpicker').iconpicker({
   fullClassFormatter: function (val) { return 'fa ' + val }
 })
-$('.summernote').length && $('.summernote').summernote({ height: 300 })
+$('.summernote').length && $('.summernote').summernote({ placeholder: 'Start typing...', height: 300 })
 $('.select2').length && $('.select2').select2()
 previewImageInput && (
   previewImageInput.onchange = (e) => displayPreviewImage(e) // display image preview
@@ -31,6 +31,7 @@ Form && (
       submitFormBtn.innerHTML = 'Submitting...';
 
       const formdata = new FormData(e.target)
+      document.querySelector('.summernote') && formdata.delete('files')
 
       Form.id === 'SubmitForm' // Handle Data Submission To Server
         ? res = await Fetch.post(apiInput.value.trim(), formdata)

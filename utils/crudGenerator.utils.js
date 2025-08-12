@@ -294,7 +294,9 @@ function createUpdateEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <textarea name="${f.field_name}" class="form-control" id="${f.field_name}" placeholder="${f.field_name}"></textarea>
+                    <textarea name="${f.field_name}" class="form-control summernote" id="${f.field_name}" placeholder="${f.field_name}">
+                        <%= response.${f.field_name} %>
+                    </textarea>
                 </div>`
 
             case 'checkbox':

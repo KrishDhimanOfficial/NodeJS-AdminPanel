@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+import mongoose from "mongoose"
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 
 const postSchema = new mongoose.Schema({
     title: {
@@ -21,6 +21,10 @@ const postSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: [true, 'author is required.'],
         ref: 'author'
+    },
+    desc: {
+        type: String,
+        required: [true, 'desc is required.'],
     }
 },
     { timestamps: true })

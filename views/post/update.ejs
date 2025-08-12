@@ -36,6 +36,13 @@
                             </option>
                     </select>
                 </div>
+
+                <div class="mb-3">
+                    <label for="desc" class="form-label mb-2">Desc</label>
+                    <textarea name="desc" class="form-control summernote" id="desc" placeholder="desc">
+                        <%= response.desc %>
+                    </textarea>
+                </div>
                     </div>
                 <div class="modal-footer justify-content-between">
                     <button id="submitFormBtn" class="btn btn-dark">Submit</button>

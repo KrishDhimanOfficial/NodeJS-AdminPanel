@@ -104,7 +104,6 @@ app.use(rateLimit(
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res, next, options) => {
-      console.error(chalk.magenta('Rate Limit Exceeded!'))
       return res.status(429).sendFile(path.join(__dirname, 'views', 'rate-limit.html'))
     },
   }

@@ -2,7 +2,7 @@ import adminModel from '../models/admin.model.js';
 import bcrypt from 'bcrypt';
 
 export const initAdmin = async () => {
-    const existing = await adminModel.findOne({ role: 'superAdmin' });
+    const existing = await adminModel.findOne({ role: 'superAdmin' })
 
     if (!existing) {
         const hashedPassword = await bcrypt.hash('admin', 10)
@@ -12,7 +12,6 @@ export const initAdmin = async () => {
             email: 'admin@gmail.com',
             password: hashedPassword,
             role: 'superAdmin',
-            profile: '/assets/images/user.png'
         })
     }
 }

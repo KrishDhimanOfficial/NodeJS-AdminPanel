@@ -36,7 +36,7 @@
                         <% } else{ %>
                             <li class="nav-item">
                                 <a href="<%= baseUrl %>/resources/<%= nav.navigation?.name.toLowerCase() %>"
-                                    class="nav-link">
+                                    class="nav-link <%= locals.activePage && 'active'  %>">
                                     <i class="nav-icon <%= nav.navigation?.icon %>"></i>
                                     <p>
                                         <%= nav.navigation?.name %>
