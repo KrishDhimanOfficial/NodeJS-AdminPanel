@@ -29,10 +29,10 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="author id" class="form-label mb-2">Author id</label>
-                    <select name="author id" data-selectbox="true" class="form-control" id="author">
-                        <option value="<%= response.author id._id %>" selected>
-                            <%= response.author id.name %>
+                    <label for="author_id" class="form-label mb-2">Author_id</label>
+                    <select name="author_id"   data-selectbox="true" class="form-control" id="author">
+                        <option value="<%= response.author_id._id %>" selected>
+                            <%= response.author_id.name %>
                             </option>
                     </select>
                 </div>
@@ -42,6 +42,17 @@
                     <textarea name="desc" class="form-control summernote" id="desc" placeholder="desc">
                         <%= response.desc %>
                     </textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tagId" class="form-label mb-2">TagId</label>
+                    <select name="tagId" multiple data-selectbox="true" class="form-control" id="tag">
+                        <% response.tagId.forEach(tagId => { %>
+                            <option value="<%= tagId._id %>" selected >
+                                <%= tagId.name %>
+                            </option>
+                           <% }) %>
+                    </select>
                 </div>
                     </div>
                 <div class="modal-footer justify-content-between">

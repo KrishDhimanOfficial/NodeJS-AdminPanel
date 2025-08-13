@@ -4,15 +4,24 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 const authorSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, 'name is required.'],
+        max: '100',
+        minLength: '3',
+
+        validate: {
+            validator: (name) => {
+                return validate(name)
+            }
+        },
+
+        required: [true, "name is required."]
     },
-    
-    image: {
-        type: String,
-        required: [true, 'image is required.'],
+
+    postId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, "postId is required."],
+        ref: "post"
     }
-},
-    { timestamps: true })
+}, { timestamps: true })
 
 authorSchema.plugin(mongooseAggregatePaginate)
 export default mongoose.model('author', authorSchema)

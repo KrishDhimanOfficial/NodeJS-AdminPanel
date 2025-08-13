@@ -102,6 +102,7 @@ addFieldBtn?.addEventListener('click', () => {
       <div id="selectBox_form_type_${counter}" class="row mb-2 d-none"></div>
 
       <div class="row mb-2">
+      
         <div class="col-md-3">${FieldCheckBox(counter)}</div>
         <div class="col-md-4">
           <label for="${searchFilterId}" class="form-label">Search Filter</label>

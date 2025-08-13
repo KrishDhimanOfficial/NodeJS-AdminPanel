@@ -1,11 +1,7 @@
-import mongoose, { model } from "mongoose"
 import bcrypt from 'bcrypt'
 import adminModel from "../models/admin.model.js"
 import validate from "../services/validate.service.js";
-import { deleteFile } from "../services/removeFile.service.js";
-import sturctureModel from "../models/sturcture.model.js";
-import handleAggregatePagination from "../services/handlepagination.service.js";
-const validateId = mongoose.Types.ObjectId.isValid;
+import { deleteFile } from "../utils/removeFile.utils.js";
 
 const adminPanelController = {
     renderAdminProfile: async (req, res) => {

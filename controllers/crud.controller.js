@@ -5,14 +5,13 @@
 */
 import mongoose from "mongoose";
 import validate from "../services/validate.service.js"
-import { deleteFile, containsImage } from '../services/removeFile.service.js'
+import { deleteFile, containsImage } from '../utils/removeFile.utils.js'
 import chalk from 'chalk';
-import handleAggregatePagination from "../services/handlepagination.service.js";
+import handleAggregatePagination from "../utils/handlepagination.utils.js";
 import sturctureModel from "../models/sturcture.model.js";
 import registerModel from "../utils/registerModel.utils.js";
 import { capitalizeFirstLetter } from "captialize";
-import { populate } from "dotenv";
-import handleFilteration from "../services/handleFilteration.service.js";
+import handleFilteration from "../utils/handleFilteration.utils.js";
 const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
@@ -69,6 +68,29 @@ const createCrudController = (model, fields = []) => ({
         }
     },
 
+    update: async (req, res) => {
+        try {
+            console.log(req.body);
+
+            if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
+            const { password } = req.body;
+            if (password?.length === 0) delete req.body.password;
+
+            const response = await model.findByIdAndUpdate({ _id: req.params.id },
+                { $set: req.body },
+                {
+                    new: true,
+                    runValidators: true,
+                }
+            )
+            if (!response) return res.status(404).json({ error: 'Not found' })
+            return res.status(200).json({ success: 'update successfully', redirect: req.originalUrl })
+        } catch (error) {
+            if (error.name === 'ValidationError') validate(res, error.errors)
+            log(chalk.red(`update -> ${model.modelName} : ${error.message}`))
+        }
+    },
+
     getSelectJsonData: async (req, res, modelName, display_key) => {
         try {
             const model = await registerModel(modelName)
@@ -100,25 +122,16 @@ const createCrudController = (model, fields = []) => ({
     },
 
     getAllJsonData: async (req, res) => {
-        const query = { page: req.query.page, limit: req.query.size }
         try {
-            const visibleFields = Object.fromEntries(
-                fields
-                    .filter(col => col.isVisible)
-                    .map(col => [col.col, 1])
-            )
+            const query = { page: req.query.page, limit: req.query.size }
+            const columns = fields
+                .filter(col => col.isVisible)
+                .map(col => {
+                    return { col: col.col, ...(col.filter && { filter: col.filter }), }
+                })
 
-            const columns = fields.filter(col => col.isVisible)
-                .map(col => ({ col: col.col, ...(col.filter && { filter: col.filter }) }))
-            columns.push({
-                col: 'actions',
-                maxWidth: 150,
-                actions: {
-                    edit: true,
-                    view: true,
-                    del: true,
-                }
-            })
+            columns.unshift({ col: 'No', maxWidth: 80 })
+            columns.push({ col: 'actions', maxWidth: 180, actions: { edit: true, view: true, del: true } })
 
             const pipeline = fields
                 .filter(col => col.isVisible)
@@ -126,51 +139,35 @@ const createCrudController = (model, fields = []) => ({
                     if (f.relation && f.relation !== 'No Relation') {
                         const collectionName = mongoose.model(f.relation).collection.name;
                         return [
-                            {
-                                $lookup: {
-                                    from: collectionName, // adjust pluralization as needed
-                                    localField: f.field_name,
-                                    foreignField: '_id',
-                                    as: f.field_name
-                                }
-                            },
-                            {
-                                $unwind: {
-                                    path: `$${f.field_name}`,
-                                    preserveNullAndEmptyArrays: true
-                                }
-                            },
-                            {
-                                $addFields: {
-                                    [f.field_name]: {
-                                        $ifNull: [`$${f.field_name}.${f.display_key}`, 'N/A']
-                                    }
-                                }
-                            }
+                            { $lookup: { from: collectionName, localField: f.field_name, foreignField: '_id', as: f.field_name } },
+                            { $unwind: { path: `$${f.field_name}`, preserveNullAndEmptyArrays: true } },
+                            { $addFields: { [f.field_name]: { $ifNull: [`$${f.field_name}.${f.display_key}`, 'N/A'] } } }
                         ]
                     }
 
                     if (f.field_type === 'Date') {
                         return [
-                            {
-                                $addFields: {
-                                    [f.col]: {
-                                        $dateToString: {
-                                            format: "%Y-%m-%d",
-                                            date: `$${f.field_name}`
-                                        }
-                                    }
-                                }
-                            }
+                            { $addFields: { [f.col]: { $dateToString: { format: "%Y-%m-%d", date: `$${f.field_name}` } } } }
                         ]
                     }
                     return []
                 })
-            pipeline.push({ $project: visibleFields })
+
+            pipeline.push({ $project: Object.fromEntries(fields.filter(col => col.isVisible).map(col => [col.col, 1])) })
 
             const updatedPipeline = handleFilteration(req.query?.filter, pipeline.filter(Boolean))
-
             const response = await handleAggregatePagination(model, updatedPipeline, query)
+
+            // const isIdExistField = fields
+            //     .filter(f => f.field_type === 'ObjectId')
+            //     .map(f => {
+            //         const model = mongoose.model(f.relation)
+            //         return {
+            //             field: f.field_name,
+            //             exist: model.exists({ _id: response.collectionData.some(doc => doc[f.field_name]._id) }) && true
+            //         }
+            //     })
+            // console.log(isIdExistField);
 
             return res.status(200).json({
                 last_row: response.totalDocs,
@@ -192,37 +189,19 @@ const createCrudController = (model, fields = []) => ({
                 if (f.field_type === 'ObjectId') {
                     await response.populate(f.field_name)
                 }
+                if (f.relation && f.relation !== 'No Relation' && f.field_type === 'Array') {
+                    await response.populate(f.field_name);
+                }
             }
             // console.log(response);
 
             return res.status(200).render(`${model.modelName}/update`, {
                 title: capitalizeFirstLetter(model.modelName),
-                api: `${req.baseUrl}/resoureces/${model.modelName}`,
+                api: `${req.baseUrl}/resources/${model.modelName}`,
                 response,
             })
         } catch (error) {
             log(chalk.red(`renderEditPage -> ${model.modelName} : ${error.message}`))
-        }
-    },
-
-    update: async (req, res) => {
-        try {
-            if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
-            const { password } = req.body;
-            if (password?.length === 0) delete req.body.password;
-
-            const response = await model.findByIdAndUpdate({ _id: req.params.id },
-                { $set: req.body },
-                {
-                    new: true,
-                    runValidators: true,
-                }
-            )
-            if (!response) return res.status(404).json({ error: 'Not found' })
-            return res.status(200).json({ success: 'update successfully', redirect: req.originalUrl })
-        } catch (error) {
-            if (error.name === 'ValidationError') validate(res, error.errors)
-            log(chalk.red(`update -> ${model.modelName} : ${error.message}`))
         }
     },
 
@@ -307,13 +286,14 @@ const createCrudController = (model, fields = []) => ({
 
             const response = await handleAggregatePagination(sturctureModel, pipeline, query)
             const columns = [
+                { col: 'No', maxWidth: 80 },
                 { col: 'model', filter: 'search' },
                 { col: 'actions', actions: { edit: true, del: true } },
             ]
             return res.status(200).json({
                 last_row: response.totalDocs,
                 last_page: response.totalPages,
-                data: response.collectionData,
+                data: response.collectionData.reverse(),
                 columns
             })
         } catch (error) {
@@ -330,7 +310,7 @@ const createCrudController = (model, fields = []) => ({
                     api: '/admin/crud',
                     collections: mongoose.modelNames(),
                     response,
-                    schemaTypes: ["String", "Number", "Boolean", "Array", "ObjectId", "Map", "Date", "Double128", "Double", "Null", "Mixed"],
+                    schemaTypes: ["String", "Number", "Boolean", "Array", "ObjectId", "Date", "Double", "Mixed", 'Map'],
                     formTypes: ["text", "select", "file", "email", "url", "tel", "search", "number", "range", "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"],
                     filters: ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number'],
                 }

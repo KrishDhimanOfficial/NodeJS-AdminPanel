@@ -2,7 +2,7 @@ import multer from 'multer'
 import path from 'node:path'
 import fs from 'node:fs'
 import config from '../config/config.js'
-import { deleteFile } from '../services/removeFile.service.js'
+import { deleteFile, } from '../utils/removeFile.utils.js'
 
 const createStorage = (dir) => {
     const uploadPath = path.join('uploads', dir)
@@ -104,7 +104,7 @@ export const upload = (folder = '') => {
     })
 }
 
-export const multerUploader = (config) => {
+export const uploadHandler = (config) => {
     switch (config.type) {
         case 'single':
             return upload(config.folder).single(config.field_name)

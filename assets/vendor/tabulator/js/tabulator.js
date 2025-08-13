@@ -57,6 +57,12 @@ const filterOptions = { // Tabulator Filter Options
 }
 
 const columnsOptions = { // Tabulator Column Options
+    No: (cell) => {
+        const rowIndex = cell.getRow().getPosition();
+        const page = cell.getTable().getPage();           // current page
+        const pageSize = cell.getTable().getPageSize();   // page size        
+        return (page - 1) * pageSize + rowIndex;
+    },
     image: (cell) => {
         const { image } = cell.getRow().getData()
         return `<img src="/${image}" alt="" loading="lazy"  width="120" height="120">`

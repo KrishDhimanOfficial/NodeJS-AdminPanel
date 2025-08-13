@@ -167,8 +167,7 @@ export function setFieldDefaultValue(counter, defaultRow, val) {
 
 export function FieldRow(fieldId, formTypeId, typeId, counter) {
     const schemaTypes = [
-        "String", "Number", "Boolean", "Array", "ObjectId", "Map", "Date",
-        "Double128", "Double", "Null", "Mixed"
+        "String", "Number", "Boolean", "Array", "ObjectId", "Date", "Double", "Mixed", 'Map'
     ]
 
     const formInputTypes = [

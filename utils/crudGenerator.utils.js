@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { capitalizeFirstLetter } from "captialize"
 import sturctureModel from "../models/sturcture.model.js"
 import validate from '../services/validate.service.js'
+import createModelFile from "../tools/createModeFile.tool.js"
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -47,7 +48,6 @@ const CRUD_GENERATOR = async (req, res) => {
 
         // Generate and write model file
         createModelFile(filePath, collection, filteredFields, timeStamp)
-        // await fs.writeFile(filePath, modelContent)
 
         if (rewrite_files === 'on' || existingCollection.rewrite_files) {
             // Create view directory
@@ -162,93 +162,6 @@ const uploader = (collection, field) => {
     }
 }
 
-// Function That's Create Mongoose Schema File
-async function createModelFile(filePath, collection, fields, timeStamp) {
-    let fileContent = '';
-
-    try {
-        fileContent = await fs.readFile(filePath, 'utf8')
-    } catch {
-        fileContent = ''; // file doesn't exist yet
-    }
-
-    // Helper to build field definition string
-    const buildField = (f) => {
-        let fieldType;
-        switch (f.field_type) {
-            case 'ObjectId':
-                fieldType = 'mongoose.Schema.Types.ObjectId';
-                break;
-            case 'Mixed':
-                fieldType = 'mongoose.Schema.Types.Mixed';
-                break;
-            case 'Date':
-                fieldType = 'Date';
-                break;
-            default:
-                fieldType = f.field_type;
-                break;
-        }
-
-        return `${f.field_name.replace(/\s+/g, '_').trim()}: { 
-                    type: ${fieldType},
-                    ${f.required === 'on' ? `required: [true, '${f.field_name} is required.'],` : ''}
-                    ${f.unique === 'on' ? `unique: [true, '${f.field_name} is already in use.'],` : ''}
-                    ${f.relation !== 'No Relation' ? `ref: '${f.relation}'` : ''}
-                }`;
-    }
-
-    // If file does not exist → create new structure
-    if (!fileContent) {
-        const schemaFields = fields.map(buildField).join(',\n')
-        const fileStructure = `
-                import mongoose from "mongoose"
-                import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
-
-                const ${collection}Schema = new mongoose.Schema({
-                ${schemaFields}
-                }, { timestamps: ${timeStamp === 'on'} })
-
-                ${collection}Schema.plugin(mongooseAggregatePaginate)
-                export default mongoose.model('${collection}', ${collection}Schema)
-                `;
-        await fs.writeFile(filePath, fileStructure.trim(), 'utf8')
-        return;
-    }
-
-    // If file exists → only insert new fields
-    const match = fileContent.match(/new mongoose\.Schema\s*\(\{\s*([\s\S]*?)\}\s*,\s*\{\s*timestamps/)
-    if (!match) {
-        console.log('⚠️ Could not find schema body in existing file.')
-        return;
-    }
-
-    const schemaBody = match[1]
-    const existingFields = schemaBody
-        .split(',')
-        .map(line => line.trim())
-        .filter(Boolean)
-        .map(line => line.split(':')[0].trim())
-
-    const newFields = fields
-        .filter(f => !existingFields.includes(f.field_name.replace(/\s+/g, '_').trim()))
-        .map(buildField)
-
-    if (newFields.length === 0) {
-        console.log('✅ No new fields found. Skipping file update.');
-        return;
-    }
-
-    const updatedSchemaBody = schemaBody.trim().endsWith(',')
-        ? schemaBody + '\n' + newFields.join(',\n')
-        : schemaBody + ',\n' + newFields.join(',\n');
-
-    const updatedFileContent = fileContent.replace(schemaBody, updatedSchemaBody);
-
-    return await fs.writeFile(filePath, updatedFileContent, 'utf8')
-}
-
-
 // That's Create EJS File
 function createAddEJSFile(collection, fields) {
     const checkInputfile = fields.filter(f => f.form_type === 'file' && f.file?.length > 1)
@@ -324,10 +237,17 @@ function createUpdateEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <select name="${f.field_name}" data-selectbox="true" class="form-control" id="${f.relation}">
-                        <option value="<%= response.${f.field_name}._id %>" selected>
-                            <%= response.${f.field_name}.${f.display_key} %>
+                    <select name="${f.field_name}" ${f.field_type === 'Array' ? 'multiple' : ' '} data-selectbox="true" class="form-control" id="${f.relation}">
+                        ${f.field_type === 'Array'
+                        ? `<% response.${f.field_name}.forEach(${f.field_name} => { %>
+                            <option value="<%= ${f.field_name}._id %>" selected >
+                                <%= ${f.field_name}.${f.display_key} %>
                             </option>
+                           <% }) %>`
+                        : `<option value="<%= response.${f.field_name}._id %>" selected>
+                            <%= response.${f.field_name}.${f.display_key} %>
+                            </option>`
+                    }
                     </select>
                 </div>`
             case 'date':

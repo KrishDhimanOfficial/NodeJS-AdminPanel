@@ -1,11 +1,9 @@
 import sturctureModel from "../models/sturcture.model.js"
 import createCrudController from "../controllers/crud.controller.js"
-import path from 'node:path'
 import mongoose from "mongoose"
 import setUniversalData from "../middleware/setUniversalData.middleware.js"
-import { handlemulterError, checkSizeLimits, multerUploader } from "../middleware/multer.middleware.js"
+import { handlemulterError, checkSizeLimits, uploadHandler } from "../middleware/multer.middleware.js"
 import { isAuthenticated } from "../middleware/auth.middleware.js"
-// import resources from "../lib/resources.lib.js"
 import registerModel from "./registerModel.utils.js"
 import { capitalizeFirstLetter } from "captialize"
 import express from "express"
@@ -21,7 +19,7 @@ const GenerateCRUDRoutes = async () => {
         const modelName = modelInstance.modelName;
         const controller = createCrudController(modelInstance, fields)
         const middlewares = [isAuthenticated, setUniversalData]
-        const fileMiddlewares = [isAuthenticated, multerUploader(uploader), handlemulterError, checkSizeLimits(uploader)]
+        const fileMiddlewares = [isAuthenticated, uploadHandler(uploader), handlemulterError, checkSizeLimits(uploader)]
         const basePath = `/resources/${modelName}`;
         const apiPath = `/resources/api/${modelName}`;
 

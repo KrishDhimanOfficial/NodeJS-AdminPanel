@@ -60,7 +60,6 @@ const structureSchema = new mongoose.Schema({
     },
     timestamps: { type: Boolean, default: true },
     navigation: navigationSchema,
-    modeldependenices: { type: [String] },
     fields: { type: [fieldSchema] },
     uploader: { type: Object },
     rewrite_files: { type: Boolean, default: true }
