@@ -43,7 +43,8 @@ const CRUD_GENERATOR = async (req, res) => {
         if (existingCollection && !req.params.id) return res.status(400).json({ error: `${collection} Collection already exists.` })
 
         // Save metadata and upload required files
-        const response = await SaveData(collection, timeStamp, filteredFields, navigation, req.method, req.params.id, rewrite_files)
+        const response = await SaveData(collection, timeStamp, filteredFields, navigation, req.method,
+            req.params.id, rewrite_files)
         if (!response.success) return validate(res, response.error.errors)
 
         // Generate and write model file
@@ -101,17 +102,17 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
             ...(f.display_key && { display_key: f.display_key }),
         }))
 
+        const modelDependencies = nav.modelDependencies
+            ? Array.isArray(nav.modelDependencies)
+                ? nav.modelDependencies.map(d => ({ model: collection, field: d.split('|')[1], relation: d.split('|')[0], }))
+                : [{ model: collection, field: nav.modelDependencies.split('|')[1], relation: nav.modelDependencies.split('|')[0], }]
+            : []
+
         const data = {
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
             rewrite_files: rewrite_files && rewrite_files === 'on',
-            modelDependencies: Array.isArray(nav.modelDependencies)
-                ? nav.modelDependencies.map(d => ({ model: collection, field: d.split('|')[1], relation: d.split('|')[0], }))
-                : [{
-                    model: collection,
-                    field: nav.modelDependencies.split('|')[1],
-                    relation: nav.modelDependencies.split('|')[0],
-                }]
+            modelDependencies
         }
 
         const res = requestMethod === 'PUT'
