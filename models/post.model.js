@@ -10,7 +10,7 @@ const postSchema = new mongoose.Schema({
 
     image: {
         type: String,
-        required: [true, "image is required."],
+        // required: [true, "image is required."],
     },
 
     date: {
@@ -24,7 +24,7 @@ const postSchema = new mongoose.Schema({
 
     author_id: {
         type: mongoose.Schema.Types.ObjectId,
-        required: [true, "author_id is required."],
+        // required: [true, "author_id is required."],
 
         ref: "author"
     },

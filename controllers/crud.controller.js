@@ -15,7 +15,7 @@ import handleFilteration from "../utils/handleFilteration.utils.js";
 const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
-const createCrudController = (model, fields = []) => ({
+const createCrudController = (model, fields = [], modelDependencies = []) => ({
     create: async (req, res) => {
         try {
             // console.log(req.body);
@@ -124,24 +124,53 @@ const createCrudController = (model, fields = []) => ({
     getAllJsonData: async (req, res) => {
         try {
             const query = { page: req.query.page, limit: req.query.size }
-            const columns = fields
-                .filter(col => col.isVisible)
-                .map(col => {
-                    return { col: col.col, ...(col.filter && { filter: col.filter }), }
-                })
+            const columns = fields.filter(col => col.isVisible)
+                .map(col => ({ col: col.col, ...(col.filter && { filter: col.filter }), }))
 
             columns.unshift({ col: 'No', maxWidth: 80 })
-            columns.push({ col: 'actions', maxWidth: 180, actions: { edit: true, view: true, del: true } })
+            columns.push({ col: 'table_actions', maxWidth: 180, actions: { edit: true, view: true } })
 
             const pipeline = fields
                 .filter(col => col.isVisible)
                 .flatMap((f) => {
+                    if (f.relation === 'No Relation') {
+                        const relationModel = modelDependencies.find(d => d.model === model.modelName)
+                        if (!relationModel) return [{ $addFields: { canDelete: true } }]
+
+                        const collectionName = mongoose.model(relationModel.relation).collection.name;
+                        return [
+                            {
+                                $lookup: {
+                                    from: collectionName,
+                                    localField: '_id',
+                                    foreignField: relationModel.field,
+                                    as: 'relatedDocs'
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    canDelete: {
+                                        $cond: {
+                                            if: { $gt: [{ $size: "$relatedDocs" }, 0] },
+                                            then: false,
+                                            else: true
+                                        }
+                                    }
+                                }
+                            },
+                        ]
+                    }
+
                     if (f.relation && f.relation !== 'No Relation') {
                         const collectionName = mongoose.model(f.relation).collection.name;
                         return [
                             { $lookup: { from: collectionName, localField: f.field_name, foreignField: '_id', as: f.field_name } },
                             { $unwind: { path: `$${f.field_name}`, preserveNullAndEmptyArrays: true } },
-                            { $addFields: { [f.field_name]: { $ifNull: [`$${f.field_name}.${f.display_key}`, 'N/A'] } } }
+                            {
+                                $addFields: {
+                                    [f.field_name]: { $ifNull: [`$${f.field_name}.${f.display_key}`, 'N/A'] },
+                                }
+                            }
                         ]
                     }
 
@@ -152,22 +181,12 @@ const createCrudController = (model, fields = []) => ({
                     }
                     return []
                 })
-
-            pipeline.push({ $project: Object.fromEntries(fields.filter(col => col.isVisible).map(col => [col.col, 1])) })
+            const visibleFields = Object.fromEntries(fields.filter(col => col.isVisible).map(col => [col.col, 1]))
+            visibleFields.canDelete = 1;
+            // pipeline.push({ $project: visibleFields })
 
             const updatedPipeline = handleFilteration(req.query?.filter, pipeline.filter(Boolean))
             const response = await handleAggregatePagination(model, updatedPipeline, query)
-
-            // const isIdExistField = fields
-            //     .filter(f => f.field_type === 'ObjectId')
-            //     .map(f => {
-            //         const model = mongoose.model(f.relation)
-            //         return {
-            //             field: f.field_name,
-            //             exist: model.exists({ _id: response.collectionData.some(doc => doc[f.field_name]._id) }) && true
-            //         }
-            //     })
-            // console.log(isIdExistField);
 
             return res.status(200).json({
                 last_row: response.totalDocs,
@@ -304,12 +323,21 @@ const createCrudController = (model, fields = []) => ({
         try {
             const response = await sturctureModel.findById({ _id: req.params.id })
             if (!response) return res.status(404).redirect(`${req.baseUrl}/404`)
+
+            const collections = mongoose.modelNames().filter(m => m !== 'Structure' && m !== 'Admin').map(m => {
+                const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
+                return {
+                    model: m,
+                    fields: Object.keys(mongoose.model(m).schema.paths)
+                        .filter(p => !notIncluded.includes(p))
+                }
+            })
+
             return res.status(200).render('crud/editCRUD',
                 {
                     title: 'Edit CRUD',
                     api: '/admin/crud',
-                    collections: mongoose.modelNames(),
-                    response,
+                    collections, response,
                     schemaTypes: ["String", "Number", "Boolean", "Array", "ObjectId", "Date", "Double", "Mixed", 'Map'],
                     formTypes: ["text", "select", "file", "email", "url", "tel", "search", "number", "range", "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"],
                     filters: ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number'],

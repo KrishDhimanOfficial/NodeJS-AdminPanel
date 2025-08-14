@@ -23,14 +23,14 @@ const CRUD_GENERATOR = async (req, res) => {
         field = [],
         isSubMenu,
         icon,
-        modeldependenices,
+        modelDependencies,
         name,
         model
     } = req.body;
     console.log(req.body);
 
     const filteredFields = field.filter(Boolean)
-    const navigation = { isSubMenu, icon, modeldependenices, name, model }
+    const navigation = { isSubMenu, icon, modelDependencies, name, model }
     const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
     const viewDir = path.join(__dirname, '../views', collection)
 
@@ -105,13 +105,17 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
             rewrite_files: rewrite_files && rewrite_files === 'on',
-            modeldependenices: Array.isArray(nav.modeldependenices)
-                ? nav.modeldependenices
-                : [nav.modeldependenices]
+            modelDependencies: Array.isArray(nav.modelDependencies)
+                ? nav.modelDependencies.map(d => ({ model: collection, field: d.split('|')[1], relation: d.split('|')[0], }))
+                : [{
+                    model: collection,
+                    field: nav.modelDependencies.split('|')[1],
+                    relation: nav.modelDependencies.split('|')[0],
+                }]
         }
 
         const res = requestMethod === 'PUT'
-            ? await sturctureModel.findByIdAndUpdate({ _id: id }, data)
+            ? await sturctureModel.findByIdAndUpdate({ _id: id }, data, { new: true, runValidators: true })
             : await sturctureModel.create(data)
 
         if (!res) return { success: false }

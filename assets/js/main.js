@@ -92,18 +92,19 @@ addFieldBtn?.addEventListener('click', () => {
   const formTypeId = `form_type_${counter}`;
   const collectionId = `relation_collection_${counter}`;
   const searchFilterId = `search_filter_${counter}`;
+  const displayNameId = `display_name_${counter}`;
 
   // Template for new field block
   const fieldTemplate = `
     <div class="field-group">
       <h3>Field ${counter + 1}</h3>
-      ${FieldRow(fieldId, formTypeId, typeId, counter)}
-
+      ${FieldRow(displayNameId, fieldId, formTypeId, typeId, counter)}
       <div id="selectBox_form_type_${counter}" class="row mb-2 d-none"></div>
 
       <div class="row mb-2">
-      
-        <div class="col-md-3">${FieldCheckBox(counter)}</div>
+        <div class="col-md-3">
+          ${FieldCheckBox(counter)}
+        </div>
         <div class="col-md-4">
           <label for="${searchFilterId}" class="form-label">Search Filter</label>
           <select name="field[${counter}][searchFilter]" class="select2 form-control" id="${searchFilterId}">
@@ -122,6 +123,14 @@ addFieldBtn?.addEventListener('click', () => {
 
       <div id="defaultValueRow_${counter}" class="row mb-2 d-none">
         <div class="col-md-3"></div>
+      </div>
+
+      <div id="displayNameRow_${counter}" class="row mb-2 d-none">
+          <div class="col-md-3">
+            <label for="${displayNameId}" class="form-label">Display Name</label>
+            <input type="text" class="form-control" name="field[${counter}][display_name]"
+                    placeholder="eg: name, email, password" id="${displayNameId}">
+          </div>
       </div>
 
       <hr style="border-top:1px solid rgba(0,0,0,0.4);">
@@ -204,4 +213,9 @@ const subMenuCheck = document.querySelector('#isSubMenu')
 subMenuCheck?.addEventListener('change', () => {
   document.querySelector('#subMenusettings')?.classList.toggle('d-none')
   document.querySelector('#mainIcon')?.classList.toggle('d-none')
+})
+
+const prevent_deletion = document.querySelector('#prevent_deletion')
+prevent_deletion?.addEventListener('change', () => {
+  document.querySelector('#preventDeletionRow')?.classList.toggle('d-none')
 })

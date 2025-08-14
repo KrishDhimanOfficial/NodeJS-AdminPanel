@@ -6,20 +6,8 @@ const authorSchema = new mongoose.Schema({
         type: String,
         max: '100',
         minLength: '3',
-
-        validate: {
-            validator: (name) => {
-                return validate(name)
-            }
-        },
-
-        required: [true, "name is required."]
-    },
-
-    postId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: [true, "postId is required."],
-        ref: "post"
+        required: [true, "name is required."],
+        default: "helo"
     }
 }, { timestamps: true })
 

@@ -187,7 +187,7 @@ const upsertField = (fieldsObjExpr, fieldName, newVal, f) => {
     });
 
 
-    return { action: "updated" }
+    return { action: 'updated' }
 }
 
 const ensureImport = (ast, source, defaultName) => {
@@ -240,13 +240,13 @@ const findSchemaBinding = (ast, collection) => {
                     t.isIdentifier(callee.property, { name: "Schema" })
                 ) {
                     schemaInitPath = path;
-                    return false;
+                    return false
                 }
             }
             this.traverse(path)
         },
     })
-    return schemaInitPath;
+    return schemaInitPath
 }
 
 const ensurePluginApplied = (ast, collection) => {

@@ -1,7 +1,6 @@
 import express from 'express'
 import logger from 'morgan'
 import cors from 'cors'
-import chalk from 'chalk'
 import helmet from 'helmet'
 import compression from 'compression'
 import rateLimit from 'express-rate-limit'

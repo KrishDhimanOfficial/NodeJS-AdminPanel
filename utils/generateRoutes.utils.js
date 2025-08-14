@@ -13,11 +13,11 @@ const validateId = mongoose.Types.ObjectId.isValid;
 const GenerateCRUDRoutes = async () => {
     const resources = await sturctureModel.find({}).lean()
 
-    for await (const { model, fields, uploader } of resources) {
+    for await (const { model, fields, uploader, modelDependencies } of resources) {
         // console.log({ model, uploader })
         const modelInstance = await registerModel(model)
         const modelName = modelInstance.modelName;
-        const controller = createCrudController(modelInstance, fields)
+        const controller = createCrudController(modelInstance, fields, modelDependencies)
         const middlewares = [isAuthenticated, setUniversalData]
         const fileMiddlewares = [isAuthenticated, uploadHandler(uploader), handlemulterError, checkSizeLimits(uploader)]
         const basePath = `/resources/${modelName}`;

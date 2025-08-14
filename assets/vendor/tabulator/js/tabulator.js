@@ -73,9 +73,9 @@ const columnsOptions = { // Tabulator Column Options
             <input type="checkbox" ${status ? 'checked' : ''} data-id="${_id}" class="status">
             </label>`;
     },
-    actions: (cell) => {
-        const { _id } = cell.getRow().getData()
-        const { staticView, view, edit, staticEdit, del } = cell.getColumn().getDefinition()
+    table_actions: (cell) => {
+        const { _id, canDelete } = cell.getRow().getData()
+        const { view, edit, del } = cell.getColumn().getDefinition()
         const buttons = document.createElement('div')
         buttons.className = 'd-flex flex-wrap gap-3';
 
@@ -84,20 +84,33 @@ const columnsOptions = { // Tabulator Column Options
                 <i class="fa-solid fa-eye" ></i>
                 </a>`)
         }
-        if (staticView) {
-            buttons.insertAdjacentHTML('beforeend', `<button class="btn btn-primary btn-sm m-0" data-id="${_id}" data-toggle="modal" data-target="#modal-danger">
-                <i class="fa-solid fa-eye" data-id="${_id}"></i>
-                </button>`)
-        }
         if (edit) {
             buttons.insertAdjacentHTML('beforeend', `<a href='${window.location.pathname}/${_id}' class="btn btn-success btn-sm">
                 <i class="fa-solid fa-edit" ></i>
                 </a>`)
         }
-        if (staticEdit) {
-            buttons.insertAdjacentHTML('beforeend', `<button class="btn btn-success btn-sm m-0" data-id="${_id}" data-toggle="modal" data-target="#modal-danger">
-                <i class="fa-solid fa-edit" data-id="${_id}"></i>
+        if (canDelete) {
+            buttons.insertAdjacentHTML('beforeend', `<button class="btn btn-danger btn-sm m-0 danger-modal" data-id="${_id}" data-toggle="modal" data-target="#modal-danger">
+                <i class="fa-solid fa-trash" data-id="${_id}"></i>
                 </button>`)
+        }
+        return buttons;
+    },
+    actions: (cell) => {
+        const { _id } = cell.getRow().getData()
+        const { view, edit, del } = cell.getColumn().getDefinition()
+        const buttons = document.createElement('div')
+        buttons.className = 'd-flex flex-wrap gap-3';
+
+        if (view) {
+            buttons.insertAdjacentHTML('beforeend', `<a href='${window.location.pathname}/view/${_id}' class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-eye" ></i>
+                </a>`)
+        }
+        if (edit) {
+            buttons.insertAdjacentHTML('beforeend', `<a href='${window.location.pathname}/${_id}' class="btn btn-success btn-sm">
+                <i class="fa-solid fa-edit" ></i>
+                </a>`)
         }
         if (del) {
             buttons.insertAdjacentHTML('beforeend', `<button class="btn btn-danger btn-sm m-0 danger-modal" data-id="${_id}" data-toggle="modal" data-target="#modal-danger">

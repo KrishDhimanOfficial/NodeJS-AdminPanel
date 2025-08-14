@@ -23,7 +23,7 @@
                             </div>
                             <div class="col-md-4 mb-2">
                                 <label class="form-label">Others options</label>
-                                <div class="d-flex gap-3 flex-wrap">
+                                <div class="d-flex gap-2 flex-wrap">
                                     <div class="form-check">
                                         <input class="form-check-input" name="timeStamp" type="checkbox"
                                             id="checkDefault" <%=response.timestamps && 'checked' %> >
@@ -38,13 +38,22 @@
                                             Is SubMenu
                                         </label>
                                     </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="prevent_deletion" type="checkbox"
+                                            id="prevent_deletion" <%=response.modelDependencies.length> 0 ? 'checked' :
+                                        '' %>>
+                                        <label class="form-check-label" for="prevent_deletion">
+                                            Prevent Deletion
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             <div id="mainIcon"
                                 class="col-md-4 mb-2 <%= response.navigation?.subMenu.length> 0 ? 'd-none' : ' ' %>">
+                                <i class="<%= response.navigation?.icon %>"></i>
                                 <label for="mainIcon" class="form-label">Icon</label>
-                                <input type="text" id="mainIcon" class="form-control iconpicker" name="icon"
-                                    placeholder="search Icon" value="<%= response.navigation?.icon %>" />
+                                <input type="text" id="mainIcon" value="<%= response.navigation?.icon %>"
+                                    class="form-control iconpicker" name="icon" placeholder="search Icon" />
                             </div>
                         </div>
                         <div class="row <%= response.navigation?.subMenu.length> 0 ? ' ' : 'd-none' %>"
@@ -72,6 +81,26 @@
                                             <% }) %>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                        <div id="preventDeletionRow"
+                            class="row <%= response.modelDependencies.length> 0 ? ' ' : 'd-none' %>">
+                            <div class="col-md-4 mb-2 d-flex flex-column">
+                                <label for="modelDependencies" class="form-label">Model Not To Delete</label>
+                                <select name="modelDependencies" class="select2 form-control" multiple
+                                    id="modelDependencies">
+                                    <% collections.forEach(col=> { %>
+                                        <optgroup label="<%= col.model.toUpperCase() %>">
+                                            <% col.fields.forEach(f=> { %>
+                                                <option value="<%= col.model %>|<%= f %>"
+                                                    <%=response.modelDependencies.some(d=> d.relation === col.model &&
+                                                    d.field === f) ? 'selected' : '' %>>
+                                                    <%= col.model %> | <%= f %>
+                                                </option>
+                                                <% }) %>
+                                        </optgroup>
+                                        <% }) %>
+                                </select>
                             </div>
                         </div>
                     </div>

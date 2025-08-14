@@ -11,6 +11,10 @@ const navigationSchema = new mongoose.Schema({
 }, { _id: false })
 
 const fieldSchema = new mongoose.Schema({
+    // display_name: {
+    //     type: String,
+    //     required: [true, 'Display Name is required.']
+    // },
     field_name: {
         type: String,
         required: [true, 'Field Name is required.'],
@@ -58,6 +62,7 @@ const structureSchema = new mongoose.Schema({
             'Model Name must be alphanumeric and underscores only.'
         ]
     },
+    modelDependencies: { type: Array },
     timestamps: { type: Boolean, default: true },
     navigation: navigationSchema,
     fields: { type: [fieldSchema] },

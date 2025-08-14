@@ -22,7 +22,7 @@
                             </div>
                             <div class="col-md-4 mb-2">
                                 <label class="form-label">Others options</label>
-                                <div class="d-flex gap-3 flex-wrap">
+                                <div class="d-flex gap-2 flex-wrap">
                                     <div class="form-check">
                                         <input class="form-check-input" name="timeStamp" checked type="checkbox"
                                             id="checkDefault">
@@ -36,10 +36,17 @@
                                             Is SubMenu
                                         </label>
                                     </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="prevent_deletion" type="checkbox"
+                                            id="prevent_deletion">
+                                        <label class="form-check-label" for="prevent_deletion">
+                                            Prevent Deletion
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             <div id="mainIcon" class="col-md-4 mb-2">
-                                <label for="mainIcon" class="form-label">Search Icon</label>
+                                <label for="mainIcon" class="form-label">Icon</label>
                                 <input type="text" class="form-control iconpicker" name="icon"
                                     placeholder="search Icon" />
                             </div>
@@ -66,6 +73,23 @@
                                             <% }) %>
                                     </select>
                                 </div>
+                            </div>
+                        </div>
+                        <div id="preventDeletionRow" class="row d-none">
+                            <div class="col-md-4 mb-2">
+                                <label for="modelDependencies" class="form-label">Model Not To Delete</label>
+                                <select name="modelDependencies" class="select2 form-control" multiple
+                                    id="modelDependencies">
+                                    <% collections.forEach(col=> { %>
+                                        <optgroup label="<%= col.model.toUpperCase() %>">
+                                            <% col.fields.forEach(f=> { %>
+                                                <option value="<%= col.model %>|<%= f %>">
+                                                    <%= col.model %> | <%= f %>
+                                                </option>
+                                                <% }) %>
+                                        </optgroup>
+                                        <% }) %>
+                                </select>
                             </div>
                         </div>
                     </div>
