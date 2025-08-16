@@ -82,7 +82,7 @@
                                     id="modelDependencies">
                                     <% collections.forEach(col=> { %>
                                         <optgroup label="<%= col.model.toUpperCase() %>">
-                                            <% col.fields.forEach(f=> { %>
+                                            <% col.fields?.forEach(f=> { %>
                                                 <option value="<%= col.model %>|<%= f %>">
                                                     <%= col.model %> | <%= f %>
                                                 </option>

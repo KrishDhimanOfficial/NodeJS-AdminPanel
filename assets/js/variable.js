@@ -135,13 +135,17 @@ export function FieldCheckBox(counter) {
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" data-counter="${counter}" id="default_value_checkBox_${counter}">
                         <label class="form-check-label" for="default_value_checkBox_${counter}">Set Default Value</label>
-                    </div>`;
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" data-counter="${counter}" id="display_name_checkBox_${counter}">
+                        <label class="form-check-label" for="display_name_checkBox_${counter}">Set Display Name</label>
+                    </div>
+                `;
     return content.trim()
 }
 
 export function setFieldDefaultValue(counter, defaultRow, val) {
     let input = '';
-
     switch (val) {
         case 'String':
             input = `<div class="col-md-3">
@@ -160,9 +164,11 @@ export function setFieldDefaultValue(counter, defaultRow, val) {
                     </div>`
             break;
         default: input = ''
+            defaultRow.classList.add('d-none')
+            notyf.open({ type: 'warning', message: 'Default value not supported for this field type' })
             break;
     }
-    defaultRow.innerHTML = input
+    return defaultRow.innerHTML = input
 }
 
 export function FieldRow(fieldId, formTypeId, typeId, counter) {

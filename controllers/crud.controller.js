@@ -123,81 +123,98 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
 
     getAllJsonData: async (req, res) => {
         try {
-            const query = { page: req.query.page, limit: req.query.size }
-            const columns = fields.filter(col => col.isVisible)
-                .map(col => ({ col: col.col, ...(col.filter && { filter: col.filter }), }))
+            // Pagination query
+            const query = {
+                page: req.query.page,
+                limit: req.query.size
+            };
 
-            columns.unshift({ col: 'No', maxWidth: 80 })
-            columns.push({ col: 'table_actions', maxWidth: 180, actions: { edit: true, view: true } })
+            // Build columns for table
+            const columns = [
+                { col: 'No', maxWidth: 80 },
+                ...fields
+                    .filter(col => col.isVisible)
+                    .map(col => ({
+                        col: col.col,
+                        ...(col.filter && { filter: col.filter })
+                    })),
+                { col: 'table_actions', maxWidth: 180, actions: { edit: true, view: true } }
+            ]
 
+            // Build aggregation pipeline
             const pipeline = fields
                 .filter(col => col.isVisible)
-                .flatMap((f) => {
+                .flatMap(f => {
+                    const displayName = f.display_name || f.field_name;
+
+                    // Case: Date fields → format as YYYY-MM-DD
+                    if (f.field_type === 'Date') {
+                        return [
+                            {
+                                $addFields: { [f.col]: { $dateToString: { format: "%Y-%m-%d", date: `$${f.field_name}` } } }
+                            }
+                        ]
+                    }
+
+                    // Case: No Relation → check for deletable docs
                     if (f.relation === 'No Relation') {
                         const relationModel = modelDependencies.find(d => d.model === model.modelName)
-                        if (!relationModel) return [{ $addFields: { canDelete: true } }]
+                        if (!relationModel) {
+                            return [{ $addFields: { canDelete: true } }];
+                        }
 
                         const collectionName = mongoose.model(relationModel.relation).collection.name;
                         return [
-                            {
-                                $lookup: {
-                                    from: collectionName,
-                                    localField: '_id',
-                                    foreignField: relationModel.field,
-                                    as: 'relatedDocs'
-                                }
-                            },
+                            { $lookup: { from: collectionName, localField: '_id', foreignField: relationModel.field, as: 'relatedDocs' } },
                             {
                                 $addFields: {
                                     canDelete: {
                                         $cond: {
-                                            if: { $gt: [{ $size: "$relatedDocs" }, 0] },
-                                            then: false,
+                                            if: { $gt: [{ $size: "$relatedDocs" }, 0] }, then: false,
                                             else: true
                                         }
                                     }
-                                }
-                            },
-                        ]
-                    }
-
-                    if (f.relation && f.relation !== 'No Relation') {
-                        const collectionName = mongoose.model(f.relation).collection.name;
-                        return [
-                            { $lookup: { from: collectionName, localField: f.field_name, foreignField: '_id', as: f.field_name } },
-                            { $unwind: { path: `$${f.field_name}`, preserveNullAndEmptyArrays: true } },
-                            {
-                                $addFields: {
-                                    [f.field_name]: { $ifNull: [`$${f.field_name}.${f.display_key}`, 'N/A'] },
                                 }
                             }
                         ]
                     }
 
-                    if (f.field_type === 'Date') {
+                    // Case: With Relation → populate reference and pick display_key
+                    if (f.relation && f.relation !== 'No Relation') {
+                        const collectionName = mongoose.model(f.relation).collection.name;
                         return [
-                            { $addFields: { [f.col]: { $dateToString: { format: "%Y-%m-%d", date: `$${f.field_name}` } } } }
+                            { $lookup: { from: collectionName, localField: f.field_name, foreignField: '_id', as: displayName } },
+                            { $unwind: { path: `$${displayName}`, preserveNullAndEmptyArrays: true } },
+                            { $addFields: { [displayName]: { $ifNull: [`$${displayName}.${f.display_key}`, 'N/A'] } } }
                         ]
                     }
-                    return []
+
+                    return [] // fallback for fields without conditions
                 })
+
+            // Visible fields projection
             const visibleFields = Object.fromEntries(fields.filter(col => col.isVisible).map(col => [col.col, 1]))
             visibleFields.canDelete = 1;
-            // pipeline.push({ $project: visibleFields })
 
+            // Apply filters to pipeline
             const updatedPipeline = handleFilteration(req.query?.filter, pipeline.filter(Boolean))
+
+            // Paginate aggregation results
             const response = await handleAggregatePagination(model, updatedPipeline, query)
 
+            // Send response
             return res.status(200).json({
                 last_row: response.totalDocs,
                 last_page: response.totalPages,
                 data: response.collectionData.reverse(),
                 columns
             })
+
         } catch (error) {
             log(chalk.red(`getAllJsonData -> ${model.modelName} : ${error.message}`))
         }
     },
+
 
     renderEditPage: async (req, res) => {
         try {
@@ -205,6 +222,8 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
             const response = await model.findById(req.params.id)
 
             for (const f of fields) {
+                console.log(f);
+
                 if (f.field_type === 'ObjectId') {
                     await response.populate(f.field_name)
                 }
@@ -212,7 +231,6 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                     await response.populate(f.field_name);
                 }
             }
-            // console.log(response);
 
             return res.status(200).render(`${model.modelName}/update`, {
                 title: capitalizeFirstLetter(model.modelName),
@@ -278,11 +296,20 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
     },
     renderGenerateCRUD: async (req, res) => {
         try {
+            const collections = mongoose.modelNames().filter(m => m !== 'Structure' && m !== 'Admin').map(m => {
+                const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
+                return {
+                    model: m,
+                    fields: Object.keys(mongoose.model(m).schema.paths)
+                        .filter(p => !notIncluded.includes(p))
+                }
+            })
+
             return res.status(200).render('crud/generateCRUD',
                 {
                     title: 'Generate CRUD',
                     api: req.originalUrl,
-                    collections: mongoose.modelNames()
+                    collections
                 }
             )
         } catch (error) {

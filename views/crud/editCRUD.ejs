@@ -39,8 +39,8 @@
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox"
-                                            id="prevent_deletion" <%=response.modelDependencies.length> 0 ? 'checked' :
+                                        <input class="form-check-input" type="checkbox" id="prevent_deletion"
+                                            <%=response.modelDependencies.length> 0 ? 'checked' :
                                         '' %>>
                                         <label class="form-check-label" for="prevent_deletion">
                                             Prevent Deletion
@@ -74,9 +74,9 @@
                                     <label for="model" class="form-label">Model</label>
                                     <select name="model" id="model" multiple class="select2 form-control">
                                         <% collections.forEach(collection=> { %>
-                                            <option value="<%= collection %>"
-                                                <%=response.navigation?.subMenu.includes(collection) && 'selected' %>>
-                                                <%= collection %>
+                                            <option value="<%= collection.model %>"
+                                                <%=response.navigation?.subMenu.includes(collection.model) && 'selected' %>>
+                                                <%= collection.model %>
                                             </option>
                                             <% }) %>
                                     </select>
@@ -219,6 +219,13 @@
                                                     <label class="form-check-label"
                                                         for="default_value_checkBox_<%= i %>">Set Default Value</label>
                                             </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" data-counter="<%= i %>"
+                                                  <%=f.display_name && 'checked' %>
+                                                    id="display_name_checkBox_<%= i %>">
+                                                <label class="form-check-label" for="display_name_checkBox_<%= i %>">Set
+                                                    Display Name</label>
+                                            </div>
                                         </div>
                                         <div class="col-md-4">
                                             <label for="search_filter_<%= i %>" class="form-label">Search Filter</label>
@@ -244,9 +251,9 @@
                                                     <option selected>No Relation</option>
                                                     <% } %>
                                                         <% collections.forEach(collection=> { %>
-                                                            <option value="<%= collection %>" <%=f.relation==collection
+                                                            <option value="<%= collection.model %>" <%=f.relation==collection.model
                                                                 && 'selected' %> >
-                                                                <%= collection %>
+                                                                <%= collection.model %>
                                                             </option>
                                                             <% }) %>
                                             </select>
@@ -262,6 +269,16 @@
                                                     id="default_value_<%= i %>" />
                                                 <label for="default_value_<%= i %>">Default Value</label>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="displayNameRow_<%= i %>" class="row mb-2 <%= f.display_name ? '' : 'd-none' %>">
+                                        <div class="col-md-3">
+                                            <label for="display_name_checkBox_<%= i %>" class="form-label">Display Name</label>
+                                            <input type="text" class="form-control"
+                                                name="field[<%= i %>][display_name]"
+                                                value="<%= f.display_name %>"
+                                                placeholder="eg: Author ,Publisher" id="display_name_checkBox_<%= i %>">
                                         </div>
                                     </div>
 

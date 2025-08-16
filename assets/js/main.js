@@ -76,7 +76,7 @@ const fieldsContainer = document.querySelector('#addField');
 
 // Fetch collections asynchronously and store them
 (async () => {
-  collections = await Fetch.get('/admin/collections')
+  collections = await Fetch.get('/admin/collections');
 })();
 
 // Delete field row logic (assumed to be defined elsewhere)
@@ -98,13 +98,14 @@ addFieldBtn?.addEventListener('click', () => {
   const fieldTemplate = `
     <div class="field-group">
       <h3>Field ${counter + 1}</h3>
-      ${FieldRow(displayNameId, fieldId, formTypeId, typeId, counter)}
+      ${FieldRow(fieldId, formTypeId, typeId, counter)}
       <div id="selectBox_form_type_${counter}" class="row mb-2 d-none"></div>
 
       <div class="row mb-2">
         <div class="col-md-3">
           ${FieldCheckBox(counter)}
         </div>
+
         <div class="col-md-4">
           <label for="${searchFilterId}" class="form-label">Search Filter</label>
           <select name="field[${counter}][searchFilter]" class="select2 form-control" id="${searchFilterId}">
@@ -112,6 +113,7 @@ addFieldBtn?.addEventListener('click', () => {
             ${filters.map(name => `<option value="${name}">${name}</option>`).join('')}
           </select>
         </div>
+
         <div class="col-md-4">
           <label for="${collectionId}" class="form-label">Field Relation</label>
           <select name="field[${counter}][relation]" class="select2 form-control" id="${collectionId}">
@@ -121,15 +123,13 @@ addFieldBtn?.addEventListener('click', () => {
         </div>
       </div>
 
-      <div id="defaultValueRow_${counter}" class="row mb-2 d-none">
-        <div class="col-md-3"></div>
-      </div>
+      <div id="defaultValueRow_${counter}" class="row mb-2 d-none"></div>
 
       <div id="displayNameRow_${counter}" class="row mb-2 d-none">
           <div class="col-md-3">
             <label for="${displayNameId}" class="form-label">Display Name</label>
             <input type="text" class="form-control" name="field[${counter}][display_name]"
-                    placeholder="eg: name, email, password" id="${displayNameId}">
+                placeholder="eg: Author ,Publisher" id="${displayNameId}">
           </div>
       </div>
 
@@ -191,19 +191,26 @@ fieldsContainer && (
     const counter = e.target.dataset.counter;
     if (!counter) return;
 
+    const default_value_checkBox = e.target.closest(`#default_value_checkBox_${counter}`)
+    const display_name_checkBox = e.target.closest(`#display_name_checkBox_${counter}`)
     const typeSelect = document.querySelector(`#type_${counter}`)
     const defaultRow = document.querySelector(`#defaultValueRow_${counter}`)
+    const displayNameRow = document.querySelector(`#displayNameRow_${counter}`)
 
-    if (defaultRow) {
-      defaultRow.classList.toggle('d-none');
+    if (default_value_checkBox) {
+      defaultRow.classList.toggle('d-none')
       setFieldDefaultValue(counter, defaultRow, typeSelect?.value)
     }
 
     // Attach onchange to type selector
-    if (typeSelect) {
+    if (typeSelect && default_value_checkBox) {
       typeSelect.onchange = (e) => {
         setFieldDefaultValue(counter, defaultRow, e.target.value)
       }
+    }
+
+    if (display_name_checkBox) {
+      displayNameRow.classList.toggle('d-none')
     }
   }
 )

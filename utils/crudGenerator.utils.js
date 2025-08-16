@@ -97,7 +97,10 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
             filter: f.searchFilter,
             unique: f.unique === 'on',
             default: f.defaultValue,
-            col: f.field_name?.replace(/\s+/g, '_').trim(),
+            col: f.display_name !== ''
+                ? f.display_name?.replace(/\s+/g, '_').trim()
+                : f.field_name?.replace(/\s+/g, '_').trim(),
+            ...(f.display_name !== '' && { display_name: f.display_name?.replace(/\s+/g, '_').trim() }),
             ...(f.relation && { relation: f.relation }),
             ...(f.display_key && { display_key: f.display_key }),
         }))
@@ -171,7 +174,7 @@ const uploader = (collection, field) => {
 function createAddEJSFile(collection, fields) {
     const checkInputfile = fields.filter(f => f.form_type === 'file' && f.file?.length > 1)
     const formFields = fields.map(f => {
-        const label = `<label for="${f.field_name}" class="form-label mb-2">${capitalizeFirstLetter(f.field_name)}</label>`;
+        const label = `<label for="${f.field_name}" class="form-label mb-2">${capitalizeFirstLetter(f.display_name || f.field_name)}</label>`;
 
         switch (f.form_type) {
             case 'select':
@@ -235,7 +238,7 @@ function createAddEJSFile(collection, fields) {
 
 function createUpdateEJSFile(collection, fields) {
     const formFields = fields.map(f => {
-        const label = `<label for="${f.field_name}" class="form-label mb-2">${capitalizeFirstLetter(f.field_name)}</label>`;
+        const label = `<label for="${f.field_name}" class="form-label mb-2">${capitalizeFirstLetter(f.display_name || f.field_name)}</label>`;
 
         switch (f.form_type) {
             case 'select':
@@ -249,8 +252,8 @@ function createUpdateEJSFile(collection, fields) {
                                 <%= ${f.field_name}.${f.display_key} %>
                             </option>
                            <% }) %>`
-                        : `<option value="<%= response.${f.field_name}._id %>" selected>
-                            <%= response.${f.field_name}.${f.display_key} %>
+                        : `<option value="<%= response.${f.field_name}?._id %>" selected>
+                            <%= response.${f.field_name}?.${f.display_key} %>
                             </option>`
                     }
                     </select>

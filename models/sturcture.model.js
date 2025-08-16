@@ -2,21 +2,19 @@ import mongoose from "mongoose"
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2"
 
 const navigationSchema = new mongoose.Schema({
-    name: { type: String },
+    name: { type: String, trim: true },
     icon: {
         type: String,
+        trim: true,
         required: [true, 'Icon is required.']
     },
     subMenu: []
 }, { _id: false })
 
 const fieldSchema = new mongoose.Schema({
-    // display_name: {
-    //     type: String,
-    //     required: [true, 'Display Name is required.']
-    // },
     field_name: {
         type: String,
+        trim: true,
         required: [true, 'Field Name is required.'],
         match: [
             /^[a-zA-Z0-9_]+$/,
@@ -25,6 +23,7 @@ const fieldSchema = new mongoose.Schema({
     },
     field_type: {
         type: String,
+        trim: true,
         required: [true, 'Field Type is required.'],
         match: [
             /^[a-zA-Z0-9_]+$/,
@@ -33,6 +32,7 @@ const fieldSchema = new mongoose.Schema({
     },
     form_type: {
         type: String,
+        trim: true,
         required: [true, 'Form Type is required.'],
         match: [
             /^[a-zA-Z0-9_]+$/,
@@ -43,18 +43,20 @@ const fieldSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    display_name: { type: String, trim: true },
     required: { type: Boolean, default: false },
     unique: { type: Boolean, default: false },
     isVisible: { type: Boolean, default: false },
     filter: { type: String },
-    col: { type: String },
-    relation: { type: String },
-    default: { type: String },
+    col: { type: String, trim: true },
+    relation: { type: String, trim: true },
+    default: { type: String, trim: true },
 }, { _id: false })
 
 const structureSchema = new mongoose.Schema({
     model: {
         type: String,
+        trim: true,
         required: [true, 'Model Name is required.'],
         unique: [true, 'Model Name is already in use.'],
         match: [

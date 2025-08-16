@@ -19,7 +19,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="date" class="form-label mb-2">Date</label>
+                    <label for="date" class="form-label mb-2">Post Date</label>
                       <input type="date" name="date" value="<%= response.date.toISOString().split('T')[0] %>" class="form-control" id="date" placeholder="date">
                 </div>
 
@@ -29,10 +29,10 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="author_id" class="form-label mb-2">Author_id</label>
+                    <label for="author_id" class="form-label mb-2">Author</label>
                     <select name="author_id"   data-selectbox="true" class="form-control" id="author">
-                        <option value="<%= response.author_id._id %>" selected>
-                            <%= response.author_id.name %>
+                        <option value="<%= response.author_id?._id %>" selected>
+                            <%= response.author_id?.name %>
                             </option>
                     </select>
                 </div>

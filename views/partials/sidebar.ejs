@@ -20,13 +20,13 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
-                                <% nav.navigation?.subMenu?.forEach(submenu=> { %>
+                                <% nav.navigation.subMenu?.forEach(submenu=> { %>
                                     <li class="nav-item">
-                                        <a href="<%= baseUrl %>/resources/<%= submenu.toLowerCase() %>"
+                                        <a href="<%= baseUrl %>/resources/<%= submenu?.toLowerCase() %>"
                                             class="nav-link">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>
-                                                <%= submenu.toLowerCase() %>
+                                                <%= submenu?.toLowerCase() %>
                                             </p>
                                         </a>
                                     </li>
