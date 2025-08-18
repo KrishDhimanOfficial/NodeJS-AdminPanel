@@ -83,29 +83,26 @@
                                     <%= locals.title ? `${title}` : '' %>
                                 </h1>
                             </div><!-- /.col -->
-                            <div class="col-sm-6">
-                                <ol class="breadcrumb float-sm-right">
-                                    <% if (locals.breadcumb) { %>
-                                        <div class="col-sm-6">
-                                            <ol class="breadcrumb float-sm-right">
-                                                <% breadcumb?.forEach(breadcumb=> { %>
-                                                    <% if (breadcumb.route) { %>
-                                                        <li class="breadcrumb-item">
-                                                            <a href="<%= breadcumb.route %>">
-                                                                <%= breadcumb.name %>
-                                                            </a>
-                                                        </li>
-                                                        <% } else { %>
-                                                            <li class="breadcrumb-item active">
-                                                                <%= breadcumb.name %>
-                                                            </li>
-                                                            <% } %>
-                                                                <% }) %>
-                                            </ol>
-                                        </div>
-                                        <% } %>
+                           <% if (locals.breadcrumb) { %>
+                             <div class="col-sm-6">
+                                <ol class="breadcrumb float-sm-right bg-body-secondary p-2 rounded-1">
+                                    <li class="breadcrumb-item"><a href="<%= baseUrl %>">Dashboard</a></li>
+                                    <% breadcrumb.forEach(breadcrumb=> { %>
+                                        <% if (breadcrumb.active) { %>
+                                            <li class="breadcrumb-item active">
+                                                <%= breadcrumb.name %>
+                                            </li>
+                                            <% } else{ %>
+                                                <li class="breadcrumb-item">
+                                                    <a href="<%= breadcrumb.url %>">
+                                                        <%= breadcrumb.name %>
+                                                    </a>
+                                                </li>
+                                                <% } %>
+                                                    <% }) %>
                                 </ol>
                             </div>
+                           <% } %>
                         </div>
                     </div>
                 </div>

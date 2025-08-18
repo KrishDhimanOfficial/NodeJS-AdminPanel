@@ -14,6 +14,7 @@ import miniyHTML from 'express-minify-html-terser'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import router from './routes/server.routes.js'
+import siteRoutes from './routes/site.routes.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -109,6 +110,7 @@ app.use(rateLimit(
 ))
 
 app.use('/admin', router)
+app.use('/', siteRoutes)
 
 app.use((err, req, res, next) => {
   return res.status(err.status || 500).render('error', {

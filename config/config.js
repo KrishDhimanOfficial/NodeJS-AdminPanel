@@ -15,7 +15,7 @@ const config = {
     smtpUsername: String(process.env.SMTP_USERNAME),
     smtpPassword: String(process.env.SMTP_PASSWORD),
     smtpservice: String(process.env.SMTP_SERVICE),
-    crud_url: Boolean(process.env.CRUD_URL)
+    crud_url: process.env.CRUD_URL === 'true',
 }
 
 export default config

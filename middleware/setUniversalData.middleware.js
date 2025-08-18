@@ -1,6 +1,6 @@
 import config from '../config/config.js'
-import sturctureModel from '../models/sturcture.model.js';
-import NodeCache from 'node-cache';
+import sturctureModel from '../models/sturcture.model.js'
+import NodeCache from 'node-cache'
 
 const cache = new NodeCache({ stdTTL: 60 }) // 1 min cache
 
@@ -14,6 +14,7 @@ const setUniversalData = async (req, res, next) => {
         cachedNavigation = data;    // keep actual value
     }
 
+    res.locals.activePage = req.url.split('/')
     res.locals.baseUrl = req.baseUrl
     res.locals.crudURL = config.crud_url
     res.locals.admin = req.user

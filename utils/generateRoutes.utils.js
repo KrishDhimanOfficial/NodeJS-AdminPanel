@@ -46,6 +46,7 @@ const GenerateCRUDRoutes = async () => {
                 addURL: `${req.originalUrl}/add`,
                 dataTableAPI: `${req.baseUrl}${apiPath}`,
                 api: req.originalUrl,
+                breadcrumb: [{ name: capitalizeFirstLetter(modelName), active: true, url: `${req.baseUrl}${basePath}` }]
             })
         }) // View DataTable Page
 
@@ -53,16 +54,11 @@ const GenerateCRUDRoutes = async () => {
             return res.status(200).render(`${modelName}/create`, {
                 title: capitalizeFirstLetter(modelName),
                 api: `${req.baseUrl}${basePath}`,
+                breadcrumb: [{ name: capitalizeFirstLetter(modelName), url: `${req.baseUrl}${basePath}` }, { name: 'Add', active: true }]
             })
         }) // View Create Page
 
-        router.get(`${basePath}/view/:id`, ...middlewares, async (req, res) => {
-            if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
-            const response = await modelInstance.findById({ _id: req.params.id })
-
-            return res.status(200).render(`${model.modelName}/view`, { response })
-        }) // View Information Page
-
+        router.get(`${basePath}/view/:id`, ...middlewares, controller.getViewInfo) // View Information Page
         router.get(`${basePath}/:id`, ...middlewares, controller.renderEditPage) // View Update page
     }
     return router

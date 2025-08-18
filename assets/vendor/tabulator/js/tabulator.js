@@ -58,14 +58,15 @@ const filterOptions = { // Tabulator Filter Options
 
 const columnsOptions = { // Tabulator Column Options
     No: (cell) => {
-        const rowIndex = cell.getRow().getPosition();
-        const page = cell.getTable().getPage();           // current page
-        const pageSize = cell.getTable().getPageSize();   // page size        
+        const rowIndex = cell.getRow().getPosition()
+        const page = cell.getTable().getPage()          // current page
+        const pageSize = cell.getTable().getPageSize() // page size        
         return (page - 1) * pageSize + rowIndex;
     },
     image: (cell) => {
         const { image } = cell.getRow().getData()
-        return `<img src="/${image}" alt="" loading="lazy"  width="120" height="120">`
+        const setImage = image === undefined ? '/assets/images/default.png' : `/${image}`;
+        return `<img src="${setImage}" alt="" loading="lazy"  width="120" height="120">`
     },
     status: (cell) => {
         const { _id, status } = cell.getRow().getData();
@@ -75,7 +76,7 @@ const columnsOptions = { // Tabulator Column Options
     },
     table_actions: (cell) => {
         const { _id, canDelete } = cell.getRow().getData()
-        const { view, edit, del } = cell.getColumn().getDefinition()
+        const { view, edit } = cell.getColumn().getDefinition()
         const buttons = document.createElement('div')
         buttons.className = 'd-flex flex-wrap gap-3';
 
@@ -186,13 +187,15 @@ const initializeTabulator = async () => {
                             title: capitalizeFirstLetter(column.col.replace(/_/g, ' ')),
                             field: column.col,
                             formatter: columnsOptions[column.col] || columnsOptions.default,
+                            downloadFormatter: columnsOptions[column.col] || columnsOptions.default,
                             hozAlign: "left",
                             vertAlign: "middle",
                             ...column.actions,
-                            ...column.maxWidth && { maxWidth: column.maxWidth },
                             ...columnsOptions[column.col],
                             ...filterOptions[column.filter],
-                            ...(!column.filter && '')
+                            ...(!column.filter && ''),
+                            ...column.maxWidth && { maxWidth: column.maxWidth },
+                            ...(column.download !== undefined ? { download: column.download } : {}),
                         }))
 
                         this.setColumns(columns); // Only if not already set

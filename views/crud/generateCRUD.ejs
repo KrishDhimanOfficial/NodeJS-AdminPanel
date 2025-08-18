@@ -67,8 +67,8 @@
                                     <label for="model" class="form-label">Model</label>
                                     <select name="model" id="model" multiple class="select2 form-control">
                                         <% collections.forEach(collection=> { %>
-                                            <option value="<%= collection %>">
-                                                <%= collection %>
+                                            <option value="<%= collection.model %>">
+                                                <%= collection.model %>
                                             </option>
                                             <% }) %>
                                     </select>

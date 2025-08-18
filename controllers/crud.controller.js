@@ -109,13 +109,12 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
     getViewInfo: async (req, res) => {
         try {
             if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
-            const response = await model.findById({ _id: req.params.id })
+            const response = await model.findById({ _id: req.params.id }, { _id: 0, __v: 0, createdAt: 0, updatedAt: 0 })
 
-            const name = model.modelName;
-            const responseObj = {}
-            responseObj[name] = response
-
-            return res.status(200).render(`${model.modelName}/view`, responseObj)
+            return res.status(200).render(`${model.modelName}/view`, {
+                [model.modelName]: response,
+                breadcrumb: [{ name: capitalizeFirstLetter(model.modelName), url: req.originalUrl }, { name: 'View', active: true }]
+            })
         } catch (error) {
             log(chalk.red(`getViewInfo -> ${model.modelName} : ${error.message}`))
         }
@@ -131,14 +130,14 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
 
             // Build columns for table
             const columns = [
-                { col: 'No', maxWidth: 80 },
+                { col: 'No', maxWidth: 80, download: true },
                 ...fields
                     .filter(col => col.isVisible)
                     .map(col => ({
                         col: col.col,
                         ...(col.filter && { filter: col.filter })
                     })),
-                { col: 'table_actions', maxWidth: 180, actions: { edit: true, view: true } }
+                { col: 'table_actions', download: false, maxWidth: 180, actions: { edit: true, view: true } }
             ]
 
             // Build aggregation pipeline
@@ -146,7 +145,6 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                 .filter(col => col.isVisible)
                 .flatMap(f => {
                     const displayName = f.display_name || f.field_name;
-
                     // Case: Date fields → format as YYYY-MM-DD
                     if (f.field_type === 'Date') {
                         return [
@@ -156,12 +154,25 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                         ]
                     }
 
+                    // Case: With Relation → populate reference and pick display_key
+                    if (f.relation !== 'No Relation') {
+                        const collectionName = mongoose.model(f.relation).collection.name;
+                        return [
+                            { $lookup: { from: collectionName, localField: f.field_name, foreignField: '_id', as: displayName } },
+                            { $unwind: { path: `$${displayName}`, preserveNullAndEmptyArrays: true } },
+                            { $addFields: { [displayName]: { $ifNull: [`$${displayName}.${f.display_key}`, 'N/A'] } } }
+                        ]
+                    }
+
+                    // Case: Custom display_name (different from field_name)
+                    if (f.display_name && f.display_name !== f.field_name) {
+                        return [{ $addFields: { [f.col]: `$${f.field_name}` } }]
+                    }
+
                     // Case: No Relation → check for deletable docs
                     if (f.relation === 'No Relation') {
                         const relationModel = modelDependencies.find(d => d.model === model.modelName)
-                        if (!relationModel) {
-                            return [{ $addFields: { canDelete: true } }];
-                        }
+                        if (!relationModel) return [{ $addFields: { canDelete: true } }]
 
                         const collectionName = mongoose.model(relationModel.relation).collection.name;
                         return [
@@ -179,16 +190,6 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                         ]
                     }
 
-                    // Case: With Relation → populate reference and pick display_key
-                    if (f.relation && f.relation !== 'No Relation') {
-                        const collectionName = mongoose.model(f.relation).collection.name;
-                        return [
-                            { $lookup: { from: collectionName, localField: f.field_name, foreignField: '_id', as: displayName } },
-                            { $unwind: { path: `$${displayName}`, preserveNullAndEmptyArrays: true } },
-                            { $addFields: { [displayName]: { $ifNull: [`$${displayName}.${f.display_key}`, 'N/A'] } } }
-                        ]
-                    }
-
                     return [] // fallback for fields without conditions
                 })
 
@@ -198,7 +199,6 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
 
             // Apply filters to pipeline
             const updatedPipeline = handleFilteration(req.query?.filter, pipeline.filter(Boolean))
-
             // Paginate aggregation results
             const response = await handleAggregatePagination(model, updatedPipeline, query)
 
@@ -236,6 +236,7 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                 title: capitalizeFirstLetter(model.modelName),
                 api: `${req.baseUrl}/resources/${model.modelName}`,
                 response,
+                breadcrumb: [{ name: capitalizeFirstLetter(model.modelName), url: req.originalUrl }, { name: 'Edit', active: true }]
             })
         } catch (error) {
             log(chalk.red(`renderEditPage -> ${model.modelName} : ${error.message}`))
@@ -288,6 +289,7 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                     addURL: `${req.baseUrl}/generate-crud`,
                     api: req.originalUrl,
                     dataTableAPI: `${req.originalUrl}/api`,
+                    breadcrumb: [{ name: 'CRUD', active: true, }]
                 }
             )
         } catch (error) {
@@ -309,7 +311,8 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                 {
                     title: 'Generate CRUD',
                     api: req.originalUrl,
-                    collections
+                    collections,
+                    breadcrumb: [{ name: 'CRUD', url: `${req.baseUrl}/crud` }, { name: 'Add', active: true, }],
                 }
             )
         } catch (error) {
@@ -365,6 +368,7 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                     title: 'Edit CRUD',
                     api: '/admin/crud',
                     collections, response,
+                    breadcrumb: [{ name: 'CRUD', url: `${req.baseUrl}/crud` }, { name: 'Edit', active: true, }],
                     schemaTypes: ["String", "Number", "Boolean", "Array", "ObjectId", "Date", "Double", "Mixed", 'Map'],
                     formTypes: ["text", "select", "file", "email", "url", "tel", "search", "number", "range", "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"],
                     filters: ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number'],

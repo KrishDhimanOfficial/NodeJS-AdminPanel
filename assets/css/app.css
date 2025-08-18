@@ -11,6 +11,11 @@ a {
   --theme-color: #6f42c1;
 }
 
+.sidebar-dark-danger .nav-sidebar>.nav-item>.nav-link.active,
+.sidebar-light-danger .nav-sidebar>.nav-item>.nav-link.active {
+  background-color: var(--theme-color);
+}
+
 .btn-outline-purple {
   color: var(--theme-color);
   border-color: var(--theme-color);

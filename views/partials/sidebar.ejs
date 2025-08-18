@@ -12,7 +12,8 @@
                 <% locals.navigation && navigation?.forEach(nav=> { %>
                     <% if (nav.navigation?.subMenu.length> 0) { %>
                         <li class="nav-item">
-                            <a href="#" class="nav-link <%= locals.activePage && 'active'  %>">
+                            <a href="#"
+                                class="nav-link <%= nav.navigation?.subMenu.some((submenu) => locals.activePage.includes(submenu.toLowerCase())) && 'active' %>">
                                 <i class="nav-icon <%= nav.navigation?.icon %>"></i>
                                 <p>
                                     <%= nav.navigation?.name %>
@@ -34,44 +35,46 @@
                             </ul>
                         </li>
                         <% } else{ %>
-                            <% if (nav.navigation?.subMenu.includes(nav.navigation?.name.toLowerCase())) { %>
-                                <li class="nav-item">
-                                    <a href="<%= baseUrl %>/resources/<%= nav.navigation?.name.toLowerCase() %>"
-                                        class="nav-link <%= locals.activePage && 'active'  %>">
-                                        <i class="nav-icon <%= nav.navigation?.icon %>"></i>
-                                        <p>
-                                            <%= nav.navigation?.name %>
-                                        </p>
-                                    </a>
-                                </li>
-                                <% } %>
-                                    <% } %>
-                                        <% }) %>
-                                            <li class="nav-item">
-                                                <a href="#" class="nav-link">
-                                                    <i class="nav-icon fas fa-tachometer-alt"></i>
-                                                    <p>
-                                                        Settings
-                                                        <i class="right fas fa-angle-left"></i>
-                                                    </p>
-                                                </a>
-                                                <ul class="nav nav-treeview">
+                            <% const Find=navigation.find((n)=> n.navigation.subMenu?.length > 0) %>
+                                <% const check=!Find.navigation.subMenu.includes(nav.navigation?.name.toLowerCase()) %>
+                                    <% if (check) { %>
+                                        <li class="nav-item">
+                                            <a href="<%= baseUrl %>/resources/<%= nav.navigation?.name.toLowerCase() %>"
+                                                class="nav-link <%= locals.activePage.includes(nav.navigation?.name.toLowerCase()) && 'active' %>">
+                                                <i class="nav-icon <%= nav.navigation?.icon %>"></i>
+                                                <p>
+                                                    <%= nav.navigation?.name %>
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <% } %>
+                                            <% } %>
+                                                <% }) %>
                                                     <li class="nav-item">
-                                                        <a href="/admin/profile" class="nav-link">
-                                                            <i class="far fa-circle nav-icon"></i>
-                                                            <p>Profile Settings</p>
+                                                        <a href="#" class="nav-link">
+                                                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                                                            <p>
+                                                                Settings
+                                                                <i class="right fas fa-angle-left"></i>
+                                                            </p>
                                                         </a>
+                                                        <ul class="nav nav-treeview">
+                                                            <li class="nav-item">
+                                                                <a href="/admin/profile" class="nav-link">
+                                                                    <i class="far fa-circle nav-icon"></i>
+                                                                    <p>Profile Settings</p>
+                                                                </a>
+                                                            </li>
+                                                            <% if (crudURL) { %>
+                                                                <li class="nav-item">
+                                                                    <a href="/admin/crud" class="nav-link">
+                                                                        <i class="far fa-circle nav-icon"></i>
+                                                                        <p>Generate CRUD</p>
+                                                                    </a>
+                                                                </li>
+                                                                <% } %>
+                                                        </ul>
                                                     </li>
-                                                    <% if (crudURL) { %>
-                                                        <li class="nav-item">
-                                                            <a href="/admin/crud" class="nav-link">
-                                                                <i class="far fa-circle nav-icon"></i>
-                                                                <p>Generate CRUD</p>
-                                                            </a>
-                                                        </li>
-                                                        <% } %>
-                                                </ul>
-                                            </li>
             </ul>
         </nav>
     </div>
