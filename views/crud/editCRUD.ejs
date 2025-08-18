@@ -4,16 +4,21 @@
         transition: none !important;
     }
 </style>
+
 <link rel="stylesheet" href="/assets/vendor/iconpicker/fontawesome-iconpicker.min.css">
+
 <div class="container">
     <input type="text" hidden id="counter" value="<%= response.fields?.length %>">
+
     <form id="updateForm" data-id="<%= response._id %>">
+        <!-- Collection Name -->
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary">
                     <div class="card-header bg-purple">
                         <h3 class="card-title">Collection Name</h3>
                     </div>
+
                     <div class="card-body">
                         <div class="row mb-2">
                             <div class="col-12 mb-3">
@@ -21,42 +26,43 @@
                                 <input type="text" class="form-control" name="collection" id="collection"
                                     placeholder="eg: user, category" value="<%= response.model %>">
                             </div>
+
+                            <!-- Other Options -->
                             <div class="col-md-4 mb-2">
                                 <label class="form-label">Others options</label>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <div class="form-check">
                                         <input class="form-check-input" name="timeStamp" type="checkbox"
-                                            id="checkDefault" <%=response.timestamps && 'checked' %> >
-                                        <label class="form-check-label" for="checkDefault">
-                                            TimeStramp
-                                        </label>
+                                            id="checkDefault" <%=response.timestamps && 'checked' %>>
+                                        <label class="form-check-label" for="checkDefault">TimeStramp</label>
                                     </div>
+
                                     <div class="form-check">
                                         <input class="form-check-input" name="isSubMenu" type="checkbox" id="isSubMenu"
                                             <%=response.navigation?.subMenu.length> 0 && 'checked' %>>
-                                        <label class="form-check-label" for="isSubMenu">
-                                            Is SubMenu
-                                        </label>
+                                        <label class="form-check-label" for="isSubMenu">Is SubMenu</label>
                                     </div>
+
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="prevent_deletion"
-                                            <%=response.modelDependencies.length> 0 ? 'checked' :
-                                        '' %>>
-                                        <label class="form-check-label" for="prevent_deletion">
-                                            Prevent Deletion
-                                        </label>
+                                            <%=response.modelDependencies.length> 0 ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="prevent_deletion">Prevent Deletion</label>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Main Icon -->
                             <div id="mainIcon"
-                                class="col-md-4 mb-2 <%= response.navigation?.subMenu.length> 0 ? 'd-none' : ' ' %>">
+                                class="col-md-4 mb-2 <%= response.navigation?.subMenu.length > 0 ? 'd-none' : '' %>">
                                 <i class="<%= response.navigation?.icon %>"></i>
                                 <label for="mainIcon" class="form-label">Icon</label>
                                 <input type="text" id="mainIcon" value="<%= response.navigation?.icon %>"
                                     class="form-control iconpicker" name="icon" placeholder="search Icon" />
                             </div>
                         </div>
-                        <div class="row <%= response.navigation?.subMenu.length> 0 ? ' ' : 'd-none' %>"
+
+                        <!-- Submenu Settings -->
+                        <div class="row <%= response.navigation?.subMenu.length > 0 ? '' : 'd-none' %>"
                             id="subMenusettings">
                             <div class="col-md-4 mb-2">
                                 <label for="navName" class="form-label">Navigation Name</label>
@@ -64,43 +70,47 @@
                                     placeholder="eg: Peoples, Categories" <%=response.navigation?.subMenu.length> 0 ?
                                 `value=${response.navigation?.name}` : "" %>>
                             </div>
+
                             <div class="col-md-4 mb-2">
                                 <label for="iconpicker" class="form-label">Icon</label>
                                 <input type="text" id="iconpicker" class="form-control iconpicker" name="icon"
                                     placeholder="search Icon" value="<%= response.navigation?.icon %>" />
                             </div>
+
                             <div class="col-md-4 mb-2">
                                 <div class="d-flex flex-column">
                                     <label for="model" class="form-label">Model</label>
                                     <select name="model" id="model" multiple class="select2 form-control">
-                                        <% collections.forEach(collection=> { %>
+                                        <% collections.forEach(collection=> { -%>
                                             <option value="<%= collection.model %>"
                                                 <%=response.navigation?.subMenu.includes(collection.model) && 'selected'
                                                 %>>
                                                 <%= collection.model %>
                                             </option>
-                                            <% }) %>
+                                            <% }) -%>
                                     </select>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Prevent Deletion Dependencies -->
                         <div id="preventDeletionRow"
-                            class="row <%= response.modelDependencies.length> 0 ? ' ' : 'd-none' %>">
+                            class="row <%= response.modelDependencies.length > 0 ? '' : 'd-none' %>">
                             <div class="col-md-4 mb-2 d-flex flex-column">
                                 <label for="modelDependencies" class="form-label">Model Not To Delete</label>
                                 <select name="modelDependencies" class="select2 form-control" multiple
                                     id="modelDependencies">
-                                    <% collections.forEach(col=> { %>
+                                    <% collections.forEach(col=> { -%>
                                         <optgroup label="<%= col.model.toUpperCase() %>">
-                                            <% col.fields.forEach(f=> { %>
+                                            <% col.fields.forEach(f=> { -%>
                                                 <option value="<%= col.model %>|<%= f %>"
                                                     <%=response.modelDependencies.some(d=> d.relation === col.model &&
                                                     d.field === f) ? 'selected' : '' %>>
                                                     <%= col.model %> | <%= f %>
                                                 </option>
-                                                <% }) %>
+                                                <% }) -%>
                                         </optgroup>
-                                        <% }) %>
+                                        <% }) -%>
                                 </select>
                             </div>
                         </div>
@@ -108,56 +118,67 @@
                 </div>
             </div>
         </div>
+
+        <!-- Add Fields Section -->
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary">
                     <div class="card-header bg-purple">
                         <h3 class="card-title">Add Field</h3>
                     </div>
+
                     <div class="card-body">
                         <div id="addField">
-                            <% response.fields?.forEach((f, i)=> { %>
+                            <% response.fields?.forEach((f, i)=> { -%>
+                                <!-- Single Field Group -->
                                 <div class="field-group">
                                     <h3>Field <%= i + 1 %>
                                     </h3>
                                     <div class="row mb-2">
+                                        <!-- Field Name -->
                                         <div class="col-md-3">
                                             <label for="field_<%= i %>" class="form-label">Field Name</label>
                                             <input type="text" class="form-control" name="field[<%= i %>][field_name]"
                                                 placeholder="eg: name, email, password" id="field_<%= i %>"
                                                 value="<%= f.field_name %>">
                                         </div>
+
+                                        <!-- Schema Type -->
                                         <div class="col-md-4">
                                             <label for="type_<%= i %>" class="form-label">Schema Type</label>
                                             <select name="field[<%= i %>][field_type]" class="select2 form-control"
                                                 id="type_<%= i %>">
-                                                <% schemaTypes.forEach(type=> { %>
+                                                <% schemaTypes.forEach(type=> { -%>
                                                     <option value="<%= type %>" <%=f.field_type==type && 'selected' %>>
                                                         <%= type %>
                                                     </option>
-                                                    <% }) %>
+                                                    <% }) -%>
                                             </select>
                                         </div>
+
+                                        <!-- Form Type -->
                                         <div class="col-md-4">
                                             <label for="form_type_<%= i %>" class="form-label">Form Type</label>
                                             <select name="field[<%= i %>][form_type]" data-counter="<%= i %>"
                                                 class="select2 form-control" id="form_type_<%= i %>">
-                                                <% formTypes.forEach(type=> { %>
+                                                <% formTypes.forEach(type=> { -%>
                                                     <option value="<%= type %>" <%=f.form_type==type && 'selected' %>>
                                                         <%= type %>
                                                     </option>
-                                                    <% }) %>
+                                                    <% }) -%>
                                             </select>
                                         </div>
+
+                                        <!-- Delete Field -->
                                         <div class="col-md-1 d-flex align-items-end">
                                             <button type="button" class="deleteFieldRow btn btn-danger">X</button>
                                         </div>
                                     </div>
 
-
+                                    <!-- Form Type: File / Select -->
                                     <div id="selectBox_form_type_<%= i %>"
-                                        class="row mb-2 <%= f.form_type == 'file' || 'select' ? '' : 'd-none' %>">
-                                        <% if (f.form_type=='select' ) { %>
+                                        class="row mb-2 <%= (f.form_type == 'file' || f.form_type == 'select') ? '' : 'd-none' %>">
+                                        <% if (f.form_type=='select' ) { -%>
                                             <div class="col-md-5 offset-md-6">
                                                 <div class="form-floating mb-3">
                                                     <input type="text" class="form-control"
@@ -166,8 +187,9 @@
                                                     <label for="formId<%= i %>_display">Display_key</label>
                                                 </div>
                                             </div>
-                                            <% } %>
-                                                <% if (f.form_type=='file' ) { %>
+                                            <% } -%>
+
+                                                <% if (f.form_type=='file' ) { -%>
                                                     <div class="col-md-5 offset-md-6">
                                                         <div class="d-flex gap-2 justify-content-center">
                                                             <div class="form-floating mb-3">
@@ -177,6 +199,7 @@
                                                                     id="formlengthId<%= i %>" />
                                                                 <label for="formlengthId<%= i %>">Length</label>
                                                             </div>
+
                                                             <div class="form-floating mb-3">
                                                                 <input type="number" class="form-control"
                                                                     name="field[<%= i %>][file][size]"
@@ -187,81 +210,88 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <% } %>
+                                                    <% } -%>
                                     </div>
 
+                                    <!-- Checkboxes: Required, Unique, etc. -->
                                     <div class="row mb-2">
                                         <div class="col-md-3">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" <%=f.required
-                                                    && 'checked' %>
-                                                name="field[<%= i %>][required]" id="required_<%= i %>">
+                                                    && 'checked' %> name="field[<%= i %>][required]" id="required_<%= i
+                                                        %>">
                                                         <label class="form-check-label"
                                                             for="required_<%= i %>">Required</label>
                                             </div>
+
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" <%=f.unique && 'checked'
-                                                    %>
-                                                name="field[<%= i %>][unique]" id="unique_<%= i %>">
+                                                    %> name="field[<%= i %>][unique]" id="unique_<%= i %>">
                                                         <label class="form-check-label"
                                                             for="unique_<%= i %>">Unique</label>
                                             </div>
+
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" <%=f.isVisible
-                                                    && 'checked' %>
-                                                name="field[<%= i %>][isVisible]" id="visible_<%= i %>">
+                                                    && 'checked' %> name="field[<%= i %>][isVisible]" id="visible_<%= i
+                                                        %>">
                                                         <label class="form-check-label"
                                                             for="visible_<%= i %>">IsVisible</label>
                                             </div>
+
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" data-counter="<%= i %>"
-                                                    <%=f.default && 'checked' %>
-                                                id="default_value_checkBox_<%= i %>">
+                                                    <%=f.default && 'checked' %> id="default_value_checkBox_<%= i %>">
                                                     <label class="form-check-label"
                                                         for="default_value_checkBox_<%= i %>">Set Default Value</label>
                                             </div>
+
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" data-counter="<%= i %>"
-                                                    <%=f.display_name && 'checked' %>
-                                                id="display_name_checkBox_<%= i %>">
+                                                    <%=f.display_name && 'checked' %> id="display_name_checkBox_<%= i %>
+                                                    ">
                                                     <label class="form-check-label"
-                                                        for="display_name_checkBox_<%= i %>">Set
-                                                        Display Name</label>
+                                                        for="display_name_checkBox_<%= i %>">Set Display Name</label>
                                             </div>
                                         </div>
+
+                                        <!-- Search Filter -->
                                         <div class="col-md-4">
                                             <label for="search_filter_<%= i %>" class="form-label">Search Filter</label>
                                             <select name="field[<%= i %>][searchFilter]" class="select2 form-control"
                                                 id="search_filter_<%= i %>">
-                                                <% if (!filters.includes(f.searchFilter)) { %>
+                                                <% if (!filters.includes(f.searchFilter)) { -%>
                                                     <option selected>No Search Filter</option>
-                                                    <% } %>
-                                                        <% filters.forEach((filter,i)=> { %>
+                                                    <% } -%>
+                                                        <% filters.forEach((filter, i)=> { -%>
                                                             <option value="<%= filter %>" <%=f.filter==filter
-                                                                && 'selected' %> >
+                                                                && 'selected' %>>
                                                                 <%= filter %>
                                                             </option>
-                                                            <% }) %>
+                                                            <% }) -%>
                                             </select>
                                         </div>
+
+                                        <!-- Relation -->
                                         <div class="col-md-4">
                                             <label for="relation_collection_<%= i %>" class="form-label">Field
                                                 Relation</label>
                                             <select name="field[<%= i %>][relation]" class="select2 form-control"
                                                 id="relation_collection_<%= i %>">
-                                                <% if (!collections.includes(f.relation)) { %>
+                                                <% if (!collections.includes(f.relation)) { -%>
                                                     <option selected>No Relation</option>
-                                                    <% } %>
-                                                        <% collections.forEach(collection=> { %>
+                                                    <% } -%>
+                                                        <% collections.forEach(collection=> { -%>
                                                             <option value="<%= collection.model %>"
-                                                                <%=f.relation==collection.model && 'selected' %> >
+                                                                <%=f.relation==collection.model && 'selected' %>>
                                                                 <%= collection.model %>
                                                             </option>
-                                                            <% }) %>
+                                                            <% }) -%>
                                             </select>
                                         </div>
                                     </div>
 
+                                    <!-- Default Value -->
                                     <div id="defaultValueRow_<%= i %>"
                                         class="row mb-2 <%= f.default ? '' : 'd-none' %>">
                                         <div class="col-md-3">
@@ -274,6 +304,7 @@
                                         </div>
                                     </div>
 
+                                    <!-- Display Name -->
                                     <div id="displayNameRow_<%= i %>"
                                         class="row mb-2 <%= f.display_name ? '' : 'd-none' %>">
                                         <div class="col-md-3">
@@ -287,23 +318,22 @@
 
                                     <hr style="border-top:1px solid rgba(0,0,0,0.4);">
                                 </div>
-                                <% }) %>
+                                <% }) -%>
                         </div>
+
+                        <!-- Add More Fields Button -->
                         <div class="row">
                             <div class="col-12">
-                                <button id="addFieldBtn" type="button" class="mb-3 btn btn-dark float-end">
-                                    Add Fields
-                                </button>
+                                <button id="addFieldBtn" type="button" class="mb-3 btn btn-dark float-end">Add
+                                    Fields</button>
                             </div>
+
                             <div class="col-12">
                                 <div class="form-check float-end">
-                                    <input class="form-check-input" name="rewrite_files" type="checkbox" 
-                                    <%= response.rewrite_files && 'checked' %>
-                                        id="makerewritefiles" />
+                                    <input class="form-check-input" name="rewrite_files" type="checkbox"
+                                        <%=response.rewrite_files && 'checked' %> id="makerewritefiles" />
                                     <label class="form-check-label" for="makerewritefiles">
-                                        <b>
-                                            Rewrite EJS Files
-                                        </b>
+                                        <b>Rewrite EJS Files</b>
                                     </label>
                                 </div>
                             </div>
@@ -312,10 +342,12 @@
                 </div>
             </div>
         </div>
+
+        <!-- Submit -->
         <div class="row justify-content-center">
             <div class="col-4">
                 <button id="submitFormBtn" class="btn btn-dark mb-3 mx-auto d-block">update</button>
             </div>
         </div>
     </form>
-</div>
+</div

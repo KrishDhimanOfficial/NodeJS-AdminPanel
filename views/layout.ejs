@@ -8,17 +8,19 @@
         <%= locals.title ? title : '' %>
     </title>
     <link rel="shortcut icon" href="/assets/images/user.png" type="image/x-icon">
+
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome Icons -->
+
+    <!-- Vendor / Custom CSS -->
     <link rel="stylesheet" href="/assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/assets/css/all.min.css">
     <link rel="stylesheet" href="/assets/vendor/pace-progress/pace-theme-flat-top.css">
     <link rel="stylesheet" href="/assets/vendor/notify/notify.css">
-    <link rel="stylesheet" href="/assets/vendor/summernote/summernote.min.css">
     <link rel="stylesheet" href="/assets/vendor/select2/css/select2.min.css">
     <link rel="stylesheet" href="/assets/vendor/adminlte/adminlte.min.css">
+    <link rel="stylesheet" href="/assets/vendor/summernote/summernote.min.css">
     <link rel="stylesheet" href="/assets/css/app.css">
 </head>
 
@@ -35,11 +37,12 @@
                     <a href="/admin" class="nav-link">Home</a>
                 </li>
             </ul>
+
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        <img src="<%= admin.profile ? `/${admin.profile}`: '/assets/images/user.png' %>"
+                        <img src="<%= admin.profile ? `/${admin.profile}` : '/assets/images/user.png' %>"
                             class="user-image img-circle elevation-2" alt="User Image">
                         <span class="d-none d-md-inline">
                             <%= admin.name.toUpperCase() %>
@@ -48,15 +51,13 @@
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                         <!-- User image -->
                         <li class="user-header bg-purple">
-                            <img src="<%= admin.profile ? `/${admin.profile}`: '/assets/images/user.png' %>"
+                            <img src="<%= admin.profile ? `/${admin.profile}` : '/assets/images/user.png' %>"
                                 class="img-circle elevation-2" alt="User Image">
                             <p>
                                 <%= admin.role %>
-                                    <!-- <small>Member since Nov. 2012</small> -->
                             </p>
                         </li>
-                        <!-- Menu Body -->
-                        <!-- Menu Footer-->
+                        <!-- Footer -->
                         <li class="user-footer">
                             <a href="/admin/profile" class="btn btn-default btn-flat">Profile</a>
                             <a href="/admin/logout" class="btn btn-default btn-flat float-right">Sign out</a>
@@ -67,42 +68,38 @@
         </nav>
         <!-- /.navbar -->
 
-        <!-- Main Sidebar Container -->
-        <!-- htmlmin:ignore -->
+        <!-- Main Sidebar -->
         <%- include('./partials/sidebar') %>
-            <!-- htmlmin:ignore -->
 
-            <!-- Content Wrapper. Contains page content -->
+            <!-- Content Wrapper -->
             <div class="content-wrapper">
-                <!-- Content Header (Page header) -->
                 <div class="content-header">
                     <div class="container-fluid">
                         <div class="row mb-2">
                             <div class="col-sm-6">
                                 <h1 class="m-0">
-                                    <%= locals.title ? `${title}` : '' %>
+                                    <%= locals.title ? title : '' %>
                                 </h1>
-                            </div><!-- /.col -->
-                           <% if (locals.breadcrumb) { %>
-                             <div class="col-sm-6">
-                                <ol class="breadcrumb float-sm-right bg-body-secondary p-2 rounded-1">
-                                    <li class="breadcrumb-item"><a href="<%= baseUrl %>">Dashboard</a></li>
-                                    <% breadcrumb.forEach(breadcrumb=> { %>
-                                        <% if (breadcrumb.active) { %>
-                                            <li class="breadcrumb-item active">
-                                                <%= breadcrumb.name %>
-                                            </li>
-                                            <% } else{ %>
-                                                <li class="breadcrumb-item">
-                                                    <a href="<%= breadcrumb.url %>">
-                                                        <%= breadcrumb.name %>
-                                                    </a>
-                                                </li>
-                                                <% } %>
-                                                    <% }) %>
-                                </ol>
                             </div>
-                           <% } %>
+                            <% if (locals.breadcrumb) { -%>
+                                <div class="col-sm-6">
+                                    <ol class="breadcrumb float-sm-right bg-body-secondary p-2 rounded-1">
+                                        <li class="breadcrumb-item"><a href="<%= baseUrl %>">Dashboard</a></li>
+                                        <% breadcrumb.forEach(breadcrumb=> { -%>
+                                            <% if (breadcrumb.active) { -%>
+                                                <li class="breadcrumb-item active">
+                                                    <%= breadcrumb.name %>
+                                                </li>
+                                                <% } else { -%>
+                                                    <li class="breadcrumb-item"><a href="<%= breadcrumb.url %>">
+                                                            <%= breadcrumb.name %>
+                                                        </a>
+                                                    </li>
+                                                    <% } -%>
+                                                        <% }) -%>
+                                    </ol>
+                                </div>
+                                <% } -%>
                         </div>
                     </div>
                 </div>
@@ -116,13 +113,7 @@
             </div>
             <!-- /.content-wrapper -->
 
-            <!-- Control Sidebar -->
-            <!-- <aside class="control-sidebar control-sidebar-dark"> -->
-            <!-- Control sidebar content goes here -->
-            <!-- </aside> -->
-            <!-- /.control-sidebar -->
-
-            <!-- Main Footer -->
+            <!-- Footer -->
             <%- include('partials/footer') %>
     </div>
     <!-- ./wrapper -->

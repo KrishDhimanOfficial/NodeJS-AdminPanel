@@ -4,7 +4,9 @@
         transition: none !important;
     }
 </style>
+
 <link rel="stylesheet" href="/assets/vendor/iconpicker/fontawesome-iconpicker.min.css">
+
 <div class="container">
     <form id="SubmitForm">
         <div class="row">
@@ -20,37 +22,35 @@
                                 <input type="text" class="form-control" name="collection" id="collection"
                                     placeholder="eg: user, category">
                             </div>
+
                             <div class="col-md-4 mb-2">
-                                <label class="form-label">Others options</label>
+                                <label class="form-label">Other options</label>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <div class="form-check">
                                         <input class="form-check-input" name="timeStamp" checked type="checkbox"
                                             id="checkDefault">
-                                        <label class="form-check-label" for="checkDefault">
-                                            TimeStramp
-                                        </label>
+                                        <label class="form-check-label" for="checkDefault">TimeStamp</label>
                                     </div>
                                     <div class="form-check">
                                         <input class="form-check-input" name="isSubMenu" type="checkbox" id="isSubMenu">
-                                        <label class="form-check-label" for="isSubMenu">
-                                            Is SubMenu
-                                        </label>
+                                        <label class="form-check-label" for="isSubMenu">Is SubMenu</label>
                                     </div>
                                     <div class="form-check">
                                         <input class="form-check-input" name="prevent_deletion" type="checkbox"
                                             id="prevent_deletion">
-                                        <label class="form-check-label" for="prevent_deletion">
-                                            Prevent Deletion
-                                        </label>
+                                        <label class="form-check-label" for="prevent_deletion">Prevent Deletion</label>
                                     </div>
                                 </div>
                             </div>
+
                             <div id="mainIcon" class="col-md-4 mb-2">
                                 <label for="mainIcon" class="form-label">Icon</label>
                                 <input type="text" class="form-control iconpicker" name="icon"
                                     placeholder="search Icon" />
                             </div>
                         </div>
+
+                        <!-- Submenu Settings -->
                         <div class="row d-none" id="subMenusettings">
                             <div class="col-md-4 mb-2">
                                 <label for="navName" class="form-label">Navigation Name</label>
@@ -66,36 +66,41 @@
                                 <div class="d-flex flex-column">
                                     <label for="model" class="form-label">Model</label>
                                     <select name="model" id="model" multiple class="select2 form-control">
-                                        <% collections.forEach(collection=> { %>
+                                        <% collections.forEach(collection=> { -%>
                                             <option value="<%= collection.model %>">
                                                 <%= collection.model %>
                                             </option>
-                                            <% }) %>
+                                            <% }) -%>
                                     </select>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Prevent Deletion -->
                         <div id="preventDeletionRow" class="row d-none">
                             <div class="col-md-4 mb-2">
                                 <label for="modelDependencies" class="form-label">Model Not To Delete</label>
                                 <select name="modelDependencies" class="select2 form-control" multiple
                                     id="modelDependencies">
-                                    <% collections.forEach(col=> { %>
+                                    <% collections.forEach(col=> { -%>
                                         <optgroup label="<%= col.model.toUpperCase() %>">
-                                            <% col.fields?.forEach(f=> { %>
+                                            <% col.fields?.forEach(f=> { -%>
                                                 <option value="<%= col.model %>|<%= f %>">
                                                     <%= col.model %> | <%= f %>
                                                 </option>
-                                                <% }) %>
+                                                <% }) -%>
                                         </optgroup>
-                                        <% }) %>
+                                        <% }) -%>
                                 </select>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Add Fields -->
         <div class="row">
             <div class="col-12">
                 <div class="card card-primary">
@@ -103,23 +108,18 @@
                         <h3 class="card-title">Add Field</h3>
                     </div>
                     <div class="card-body">
-                        <div id="addField">
-                        </div>
+                        <div id="addField"></div>
                         <div class="row">
                             <div class="col-12">
-                                <button id="addFieldBtn" type="button" class="mb-3 btn btn-dark float-end">
-                                    Add Fields
-                                </button>
+                                <button id="addFieldBtn" type="button" class="mb-3 btn btn-dark float-end">Add
+                                    Fields</button>
                             </div>
                             <div class="col-12">
                                 <div class="form-check float-end">
                                     <input class="form-check-input" name="rewrite_files" type="checkbox" checked
                                         id="makerewritefiles" />
-                                    <label class="form-check-label" for="makerewritefiles">
-                                        <b>
-                                            Rewrite EJS Files
-                                        </b>
-                                    </label>
+                                    <label class="form-check-label" for="makerewritefiles"><b>Rewrite EJS
+                                            Files</b></label>
                                 </div>
                             </div>
                         </div>
@@ -127,6 +127,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Submit -->
         <div class="row justify-content-center">
             <div class="col-4">
                 <button id="submitFormBtn" class="btn btn-dark mb-3 mx-auto d-block">Generate</button>

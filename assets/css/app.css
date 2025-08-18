@@ -3,12 +3,13 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-a {
-  color: #00B7FF;
-}
 
 :root {
   --theme-color: #6f42c1;
+}
+
+a {
+  color: var(--theme-color);
 }
 
 .sidebar-dark-danger .nav-sidebar>.nav-item>.nav-link.active,

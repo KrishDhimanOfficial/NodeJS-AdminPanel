@@ -58,10 +58,19 @@ const filterOptions = { // Tabulator Filter Options
 
 const columnsOptions = { // Tabulator Column Options
     No: (cell) => {
-        const rowIndex = cell.getRow().getPosition()
-        const page = cell.getTable().getPage()          // current page
-        const pageSize = cell.getTable().getPageSize() // page size        
-        return (page - 1) * pageSize + rowIndex;
+        const table = cell.getTable();
+        const rowIndex = cell.getRow().getPosition(); // index in current page
+        const page = table.getPage();
+        const pageSize = table.getPageSize();
+
+        // Calculate absolute row number
+        const number = (page - 1) * pageSize + rowIndex;
+
+        // Store it in row data for PDF export
+        const rowData = cell.getRow().getData();
+        rowData.No = number;
+
+        return number;
     },
     image: (cell) => {
         const { image } = cell.getRow().getData()
@@ -144,6 +153,11 @@ const initializeTabulator = async () => {
                 paginationCounter: "rows", //display count of paginated rows in footer
                 ajaxURL: dataTableAPI?.value.trim() || '',
                 movableColumns: true,  //allow column order to be changed
+                placeholder: function () {
+                    return this.getHeaderFilters().length
+                        ? 'No Matching Data'
+                        : 'No Data'
+                },
                 ajaxRequesting: function (url, params) {
                     if (params.filter && Array.isArray(params.filter)) {
                         params.filter = params.filter.map(f => {

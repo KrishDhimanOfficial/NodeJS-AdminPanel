@@ -112,8 +112,9 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
             const response = await model.findById({ _id: req.params.id }, { _id: 0, __v: 0, createdAt: 0, updatedAt: 0 })
 
             return res.status(200).render(`${model.modelName}/view`, {
+                title: capitalizeFirstLetter(model.modelName),
                 [model.modelName]: response,
-                breadcrumb: [{ name: capitalizeFirstLetter(model.modelName), url: req.originalUrl }, { name: 'View', active: true }]
+                breadcrumb: [{ name: capitalizeFirstLetter(model.modelName), url: `${req.baseUrl}/resources/${model.modelName}` }, { name: 'View', active: true }]
             })
         } catch (error) {
             log(chalk.red(`getViewInfo -> ${model.modelName} : ${error.message}`))
@@ -135,7 +136,8 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                     .filter(col => col.isVisible)
                     .map(col => ({
                         col: col.col,
-                        ...(col.filter && { filter: col.filter })
+                        ...(col.filter && { filter: col.filter }),
+                        ...(col.col === 'image' && { download: false }),
                     })),
                 { col: 'table_actions', download: false, maxWidth: 180, actions: { edit: true, view: true } }
             ]
@@ -222,7 +224,6 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
             const response = await model.findById(req.params.id)
 
             for (const f of fields) {
-                console.log(f);
 
                 if (f.field_type === 'ObjectId') {
                     await response.populate(f.field_name)
@@ -236,7 +237,7 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                 title: capitalizeFirstLetter(model.modelName),
                 api: `${req.baseUrl}/resources/${model.modelName}`,
                 response,
-                breadcrumb: [{ name: capitalizeFirstLetter(model.modelName), url: req.originalUrl }, { name: 'Edit', active: true }]
+                breadcrumb: [{ name: capitalizeFirstLetter(model.modelName), url: `${req.baseUrl}/resources/${model.modelName}` }, { name: 'Edit', active: true }]
             })
         } catch (error) {
             log(chalk.red(`renderEditPage -> ${model.modelName} : ${error.message}`))
