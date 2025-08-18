@@ -13,7 +13,7 @@ const PARSER = {
                 "decorators-legacy",
                 "importAssertions",
                 "topLevelAwait",
-                "typescript", // harmless if unused; helps if file has TS hints
+
             ],
         }),
 }

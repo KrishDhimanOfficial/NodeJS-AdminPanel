@@ -198,11 +198,11 @@ const initializeTabulator = async () => {
                             ...(column.download !== undefined ? { download: column.download } : {}),
                         }))
 
-                        this.setColumns(columns); // Only if not already set
+                        this.setColumns(columns) // Only if not already set
                     }
 
                     // ✅ Debounced row-only update
-                    debounceRefreshTable(response.data, this); // pass `this` as Tabulator instance
+                    debounceRefreshTable(response.data, this) // pass `this` as Tabulator instance
                     return response
                 },
                 tableBuilt: () => resolve()

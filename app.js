@@ -10,7 +10,6 @@ import passport from 'passport'
 import session from 'express-session'
 import config from './config/config.js'
 import MongoStore from 'connect-mongo'
-import miniyHTML from 'express-minify-html-terser'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import router from './routes/server.routes.js'
@@ -27,7 +26,7 @@ app.use(helmet(
 app.use(mongoSanitize())
 app.use(cors(
   {
-    origin: '*',
+    origin: [config.serverURL],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -74,18 +73,6 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user, done) => {
   return done(null, user)
 })
-
-app.use(miniyHTML({
-  override: true,
-  htmlMinifier: {
-    removeComments: true,
-    collapseWhitespace: true,
-    collapseBooleanAttributes: true,
-    removeAttributeQuotes: true,
-    removeEmptyAttributes: true,
-    minifyJS: true
-  }
-}))
 
 // View Engine
 app.set('view engine', 'ejs')

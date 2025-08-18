@@ -1,4 +1,4 @@
-import chalk from "chalk"
+import chalk from 'chalk'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -12,8 +12,8 @@ const __dirname = path.dirname(__filename)
 /**
  * FN : CRUD_GENERATOR => Create Mongoose Schema, views File
  * FN : createModelFile => Create Mongoose Schema Structure
- * FN : createAddEJSFile => Create Views Add Form Sturcture
- */
+ * FN : createAddEJSFile,createUpdateEJSFile,createViewEJSFile => Create Views Add Form Sturcture
+*/
 
 const CRUD_GENERATOR = async (req, res) => {
     const {
@@ -114,7 +114,7 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
         const data = {
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
-            rewrite_files: rewrite_files && rewrite_files === 'on',
+            rewrite_files: rewrite_files === undefined ? false : true,
             modelDependencies
         }
 

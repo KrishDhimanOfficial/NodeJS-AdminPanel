@@ -1,6 +1,5 @@
 import sturctureModel from "../models/sturcture.model.js"
 import createCrudController from "../controllers/crud.controller.js"
-import mongoose from "mongoose"
 import setUniversalData from "../middleware/setUniversalData.middleware.js"
 import { handlemulterError, checkSizeLimits, uploadHandler } from "../middleware/multer.middleware.js"
 import { isAuthenticated } from "../middleware/auth.middleware.js"
@@ -8,7 +7,6 @@ import registerModel from "./registerModel.utils.js"
 import { capitalizeFirstLetter } from "captialize"
 import express from "express"
 const router = express.Router({ caseSensitive: true, strict: true })
-const validateId = mongoose.Types.ObjectId.isValid;
 
 const GenerateCRUDRoutes = async () => {
     const resources = await sturctureModel.find({}).lean()
@@ -40,26 +38,31 @@ const GenerateCRUDRoutes = async () => {
         router.delete(`${basePath}/:id`, isAuthenticated, controller.remove)
 
         // UI routes
+        // View DataTable Page
         router.get(basePath, ...middlewares, (req, res) => {
             return res.status(200).render('datatable', {
-                title: capitalizeFirstLetter(modelName),
+                title: capitalizeFirstLetter(`${modelName}s`),
                 addURL: `${req.originalUrl}/add`,
                 dataTableAPI: `${req.baseUrl}${apiPath}`,
                 api: req.originalUrl,
                 breadcrumb: [{ name: capitalizeFirstLetter(modelName), active: true, url: `${req.baseUrl}${basePath}` }]
             })
-        }) // View DataTable Page
+        })
 
+        // View Create Page
         router.get(`${basePath}/add`, ...middlewares, (req, res) => {
             return res.status(200).render(`${modelName}/create`, {
                 title: capitalizeFirstLetter(modelName),
                 api: `${req.baseUrl}${basePath}`,
                 breadcrumb: [{ name: capitalizeFirstLetter(modelName), url: `${req.baseUrl}${basePath}` }, { name: 'Add', active: true }]
             })
-        }) // View Create Page
+        })
 
-        router.get(`${basePath}/view/:id`, ...middlewares, controller.getViewInfo) // View Information Page
-        router.get(`${basePath}/:id`, ...middlewares, controller.renderEditPage) // View Update page
+        // View Information Page
+        router.get(`${basePath}/view/:id`, ...middlewares, controller.getViewInfo)
+
+        // View Update page
+        router.get(`${basePath}/:id`, ...middlewares, controller.renderEditPage)
     }
     return router
 }
