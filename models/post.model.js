@@ -43,7 +43,13 @@ const postSchema = new mongoose.Schema({
     tagId: {
         type: [mongoose.Schema.Types.ObjectId],
         required: [true, "tagId is required."],
-        ref: "tag"
+        ref: "tag",
+        validate: {
+            validator: function (v) {
+                return v.length >= 2;
+            },
+            message: "Atleast 2 tags are required."
+        },
     },
 },
     { timestamps: true })

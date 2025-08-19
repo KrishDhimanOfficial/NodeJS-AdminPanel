@@ -9,7 +9,7 @@ export const datatable = document.querySelector('#tabulator')
 import Fetch from "./fetch.js"
 
 const notyf = new Notyf({
-    duration: 1000,
+    duration: 2500,
     position: { x: 'right', y: 'bottom' },
     types: [
         { type: 'warning', background: 'orange', duration: 2000 },

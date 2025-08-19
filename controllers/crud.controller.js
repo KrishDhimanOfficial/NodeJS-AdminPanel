@@ -45,7 +45,8 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
             if (!response) return res.status(400).json({ error: 'Something went wrong, please try again later.' })
             return res.status(200).json({ success: 'created successfully.', redirect: req.originalUrl })
         } catch (error) {
-            if (error.name === 'ValidationError') validate(res, error.errors)
+            log(chalk.red(`create -> ${model.modelName} : ${error.message}`))
+
             if (req.file && error) {
                 await deleteFile(req.file.path)
             } // Delete single file (upload.single)
@@ -59,35 +60,94 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                 }
             }  // Delete files in fields object (upload.fields)
 
-            if (Array.isArray(req.files)) {
+            if (req.files && Array.isArray(req.files)) {
                 for (const file of req.files) {
                     if (file?.path) await deleteFile(file.path)
                 }
             } // Delete array of files (upload.array)
-            log(chalk.red(`create -> ${model.modelName} : ${error.message}`))
+
+            if (error?.cause?.code === 11000) return res.status(400).json({ error: `${error.cause.keyValue.name} Already Exist.` })
+            if (error.name === 'ValidationError') validate(res, error.errors)
+            if (error.name === 'CastError') return res.status(400).json({ error: `Invalid value for ${error.path}` })
         }
     },
 
     update: async (req, res) => {
         try {
-            console.log(req.body);
-
             if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
             const { password } = req.body;
             if (password?.length === 0) delete req.body.password;
 
+            if (req.file?.fieldname && req.file?.path) {
+                req.body[req.file.fieldname] = req.file.path;
+            } // Case: upload.single()
+
+            if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
+                for (const [fieldName, files] of Object.entries(req.files)) {
+                    files.length === 1
+                        ? req.body[fieldName] = files[0].path
+                        : req.body[fieldName] = files.map(file => file.path)
+                }
+            } // Case: upload.fields()
+
+            if (Array.isArray(req.files)) {
+                const fieldName = req.files[0]?.fieldname;
+                if (fieldName) req.body[fieldName] = req.files.map(file => file.path)
+            }  // Case: upload.array()
+
             const response = await model.findByIdAndUpdate({ _id: req.params.id },
                 { $set: req.body },
-                {
-                    new: true,
-                    runValidators: true,
-                }
-            )
+                { runValidators: true }
+            ) // update Data
             if (!response) return res.status(404).json({ error: 'Not found' })
+
+            if (req.file?.fieldname && req.file?.path) {
+                await deleteFile(response[req.file.fieldname])
+            } // Case: upload.single()
+
+            if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
+                for (const [fieldName, files] of Object.entries(req.files)) {
+                    if (Array.isArray(response[fieldName])) {
+                        for (const file of response[fieldName]) {
+                            await deleteFile(file)
+                        }
+                    } else {
+                        await deleteFile(response[fieldName])
+                    }
+                }
+            }
+            // Case: upload.fields()
+
+            if (Array.isArray(req.files)) {
+                const fieldName = response[req.files[0]?.fieldname];
+                if (Array.isArray(fieldName)) for (const file of fieldName) await deleteFile(file)
+            } // Case: upload.array()
+
             return res.status(200).json({ success: 'update successfully', redirect: req.originalUrl })
         } catch (error) {
-            if (error.name === 'ValidationError') validate(res, error.errors)
             log(chalk.red(`update -> ${model.modelName} : ${error.message}`))
+
+            if (req.file && error) {
+                await deleteFile(req.file.path)
+            } // Delete single file (upload.single)
+
+            if (req.files && Array.isArray(req.files)) {
+                for (const file of req.files) {
+                    if (file?.path) await deleteFile(file.path)
+                }
+            } // Delete array of files (upload.array)
+
+            if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
+                for (const [fieldName, files] of Object.entries(req.files)) {
+                    for (const file of files) {
+                        if (file?.path) await deleteFile(file.path);
+                    }
+                }
+            }  // Delete files in fields object (upload.fields)
+
+            if (error?.cause?.code === 11000) return res.status(400).json({ error: `${error.cause.keyValue.name} Already Exist.` })
+            if (error.name === 'ValidationError') validate(res, error.errors)
+            if (error.name === 'CastError') return res.status(400).json({ error: `Invalid value for ${error.path}.` })
         }
     },
 

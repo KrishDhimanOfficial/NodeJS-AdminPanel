@@ -20,6 +20,7 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async (senderEMAIL, receiverEMAIL, verifyLink) => {
     try {
+        const name = receiverEMAIL.split('@')[0].toUpperCase()
         // const rawToken = crypto.randomBytes(32).toString('hex')
         // const verifyLink = crypto.createHash('sha256').update(rawToken).digest('hex')
         await transporter.sendMail({ // Send Verification Email

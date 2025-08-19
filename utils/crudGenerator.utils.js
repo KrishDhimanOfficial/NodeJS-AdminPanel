@@ -237,6 +237,7 @@ function createAddEJSFile(collection, fields) {
 }
 
 function createUpdateEJSFile(collection, fields) {
+    const checkInputfile = fields.filter(f => f.form_type === 'file' && f.file?.length > 1)
     const formFields = fields.map(f => {
         const label = `<label for="${f.field_name}" class="form-label mb-2">${capitalizeFirstLetter(f.display_name || f.field_name)}</label>`;
 
@@ -287,7 +288,7 @@ function createUpdateEJSFile(collection, fields) {
                 return `
                 <div class="mb-3">
                     ${label}
-                    <input type="${f.form_type}" name="${f.field_name}" value="<%= response.${f.field_name} %>" class="form-control" id="${f.field_name}" placeholder="${f.field_name}">
+                    <input type="${f.form_type}" ${checkInputfile.includes(f) ? 'multiple' : ''} name="${f.field_name}" value="<%= response.${f.field_name} %>" class="form-control" id="${f.field_name}" placeholder="${f.field_name}">
                 </div>`
         }
     }).join('\n')
