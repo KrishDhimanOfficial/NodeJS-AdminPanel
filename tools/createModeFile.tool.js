@@ -354,12 +354,12 @@ const createFreshContent = (collection, fields, timeStamp) => {
         })
         .join(",\n")
 
-    return `import mongoose from "mongoose";
-            import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+    return `import mongoose from 'mongoose'
+            import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 
             const ${collection}Schema = new mongoose.Schema({
             ${fieldLines}
-            }, { timestamps: ${timeStamp === "on"} })
+            }, { timestamps: ${timeStamp === 'on'} })
 
             ${collection}Schema.plugin(mongooseAggregatePaginate)
             export default mongoose.model("${collection}", ${collection}Schema)`;

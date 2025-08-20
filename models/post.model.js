@@ -46,7 +46,7 @@ const postSchema = new mongoose.Schema({
         ref: "tag",
         validate: {
             validator: function (v) {
-                return v.length >= 2;
+                return v.length <= 2;
             },
             message: "Atleast 2 tags are required."
         },

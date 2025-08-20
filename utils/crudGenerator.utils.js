@@ -103,6 +103,8 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
             ...(f.display_name !== '' && { display_name: f.display_name?.replace(/\s+/g, '_').trim() }),
             ...(f.relation && { relation: f.relation }),
             ...(f.display_key && { display_key: f.display_key }),
+            ...(f.radio_option && { radio_option: f.radio_option.split(',') }),
+            ...(f.checkbox_option && { checkbox_option: f.checkbox_option.split(',') }),
         }))
 
         const modelDependencies = nav.modelDependencies
@@ -115,7 +117,7 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
             rewrite_files: rewrite_files === undefined ? false : true,
-            modelDependencies
+            modelDependencies,
         }
 
         const res = requestMethod === 'PUT'
@@ -196,14 +198,29 @@ function createAddEJSFile(collection, fields) {
                     <textarea name="${f.field_name}" class="form-control summernote" id="${f.field_name}" placeholder="${f.field_name}"></textarea>
                 </div>`
 
+            case 'radio':
+                const options = f.radio_option?.split(',')
+                return ` <div class="mb-3 d-flex flex-column">
+                    ${label}
+                    <div class='d-flex'>
+                     ${options.map(o => `<div class="form-check form-check-inline">
+                        <input class="form-check-input" type="${f.form_type}" name="${f.field_name}" id="${o}" value="${o}" />
+                        <label class="form-check-label" for="${o}">${o}</label>
+                    </div>`).join('')}
+                     </div>
+                    </div>`
+
             case 'checkbox':
-                return `
-                <div class="form-check d-flex mb-3">
-                    <input class="form-check-input" name="${f.field_name}" type="checkbox" checked value="true" id="${f.field_name}" />
-                    <label class="form-check-label" for="${f.field_name}">
-                        ${f.field_name}
-                    </label>
-                </div>`
+                const checkoptions = f.checkbox_option?.split(',')
+                return ` <div class="mb-3 d-flex flex-column">
+                    ${label}
+                    <div class='d-flex'>
+                     ${checkoptions.map(o => `<div class="form-check form-check-inline">
+                        <input class="form-check-input" type="${f.form_type}" name="${f.field_name}" id="${o}" value="${o}" />
+                        <label class="form-check-label" for="${o}">${o}</label>
+                    </div>`).join('')}
+                     </div>
+                    </div>`
 
             default: // input type text
                 return `
@@ -259,12 +276,57 @@ function createUpdateEJSFile(collection, fields) {
                     }
                     </select>
                 </div>`
+
             case 'date':
                 return `
                 <div class="mb-3">
                     ${label}
-                      <input type="${f.form_type}" name="${f.field_name}" value="<%= response.${f.field_name}.toISOString().split('T')[0] %>" class="form-control" id="${f.field_name}" placeholder="${f.field_name}">
+                      <input 
+                            type="${f.form_type}" 
+                            name="${f.field_name}" 
+                            value="<%= response.${f.field_name}.toISOString().split('T')[0] %>" 
+                            class="form-control" 
+                            id="${f.field_name}" 
+                            placeholder="${f.field_name}"
+                        />
                 </div>`
+
+            case 'radio':
+                const options = f.radio_option?.split(',')
+                return `<div class="mb-3 d-flex flex-column">
+                    ${label}
+                    <div class='d-flex'>
+                     ${options.map(o => `<div class="form-check form-check-inline">
+                        <input class="form-check-input"
+                            type="${f.form_type}" 
+                            name="${f.field_name}" 
+                            id="${o}" 
+                            value="${o}" 
+                            <%= response.${f.field_name} === '${o}' ? 'checked' : '' %> 
+                        />
+                        <label class="form-check-label" for="${o}">${o}</label>
+                    </div>`).join('')}
+                     </div>
+                    </div>`
+
+            case 'checkbox':
+                const checkoptions = f.checkbox_option?.split(',')
+                return `<div class="mb-3 d-flex flex-column">
+                    ${label}
+                    <div class='d-flex'>
+                     ${checkoptions.map(o => `<div class="form-check form-check-inline">
+                        <input 
+                            class="form-check-input" 
+                            type="${f.form_type}" 
+                            name="${f.field_name}" 
+                            id="${o}" 
+                            value="${o}" 
+                            <%= response.${f.field_name}.includes('${o}') && 'checked' %> 
+                            /> 
+                        <label class="form-check-label" for="${o}">${o}</label>
+                    </div>`).join('')}
+                     </div>
+                    </div>`
 
             case 'textarea':
                 return `
@@ -273,15 +335,6 @@ function createUpdateEJSFile(collection, fields) {
                     <textarea name="${f.field_name}" class="form-control summernote" id="${f.field_name}" placeholder="${f.field_name}">
                         <%= response.${f.field_name} %>
                     </textarea>
-                </div>`
-
-            case 'checkbox':
-                return `
-                <div class="form-check d-flex mb-3">
-                    <input class="form-check-input" name="${f.field_name}" type="checkbox" checked value="true" id="${f.field_name}" />
-                    <label class="form-check-label" for="${f.field_name}">
-                        ${f.field_name}
-                    </label>
                 </div>`
 
             default:

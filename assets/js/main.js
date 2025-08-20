@@ -164,16 +164,26 @@ $(document).on('change', 'select[data-counter]', function () {
             <label for="formId${counter}_size">Size (eg: 2 * 1024 = 2KB)</label>
           </div>
         </div>
-      </div>
-    `,
+      </div>`,
     select: `
       <div class="col-md-5 offset-md-6">
           <div class="form-floating mb-3">
             <input type="text" class="form-control" name="field[${counter}][display_key]" id="formId${counter}_display" />
             <label for="formId${counter}_display">Display_key</label>
           </div>
-      </div>
-    `
+      </div>`,
+    checkbox: `<div class="col-md-5 offset-md-6">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" name="field[${counter}][checkbox_option]" id="formId${counter}_checkbox_option" />
+                <label for="formId${counter}_checkbox_option">Add Options (eg: option1,option2,option3)</label>
+              </div>
+            </div>`,
+    radio: `<div class="col-md-5 offset-md-6">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" name="field[${counter}][check_options]" id="formId${counter}_check_options"  />
+                <label for="formId${counter}_check_options">Add Options (eg: option1,option2,option3)</label>
+              </div>
+            </div>`
   }
 
   // Toggle visibility and insert template
