@@ -34,29 +34,13 @@ const fieldSchema = new mongoose.Schema({
         type: String,
         trim: true,
         required: [true, 'Form Type is required.'],
-        match: [
-            /^[a-zA-Z0-9_]+$/,
-            'Form Type must be alphanumeric and underscores only.'
-        ]
     },
     display_key: {
         type: String,
         trim: true
     },
-    radio_option: {
-        type: [String], trim: true,
-        validate: {
-            validator: function (v) { return v.length < 2 },
-            message: "Atleast 2 options are required."
-        },
-    }, // For : radio_buttons
-    checkbox_option: {
-        type: [String], trim: true,
-        validate: {
-            validator: function (v) { return v.length < 2 },
-            message: "Atleast 2 options are required."
-        },
-    }, // For : checkboxes
+    radio_option: { type: [String], trim: true }, // For : radio_buttons
+    checkbox_option: { type: [String], trim: true }, // For : checkboxes
     display_name: { type: String, trim: true },
     required: { type: Boolean, default: false },
     unique: { type: Boolean, default: false },

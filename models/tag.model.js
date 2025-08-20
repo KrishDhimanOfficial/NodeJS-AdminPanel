@@ -6,14 +6,6 @@ const tagSchema = new mongoose.Schema({
     type: String,
     required: [true, "name is required."],
     unique: [true, "name is already in use."]
-  },
-
-  gender: {
-    type: String
-  },
-
-  hobbies: {
-    type: []
   }
 }, { timestamps: true })
 

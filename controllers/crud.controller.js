@@ -11,7 +11,6 @@ import handleAggregatePagination from "../utils/handlepagination.utils.js";
 import sturctureModel from "../models/sturcture.model.js";
 import registerModel from "../utils/registerModel.utils.js";
 import { capitalizeFirstLetter } from "captialize";
-import handleFilteration from "../utils/handleFilteration.utils.js";
 const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
@@ -199,7 +198,11 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                         ...(col.filter && { filter: col.filter }),
                         ...(col.col === 'image' && { download: false }),
                     })),
-                { col: 'table_actions', download: false, maxWidth: 180, actions: { edit: true, view: true } }
+                {
+                    col: 'table_actions', download: false, maxWidth: 180, actions: {
+                        edit: true, view: false,
+                    }
+                }
             ]
 
             // Build aggregation pipeline
@@ -259,10 +262,8 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
             const visibleFields = Object.fromEntries(fields.filter(col => col.isVisible).map(col => [col.col, 1]))
             visibleFields.canDelete = 1;
 
-            // Apply filters to pipeline
-            const updatedPipeline = handleFilteration(req.query?.filter, pipeline.filter(Boolean))
             // Paginate aggregation results
-            const response = await handleAggregatePagination(model, updatedPipeline, query)
+            const response = await handleAggregatePagination(model, pipeline, query, req.query?.filter)
 
             // Send response
             return res.status(200).json({
@@ -383,23 +384,20 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
     },
     getCRUDJsonData: async (req, res) => {
         try {
-            const query = { page: req.query.page, limit: req.query.size }
+            const query = { page: req.query.page, limit: req.query.size, }
             const pipeline = [{ $project: { model: 1 } }]
 
-            if (req.query?.filter) {
-                req.query.filter.forEach(item => {
-                    if (item.field === 'model') {
-                        pipeline.push({ $match: { [item.field]: { $regex: item.value, $options: 'i' } } })
-                    }
-                })
-            }
-
-            const response = await handleAggregatePagination(sturctureModel, pipeline, query)
+            const response = await handleAggregatePagination(sturctureModel, pipeline, query, req.query?.filter)
             const columns = [
                 { col: 'No', maxWidth: 80 },
                 { col: 'model', filter: 'search' },
-                { col: 'actions', actions: { edit: true, del: true } },
+                {
+                    col: 'actions', actions: {
+                        edit: true, del: true
+                    }
+                },
             ]
+
             return res.status(200).json({
                 last_row: response.totalDocs,
                 last_page: response.totalPages,
@@ -415,14 +413,14 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
             const response = await sturctureModel.findById({ _id: req.params.id })
             if (!response) return res.status(404).redirect(`${req.baseUrl}/404`)
 
-            const collections = mongoose.modelNames().filter(m => m !== 'Structure' && m !== 'Admin').map(m => {
-                const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
-                return {
-                    model: m,
-                    fields: Object.keys(mongoose.model(m).schema.paths)
-                        .filter(p => !notIncluded.includes(p))
-                }
-            })
+            const collections = mongoose.modelNames().filter(m => m !== 'Structure' && m !== 'Admin')
+                .map(m => {
+                    const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
+                    return {
+                        model: m,
+                        fields: Object.keys(mongoose.model(m).schema.paths).filter(p => !notIncluded.includes(p))
+                    }
+                })
 
             return res.status(200).render('crud/editCRUD',
                 {

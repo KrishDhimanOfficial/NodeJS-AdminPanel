@@ -1,10 +1,8 @@
-// Tabulator 
 const pdfbtn = document.getElementById("download-pdf")
 const xlsxbtn = document.getElementById("download-xlsx")
 const csvbtn = document.getElementById("download-csv")
 const select = document.querySelector('#hide-column-select')
-const tabulator = document.querySelector('#tabulator')
-const dataTableAPI = document.querySelector('#dataTableAPI')
+// const tabulator = document.querySelector('#tabulator')
 
 const capitalizeFirstLetter = (str) => {
     if (!str) return '';
@@ -58,19 +56,19 @@ const filterOptions = { // Tabulator Filter Options
 
 const columnsOptions = { // Tabulator Column Options
     No: (cell) => {
-        const table = cell.getTable();
-        const rowIndex = cell.getRow().getPosition(); // index in current page
-        const page = table.getPage();
-        const pageSize = table.getPageSize();
+        const table = cell.getTable()
+        const rowIndex = cell.getRow().getPosition() // index in current page
+        const page = table.getPage()
+        const pageSize = table.getPageSize()
 
         // Calculate absolute row number
         const number = (page - 1) * pageSize + rowIndex;
 
         // Store it in row data for PDF export
-        const rowData = cell.getRow().getData();
+        const rowData = cell.getRow().getData()
         rowData.No = number;
 
-        return number;
+        return number
     },
     image: (cell) => {
         const { image } = cell.getRow().getData()
@@ -85,7 +83,9 @@ const columnsOptions = { // Tabulator Column Options
     },
     table_actions: (cell) => {
         const { _id, canDelete } = cell.getRow().getData()
-        const { view, edit } = cell.getColumn().getDefinition()
+        const { actions = {} } = cell.getColumn().getDefinition()
+        const { view, edit } = actions
+
         const buttons = document.createElement('div')
         buttons.className = 'd-flex flex-wrap gap-3';
 
@@ -108,7 +108,9 @@ const columnsOptions = { // Tabulator Column Options
     },
     actions: (cell) => {
         const { _id } = cell.getRow().getData()
-        const { view, edit, del } = cell.getColumn().getDefinition()
+        const { actions = {} } = cell.getColumn().getDefinition()
+        const { view, edit, del } = actions
+
         const buttons = document.createElement('div')
         buttons.className = 'd-flex flex-wrap gap-3';
 
@@ -174,12 +176,16 @@ const initializeTabulator = async () => {
                 ajaxResponse: function (url, params, response) {
                     filterColumns = response.columns.filter(col => !col.actions)
                     if (response.data.length == 0) {
-                        csvbtn.classList.add('d-none'), pdfbtn.classList.add('d-none'), xlsxbtn.classList.add('d-none')
-                        // tabulator.innerHTML = '<div class="text-center my-5"><h2>No Data Found</h2></div>'
+                        csvbtn && csvbtn.classList.add('d-none')
+                        pdfbtn && pdfbtn.classList.add('d-none')
+                        xlsxbtn && xlsxbtn.classList.add('d-none')
                         return []
                     } else {
-                        csvbtn?.classList.remove('d-none'), pdfbtn?.classList.remove('d-none'), xlsxbtn?.classList.remove('d-none')
+                        csvbtn?.classList.remove('d-none')
+                        pdfbtn?.classList.remove('d-none')
+                        xlsxbtn?.classList.remove('d-none')
                     }
+
                     select && response.columns?.forEach(col => {
                         const value = col.col;
                         const label = col.col.replace(/_/g, ' ')
@@ -188,6 +194,7 @@ const initializeTabulator = async () => {
                         const exists = Array.from(select.options).some(option => option.value === value)
                         if (!exists) select.append(new Option(label, value))
                     })
+                
                     // Only set columns once if they haven’t been set yet
                     if (!this.getColumnDefinitions().length) {
                         select && response.columns?.forEach(col => {
@@ -201,10 +208,9 @@ const initializeTabulator = async () => {
                             title: capitalizeFirstLetter(column.col.replace(/_/g, ' ')),
                             field: column.col,
                             formatter: columnsOptions[column.col] || columnsOptions.default,
-                            downloadFormatter: columnsOptions[column.col] || columnsOptions.default,
                             hozAlign: "left",
                             vertAlign: "middle",
-                            ...column.actions,
+                            actions: column.actions,
                             ...columnsOptions[column.col],
                             ...filterOptions[column.filter],
                             ...(!column.filter && ''),

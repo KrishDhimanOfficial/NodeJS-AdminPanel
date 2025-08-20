@@ -7,7 +7,7 @@ import '../vendor/summernote/summernote.min.js'
 import '../vendor/iconpicker/fontawesome-iconpicker.min.js'
 import Fetch from "./fetch.js"
 import {
-  datatable, displayPreviewImage, apiInput, updatetableDataStatus,
+  datatable, displayPreviewImage, updatetableDataStatus,
   Form, Notify, previewImageInput, openDangerModal, setupSelect2, deleteCRUDFieldRow,
   FieldCheckBox, setFieldDefaultValue, FieldRow
 } from "./variable.js";
