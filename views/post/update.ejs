@@ -10,22 +10,29 @@
                         
                 <div class="mb-3">
                     <label for="title" class="form-label mb-2">Title</label>
-                    <input type="text" name="title" value="<%= response.title %>" class="form-control" id="title" placeholder="title">
+                    <input type="text"  name="title" value="<%= response.title %>" class="form-control" id="title" placeholder="title">
                 </div>
 
                 <div class="mb-3">
                     <label for="image" class="form-label mb-2">Image</label>
-                    <input type="file" name="image" value="<%= response.image %>" class="form-control" id="image" placeholder="image">
+                    <input type="file"  name="image" value="<%= response.image %>" class="form-control" id="image" placeholder="image">
                 </div>
 
                 <div class="mb-3">
                     <label for="date" class="form-label mb-2">Post_Date</label>
-                      <input type="date" name="date" value="<%= response.date.toISOString().split('T')[0] %>" class="form-control" id="date" placeholder="date">
+                      <input 
+                            type="date" 
+                            name="date" 
+                            value="<%= response.date.toISOString().split('T')[0] %>" 
+                            class="form-control" 
+                            id="date" 
+                            placeholder="date"
+                        />
                 </div>
 
                 <div class="mb-3">
                     <label for="comments" class="form-label mb-2">Comments</label>
-                    <input type="number" name="comments" value="<%= response.comments %>" class="form-control" id="comments" placeholder="comments">
+                    <input type="number"  name="comments" value="<%= response.comments %>" class="form-control" id="comments" placeholder="comments">
                 </div>
 
                 <div class="mb-3">
@@ -52,6 +59,24 @@
                                 <%= tagId.name %>
                             </option>
                            <% }) %>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="categoryID" class="form-label mb-2">Category</label>
+                    <select name="categoryID"   data-selectbox="true" class="form-control" id="category">
+                        <option value="<%= response.categoryID?._id %>" selected>
+                            <%= response.categoryID?.name %>
+                            </option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="subcategoryId" class="form-label mb-2">Sub_category</label>
+                    <select name="subcategoryId"   data-selectbox="true" class="form-control" id="subcategory">
+                        <option value="<%= response.subcategoryId?._id %>" selected>
+                            <%= response.subcategoryId?.name %>
+                            </option>
                     </select>
                 </div>
                     </div>

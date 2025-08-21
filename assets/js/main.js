@@ -23,6 +23,12 @@ previewImageInput && (
   previewImageInput.onchange = (e) => displayPreviewImage(e) // display image preview
 )
 
+// window['dark-mode-btn'].onclick = () => {
+//   document.body.classList.toggle('dark-mode')
+//   document.querySelector('.main-sidebar').classList.toggle('sidebar-dark-purple')
+//   document.querySelector('.navbar').classList.toggle('navbar-purple')
+// }
+
 Form && (
   Form.onsubmit = async (e) => {
     try {
@@ -168,7 +174,7 @@ $(document).on('change', 'select[data-counter]', function () {
     select: `
       <div class="col-md-5 offset-md-6">
           <div class="form-floating mb-3">
-            <input type="text" class="form-control" name="field[${counter}][display_key]" id="formId${counter}_display" />
+            <input type="text" class="form-control" name="field[${counter}][display_key]" id="formId${counter}_display" placeholder="eg: category,author -> name,title" />
             <label for="formId${counter}_display">Display_key</label>
           </div>
       </div>`,

@@ -51,6 +51,18 @@ const postSchema = new mongoose.Schema({
             message: "Atleast 2 tags are required."
         },
     },
+
+    categoryID: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, "categoryID is required."],
+        ref: "category"
+    },
+
+    subcategoryId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, "subcategoryId is required."],
+        ref: "subcategory"
+    }
 },
     { timestamps: true })
 

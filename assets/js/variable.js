@@ -85,9 +85,11 @@ const handleDeleteRequest = async (api) => {
     if (res.success) setTimeout(() => window.location.reload(), 1000)
 }
 
-export const setupSelect2 = (selector, url, placeholder) => {
+export const setupSelect2 = async (selector, url, placeholder) => {
+
     $(selector).select2({
         placeholder,
+        minimumResultsForSearch: 20,
         ajax: {
             url,
             dataType: 'json',
@@ -100,7 +102,12 @@ export const setupSelect2 = (selector, url, placeholder) => {
                     text: item.label
                 }))
             })
-        }
+        },
+    })
+
+    // ✅ When dropdown opens, trigger empty search so options appear immediately
+    $(selector).on('select2:open', () => {
+        $('.select2-search__field').val('').trigger('input')
     })
 }
 

@@ -83,14 +83,16 @@
                                 <select name="modelDependencies" class="select2 form-control" multiple
                                     id="modelDependencies">
                                     <% collections.forEach(col=> { -%>
-                                        <optgroup label="<%= col.model.toUpperCase() %>">
-                                            <% col.fields?.forEach(f=> { -%>
-                                                <option value="<%= col.model %>|<%= f %>">
-                                                    <%= col.model %> | <%= f %>
-                                                </option>
+                                        <% if (col.fields?.length> 0) { -%>
+                                            <optgroup label="<%= col.model.toUpperCase() %>">
+                                                <% col.fields?.forEach(f=> { -%>
+                                                    <option value="<%= col.model %>|<%= f %>">
+                                                        <%= col.model %> | <%= f %>
+                                                    </option>
+                                                    <% }) -%>
+                                            </optgroup>
+                                            <% } -%>
                                                 <% }) -%>
-                                        </optgroup>
-                                        <% }) -%>
                                 </select>
                             </div>
                         </div>

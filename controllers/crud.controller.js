@@ -2,6 +2,7 @@
  * A factory function to generate CRUD controller methods for any Mongoose model.
  * @param {mongoose.Model} model - The Mongoose model.
  * @returns {object} CRUD methods
+ * Developer - KRISH DHIMAN
 */
 import mongoose from "mongoose";
 import validate from "../services/validate.service.js"
@@ -122,7 +123,11 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                 if (Array.isArray(fieldName)) for (const file of fieldName) await deleteFile(file)
             } // Case: upload.array()
 
-            return res.status(200).json({ success: 'update successfully', redirect: req.originalUrl })
+            return res.status(200).json(
+                {
+                    success: 'update successfully',
+                    redirect: `${req.baseUrl}/resources/${model.modelName}`
+                })
         } catch (error) {
             log(chalk.red(`update -> ${model.modelName} : ${error.message}`))
 
@@ -154,7 +159,7 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
         try {
             const model = await registerModel(modelName)
             const response = await model.aggregate([
-                { $match: { [display_key]: { $regex: req.query.search, $options: 'i' } } },
+                { $match: { [display_key]: { $regex: String(req.query.search), $options: 'i' } } },
                 { $addFields: { label: `$${display_key}`, value: '$_id' } },
                 { $project: { label: 1, value: 1 } }
             ])
@@ -204,7 +209,6 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                     }
                 }
             ]
-
             // Build aggregation pipeline
             const pipeline = fields
                 .filter(col => col.isVisible)
@@ -220,7 +224,7 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                     }
 
                     // Case: With Relation → populate reference and pick display_key
-                    if (f.relation !== 'No Relation') {
+                    if (f.relation && f.relation !== 'No Relation') {
                         const collectionName = mongoose.model(f.relation).collection.name;
                         return [
                             { $lookup: { from: collectionName, localField: f.field_name, foreignField: '_id', as: displayName } },
@@ -229,30 +233,61 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                         ]
                     }
 
-                    // Case: Custom display_name (different from field_name)
-                    if (f.display_name && f.display_name !== f.field_name) {
-                        return [{ $addFields: { [f.col]: `$${f.field_name}` } }]
-                    }
-
                     // Case: No Relation → check for deletable docs
-                    if (f.relation === 'No Relation') {
-                        const relationModel = modelDependencies.find(d => d.model === model.modelName)
-                        if (!relationModel) return [{ $addFields: { canDelete: true } }]
+                    if (f.relation && f.relation === 'No Relation') {
+                        const docs_lookups = modelDependencies.map(m => {
+                            const collectionName = mongoose.model(m.relation).collection.name;
+                            return {
+                                $lookup: {
+                                    from: collectionName,
+                                    localField: '_id',
+                                    foreignField: m.field,
+                                    as: `${m.relation}_Docs`
+                                }
+                            }
+                        })
 
-                        const collectionName = mongoose.model(relationModel.relation).collection.name;
-                        return [
-                            { $lookup: { from: collectionName, localField: '_id', foreignField: relationModel.field, as: 'relatedDocs' } },
-                            {
-                                $addFields: {
-                                    canDelete: {
-                                        $cond: {
-                                            if: { $gt: [{ $size: "$relatedDocs" }, 0] }, then: false,
-                                            else: true
-                                        }
+                        const docs_unwind = {
+                            $addFields: {
+                                canDelete: {
+                                    $cond: {
+                                        if: {
+                                            $or: modelDependencies.map(
+                                                item => ({
+                                                    $gt: [{ $size: `$${item.relation}_Docs` }, 0]
+                                                })
+                                            )
+                                        },
+                                        then: false,
+                                        else: true
                                     }
                                 }
                             }
-                        ]
+                        }
+                        return [...docs_lookups, docs_unwind]
+
+                        // const relationModel = modelDependencies.find(d => d.model === model.modelName)
+                        // if (!relationModel) return [{ $addFields: { canDelete: true } }]
+
+                        // const collectionName = mongoose.model(relationModel.relation).collection.name;
+                        // return [
+                        //     { $lookup: { from: collectionName, localField: '_id', foreignField: relationModel.field, as: 'relatedDocs' } },
+                        //     {
+                        //         $addFields: {
+                        //             canDelete: {
+                        //                 $cond: {
+                        //                     if: { $gt: [{ $size: "$relatedDocs" }, 0] }, then: false,
+                        //                     else: true
+                        //                 }
+                        //             }
+                        //         }
+                        //     }
+                        // ]
+                    }
+
+                    // Case: Custom display_name (different from field_name)
+                    if (f.display_name) {
+                        return [{ $addFields: { [f.col]: `$${f.field_name}` } }]
                     }
 
                     return [] // fallback for fields without conditions
@@ -413,12 +448,23 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
             const response = await sturctureModel.findById({ _id: req.params.id })
             if (!response) return res.status(404).redirect(`${req.baseUrl}/404`)
 
-            const collections = mongoose.modelNames().filter(m => m !== 'Structure' && m !== 'Admin')
+            const collections = mongoose.modelNames()
+                .filter(m => m !== 'Structure' && m !== 'Admin')
                 .map(m => {
+                    const model = mongoose.model(m)
+                    const schemaPaths = model.schema.paths;
                     const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
+                    const types = ['String', 'Number', 'Boolean', 'Date']
+
                     return {
                         model: m,
-                        fields: Object.keys(mongoose.model(m).schema.paths).filter(p => !notIncluded.includes(p))
+                        fields: Object.keys(schemaPaths).filter(p => {
+                            const path = schemaPaths[p]
+                            return (
+                                !notIncluded.includes(p) &&
+                                !types.includes(path.instance)
+                            )
+                        })
                     }
                 })
 

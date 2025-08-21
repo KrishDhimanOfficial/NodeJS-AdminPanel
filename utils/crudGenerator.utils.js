@@ -186,8 +186,7 @@ function createAddEJSFile(collection, fields) {
                     <select name="${f.field_name}" ${f.field_type === 'Array' ? 'multiple' : ' '} data-selectbox="true" class="form-control select2" id="${f.relation}">
                        ${f.field_type === 'Array'
                         ? ''
-                        : '<option value="" disabled selected>Select</option>'
-                    }
+                        : '<option value="" disabled selected>Select</option>'}
                     </select>
                 </div>`
 

@@ -8,6 +8,8 @@ const setUniversalData = async (req, res, next) => {
     const cache_Key = 'navigation';
     let cachedNavigation = cache.get(cache_Key)
 
+    // console.log(config.crud_url, process.env.CRUD_URL);
+
     if (!cachedNavigation) {
         const data = await sturctureModel.find({}, { navigation: 1, _id: 0 }).lean()
         cache.set(cache_Key, data); // store in cache

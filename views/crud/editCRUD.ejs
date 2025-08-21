@@ -101,16 +101,19 @@
                                 <select name="modelDependencies" class="select2 form-control" multiple
                                     id="modelDependencies">
                                     <% collections.forEach(col=> { -%>
-                                        <optgroup label="<%= col.model.toUpperCase() %>">
-                                            <% col.fields.forEach(f=> { -%>
-                                                <option value="<%= col.model %>|<%= f %>"
-                                                    <%=response.modelDependencies.some(d=> d.relation === col.model &&
-                                                    d.field === f) ? 'selected' : '' %>>
-                                                    <%= col.model %> | <%= f %>
-                                                </option>
-                                                <% }) -%>
-                                        </optgroup>
-                                        <% }) -%>
+                                        <% if (col.fields?.length> 0) { -%>
+                                            <optgroup label="<%= col.model.toUpperCase() %>">
+                                                <% col.fields.forEach(f=> { -%>
+                                                    <option value="<%= col.model %>|<%= f %>"
+                                                        <%=response.modelDependencies.some(d=> d.relation === col.model
+                                                        &&
+                                                        d.field === f) ? 'selected' : '' %>>
+                                                        <%= col.model %> | <%= f %>
+                                                    </option>
+                                                    <% }) -%>
+                                            </optgroup>
+                                        <% } -%>
+                                    <% }) -%>w
                                 </select>
                             </div>
                         </div>
@@ -201,43 +204,48 @@
                                                         </div>
                                                     </div>
                                                     <% } -%>
-                                                      <% if (f.form_type=='checkbox' ) { -%>
-                                                    <div class="col-md-5 offset-md-6">
-                                                        <div class="form-floating mb-3">
-                                                            <input type="text" class="form-control"
-                                                                name="field[<%= i %>][checkbox_option]"
-                                                                value="<%= f.checkbox_option.map(o=>o).join(',') -%>"
-                                                                id="formId<%= i %>_checkbox_option" />
-                                                            <label for="formId<%= i %>_checkbox_option">
-                                                                Add Options (eg: option1,option2,option3)
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                    <% } -%>
-
-                                                        <% if (f.form_type=='file' ) { -%>
+                                                        <% if (f.form_type=='checkbox' ) { -%>
                                                             <div class="col-md-5 offset-md-6">
-                                                                <div class="d-flex gap-2 justify-content-center">
-                                                                    <div class="form-floating mb-3">
-                                                                        <input type="number" class="form-control"
-                                                                            value="<%= f.form_type == 'file' ? response.uploader?.count : '' %>"
-                                                                            name="field[<%= i %>][file][length]" min="0"
-                                                                            id="formlengthId<%= i %>" />
-                                                                        <label for="formlengthId<%= i %>">Length</label>
-                                                                    </div>
-
-                                                                    <div class="form-floating mb-3">
-                                                                        <input type="number" class="form-control"
-                                                                            name="field[<%= i %>][file][size]"
-                                                                            id="formsizeId<%= i %>" min="0"
-                                                                            value="<%= f.form_type == 'file' ? response.uploader?.size : '' %>" />
-                                                                        <label for="formsizeId<%= i %>">Size (eg: 2 *
-                                                                            1024 =
-                                                                            2KB)</label>
-                                                                    </div>
+                                                                <div class="form-floating mb-3">
+                                                                    <input type="text" class="form-control"
+                                                                        name="field[<%= i %>][checkbox_option]"
+                                                                        value="<%= f.checkbox_option.map(o=>o).join(',') -%>"
+                                                                        id="formId<%= i %>_checkbox_option" />
+                                                                    <label for="formId<%= i %>_checkbox_option">
+                                                                        Add Options (eg: option1,option2,option3)
+                                                                    </label>
                                                                 </div>
                                                             </div>
                                                             <% } -%>
+
+                                                                <% if (f.form_type=='file' ) { -%>
+                                                                    <div class="col-md-5 offset-md-6">
+                                                                        <div
+                                                                            class="d-flex gap-2 justify-content-center">
+                                                                            <div class="form-floating mb-3">
+                                                                                <input type="number"
+                                                                                    class="form-control"
+                                                                                    value="<%= f.form_type == 'file' ? response.uploader?.count : '' %>"
+                                                                                    name="field[<%= i %>][file][length]"
+                                                                                    min="0" id="formlengthId<%= i %>" />
+                                                                                <label
+                                                                                    for="formlengthId<%= i %>">Length</label>
+                                                                            </div>
+
+                                                                            <div class="form-floating mb-3">
+                                                                                <input type="number"
+                                                                                    class="form-control"
+                                                                                    name="field[<%= i %>][file][size]"
+                                                                                    id="formsizeId<%= i %>" min="0"
+                                                                                    value="<%= f.form_type == 'file' ? response.uploader?.size : '' %>" />
+                                                                                <label for="formsizeId<%= i %>">Size
+                                                                                    (eg: 2 *
+                                                                                    1024 =
+                                                                                    2KB)</label>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <% } -%>
                                     </div>
 
                                     <!-- Checkboxes: Required, Unique, etc. -->

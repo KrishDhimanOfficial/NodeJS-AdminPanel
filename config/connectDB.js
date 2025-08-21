@@ -15,15 +15,6 @@ const connectDB = async () => {
 
         // Initialize admin after successful connection
         await initAdmin()
-
-        // Set up connection event listeners
-        mongoose.connection.on('disconnected', () => {
-            console.log(chalk.yellow('⚠️ MongoDB disconnected'))
-        })
-
-        mongoose.connection.on('reconnected', () => {
-            console.log(chalk.green('🔄 MongoDB reconnected'))
-        })
     } catch (error) {
         console.error(chalk.red(`❌ MongoDB connection error: ${error.message}`))
         process.exit(1)

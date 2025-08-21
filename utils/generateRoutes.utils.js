@@ -6,6 +6,7 @@ import { isAuthenticated } from "../middleware/auth.middleware.js"
 import registerModel from "./registerModel.utils.js"
 import { capitalizeFirstLetter } from "captialize"
 import express from "express"
+import mongoose from "mongoose"
 const router = express.Router({ caseSensitive: true, strict: true })
 
 const GenerateCRUDRoutes = async () => {
@@ -15,6 +16,7 @@ const GenerateCRUDRoutes = async () => {
         // console.log({ model, uploader })
         const modelInstance = await registerModel(model)
         const modelName = modelInstance.modelName;
+        const collectionName = mongoose.model(modelName).collection.collectionName
         const controller = createCrudController(modelInstance, fields, modelDependencies)
         const middlewares = [isAuthenticated, setUniversalData]
         const fileMiddlewares = [isAuthenticated, uploadHandler(uploader), handlemulterError, checkSizeLimits(uploader)]
@@ -41,7 +43,7 @@ const GenerateCRUDRoutes = async () => {
         // View DataTable Page
         router.get(basePath, ...middlewares, (req, res) => {
             return res.status(200).render('datatable', {
-                title: capitalizeFirstLetter(`${modelName}s`),
+                title: capitalizeFirstLetter(collectionName),
                 addURL: `${req.originalUrl}/add`,
                 dataTableAPI: `${req.baseUrl}${apiPath}`,
                 api: req.originalUrl,
@@ -50,9 +52,9 @@ const GenerateCRUDRoutes = async () => {
         })
 
         // View Create Page
-        router.get(`${basePath}/add`, ...middlewares, (req, res) => {
+        router.get(`${basePath}/add`, ...middlewares, async (req, res) => {
             return res.status(200).render(`${modelName}/create`, {
-                title: capitalizeFirstLetter(modelName),
+                title: capitalizeFirstLetter(collectionName),
                 api: `${req.baseUrl}${basePath}`,
                 breadcrumb: [{ name: capitalizeFirstLetter(modelName), url: `${req.baseUrl}${basePath}` }, { name: 'Add', active: true }]
             })
