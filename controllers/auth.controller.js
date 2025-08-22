@@ -1,4 +1,6 @@
+import chalk from "chalk"
 import { Login_Auth } from "../config/auth.strategy.js"
+import jwt from "../services/generateJWT.service.js"
 
 const authControllers = {
     localStrategy: async (req, res, next, model) => {
@@ -19,7 +21,7 @@ const authControllers = {
             })
         })(req, res, next)
     },
-    
+
     localStrategyLogout: async (req, res, next) => {
         return req.logout((err) => {
             if (err) return next(err)
@@ -28,7 +30,23 @@ const authControllers = {
                 return res.redirect(`${req.baseUrl}/login`)
             })
         })
-    }
+    },
+
+    handleLogin: async (req, res) => {
+        try {
+
+        } catch (error) {
+            chalk.red(console.log('handleLogin : ' + error.message))
+        }
+    },
+
+    handleLogout: async (req, res) => {
+        try {
+
+        } catch (error) {
+            chalk.red(console.log('handleLogout : ' + error.message))
+        }
+    },
 }
 
 export default authControllers
