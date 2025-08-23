@@ -69,7 +69,11 @@ const CRUD_GENERATOR = async (req, res) => {
             )
         }
 
-        return res.status(200).json({ success: 'Schema created successfully.', redirect: `${req.baseUrl}/crud` })
+        return res.status(200).json({
+            success: 'Schema created successfully. You will be redirecting soon.',
+            redirect: `${req.baseUrl}/crud`,
+            delay: 1500
+        })
     } catch (error) {
         console.error('createSchema:', error.message);
         return res.status(500).json({ error: 'Internal Server Error. Unable to create schema.' })

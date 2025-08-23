@@ -22,7 +22,7 @@ const createStorage = (dir) => {
 
 const fileFilter = (req, file, cb) => {
     if (!file || !file.originalname) {
-        return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', 'Missing file name'), false);
+        return cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', 'Missing file name'), false)
     }
 
     const ext = path.extname(file.originalname);
@@ -98,10 +98,7 @@ export const rendermulterError = (err, req, res, next) => {
 } // Error handling middleware
 
 export const upload = (folder = '') => {
-    return multer({
-        storage: createStorage(folder),
-        fileFilter
-    })
+    return multer({ storage: createStorage(folder), fileFilter })
 }
 
 export const uploadHandler = (config) => {

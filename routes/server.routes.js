@@ -40,16 +40,17 @@ router.route('/generate-crud/:id?')
     .get(createCrudController().renderGenerateCRUD)
     .post(upload().none(), (req, res) => CRUD_GENERATOR(req, res))
 
-router.get('/collections', isAuthenticated, (req, res) => res.status(200).json(mongoose.modelNames()));
+router.get('/collections', isAuthenticated, (req, res) => res.status(200).json(mongoose.modelNames()))
 
-(
-    async () => {
-        await mongoose.connect(config.mongodb_URL, { dbName: config.db_name })
-        const crudRouter = await GenerateCRUDRoutes()
-        router.use('/', crudRouter)
-        router.use('/404', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
-        router.use('/*', isAuthenticated, setUniversalData, (req, res) => res.status(404).render('partials/404'))
-    }
-)(); // IIFE
+mongoose.connect(config.mongodb_URL, { dbName: config.db_name })
+const crudRouter = await GenerateCRUDRoutes()
+router.use('/', crudRouter)
+
+router.use('/404', isAuthenticated, setUniversalData, (req, res) =>
+    res.status(404).render("partials/404")
+)
+router.use('/*', isAuthenticated, setUniversalData, (req, res) =>
+    res.status(404).render("partials/404")
+)
 
 export default router

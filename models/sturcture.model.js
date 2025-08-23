@@ -39,8 +39,34 @@ const fieldSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    radio_option: { type: [String], trim: true }, // For : radio_buttons
-    checkbox_option: { type: [String], trim: true }, // For : checkboxes
+    radio_option: {
+        type: [String],
+        set: (values) => values.map(v => v.trim()),
+        validate: [
+            {
+                validator: function (v) { return v.length >= 2 },
+                message: 'Radio Options must have at least two values.'
+            },
+            {
+                validator: function (v) { return v.every(opt => opt && opt.trim().length > 0) },
+                message: 'Radio Options cannot be empty.'
+            }
+        ]
+    },  // For : radio
+    checkbox_option: {
+        type: [String],
+        set: (values) => values.map(v => v.trim()),
+        validate: [
+            {
+                validator: function (v) { return v.length >= 2 },
+                message: 'Checkbox Options must have at least two values.'
+            },
+            {
+                validator: function (v) { return v.every(opt => opt && opt.trim().length > 0) },
+                message: 'Checkbox Options cannot be empty.'
+            }
+        ],
+    }, // For : checkboxes
     display_name: { type: String, trim: true },
     required: { type: Boolean, default: false },
     unique: { type: Boolean, default: false },

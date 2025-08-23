@@ -45,7 +45,7 @@ Form && (
         : res = await Fetch.put(`${apiInput.value.trim()}/${e.target.dataset?.id}`, formdata)
 
       Notify(res) // Notify Server Message
-      if (res.success && res.redirect) setTimeout(() => { window.location.href = res.redirect }, 800)
+      if (res.success && res.redirect) setTimeout(() => { window.location.href = res.redirect }, res.delay || 800)
     } catch (error) {
       console.error(error)
     } finally {

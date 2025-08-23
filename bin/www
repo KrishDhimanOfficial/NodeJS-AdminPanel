@@ -24,7 +24,6 @@ if (cluster.isPrimary) {
   connectDB()
 
   const server = http.createServer(app)  // Create HTTP server.
-
   server.listen(port, '127.0.0.1', () => {
     const endTime = Date.now() // ⏱ Record end time
     console.log(chalk.blue(`🚀 Startup Time: ${endTime - startTime} ms`))
@@ -64,7 +63,7 @@ if (cluster.isPrimary) {
    */
 
   function onListening() {
-    const addr= server.address()
+    const addr = server.address()
     const bind = typeof addr === 'string'
       ? 'pipe ' + addr
       : 'port ' + addr.port

@@ -7,9 +7,9 @@ import registerModel from "./registerModel.utils.js"
 import { capitalizeFirstLetter } from "captialize"
 import express from "express"
 import mongoose from "mongoose"
-const router = express.Router({ caseSensitive: true, strict: true })
 
 const GenerateCRUDRoutes = async () => {
+    const router = express.Router({ caseSensitive: true, strict: true })
     const resources = await sturctureModel.find({}).lean()
 
     for await (const { model, fields, uploader, modelDependencies } of resources) {
