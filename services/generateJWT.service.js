@@ -1,4 +1,4 @@
-import { JsonWebToken } from "jsonwebtoken"
+import JsonWebToken from "jsonwebtoken"
 import config from "../config/config.js"
 
 const jwt = {
@@ -11,7 +11,7 @@ const jwt = {
     },
 
     refreshToken: (payload) => {
-        if (!payload || typeof payload !== 'object')  throw new Error('Payload must be an object')
+        if (!payload || typeof payload !== 'object') throw new Error('Payload must be an object')
         return JsonWebToken.sign(payload, config.jwt_key, {
             algorithm: 'HS256',
             expiresIn: '7d'
