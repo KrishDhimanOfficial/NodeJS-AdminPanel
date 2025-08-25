@@ -41,14 +41,21 @@ const fieldSchema = new mongoose.Schema({
     },
     radio_option: {
         type: [String],
-        set: (values) => values.map(v => v.trim()),
+        set: (values) => values?.map(v => v.trim()),
+
         validate: [
             {
-                validator: function (v) { return v.length >= 2 },
+                validator: function (v) {
+                    if (!this.radio_option || this.radio_option.length === 0) return true;
+                    return v.length >= 2;
+                },
                 message: 'Radio Options must have at least two values.'
             },
             {
-                validator: function (v) { return v.every(opt => opt && opt.trim().length > 0) },
+                validator: function (v) {
+                    if (!this.radio_option || this.radio_option.length === 0) return true;
+                    return v.every(opt => opt && opt.trim().length > 0);
+                },
                 message: 'Radio Options cannot be empty.'
             }
         ]
@@ -58,11 +65,17 @@ const fieldSchema = new mongoose.Schema({
         set: (values) => values.map(v => v.trim()),
         validate: [
             {
-                validator: function (v) { return v.length >= 2 },
+                validator: function (v) {
+                    if (!this.checkbox_option || this.checkbox_option.length === 0) return true;
+                    return v.length >= 2
+                },
                 message: 'Checkbox Options must have at least two values.'
             },
             {
-                validator: function (v) { return v.every(opt => opt && opt.trim().length > 0) },
+                validator: function (v) {
+                    if (!this.checkbox_option || this.checkbox_option.length === 0) return true;
+                    return v.every(opt => opt && opt.trim().length > 0)
+                },
                 message: 'Checkbox Options cannot be empty.'
             }
         ],

@@ -12,7 +12,7 @@ const jwt = {
 
     refreshToken: (payload) => {
         if (!payload || typeof payload !== 'object') throw new Error('Payload must be an object')
-        return JsonWebToken.sign(payload, config.jwt_key, {
+        return JsonWebToken.sign(payload, config.jwt_refresh_key, {
             algorithm: 'HS256',
             expiresIn: '7d'
         })

@@ -6,6 +6,8 @@ import { capitalizeFirstLetter } from "captialize"
 import sturctureModel from "../models/sturcture.model.js"
 import validate from '../services/validate.service.js'
 import createModelFile from "../tools/createModeFile.tool.js"
+import config from '../config/config.js'
+import { exec } from 'node:child_process'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -69,13 +71,10 @@ const CRUD_GENERATOR = async (req, res) => {
             )
         }
 
-        return res.status(200).json({
-            success: 'Schema created successfully. You will be redirecting soon.',
-            redirect: `${req.baseUrl}/crud`,
-            delay: 1500
-        })
+        if (config.node_env === 'production')  exec('npm restart', { shell: true })
+        return res.status(200).json({ success: 'Schema created successfully.' })
     } catch (error) {
-        console.error('createSchema:', error.message);
+        console.error('createSchema:', error.message)
         return res.status(500).json({ error: 'Internal Server Error. Unable to create schema.' })
     }
 }

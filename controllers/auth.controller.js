@@ -1,6 +1,7 @@
 import chalk from "chalk"
 import { Login_Auth } from "../config/auth.strategy.js"
 import jwt from "../services/generateJWT.service.js"
+import userModel from "../models/user.model.js"
 
 const authControllers = {
     localStrategy: async (req, res, next, model) => {
@@ -34,7 +35,13 @@ const authControllers = {
 
     handleLogin: async (req, res) => {
         try {
+            const response = await userModel.findOne({ email: req.body.email })
+            if (!response) return res.status(400).json({ error: 'User not found' })
 
+            return res.status(200).json({
+                success: 'Login successfully.',
+                token: jwt.generateToken({ id: response._id, name: response.name, email: response.email })
+            })
         } catch (error) {
             chalk.red(console.log('handleLogin : ' + error.message))
         }
