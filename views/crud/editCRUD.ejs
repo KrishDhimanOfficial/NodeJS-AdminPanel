@@ -112,8 +112,8 @@
                                                     </option>
                                                     <% }) -%>
                                             </optgroup>
-                                        <% } -%>
-                                    <% }) -%>w
+                                            <% } -%>
+                                                <% }) -%>w
                                 </select>
                             </div>
                         </div>
@@ -364,12 +364,23 @@
                             </div>
 
                             <div class="col-12">
-                                <div class="form-check float-end">
-                                    <input class="form-check-input" name="rewrite_files" type="checkbox"
-                                        <%=response.rewrite_files && 'checked' %> id="makerewritefiles" />
-                                    <label class="form-check-label" for="makerewritefiles">
-                                        <b>Rewrite EJS Files</b>
-                                    </label>
+                                <div class="d-flex gap-2 justify-content-end align-items-center">
+                                    <label class="form-label m-0"> Rewrite HTML Files : </label>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" name="create" type="checkbox" id="create"
+                                            <%=response.rewrite?.create && 'checked' -%> />
+                                        <label class="form-check-label" for="create">Create</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" name="edit" type="checkbox" id="edit"
+                                            <%=response.rewrite?.edit && 'checked' -%> />
+                                        <label class="form-check-label" for="edit">Edit</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" name="view" type="checkbox" id="view"
+                                            <%=response.rewrite?.view && 'checked' -%> />
+                                        <label class="form-check-label" for="view">View</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

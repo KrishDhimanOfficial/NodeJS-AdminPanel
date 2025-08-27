@@ -19,7 +19,6 @@ const __dirname = path.dirname(__filename)
 
 const CRUD_GENERATOR = async (req, res) => {
     const {
-        rewrite_files,
         collection,
         timeStamp,
         field = [],
@@ -27,16 +26,16 @@ const CRUD_GENERATOR = async (req, res) => {
         icon,
         modelDependencies,
         name,
-        model
+        model,
+        view, edit, create
     } = req.body;
     console.log(req.body);
-
+    const file_permissions = { view, edit, create }
     const filteredFields = field.filter(Boolean)
     const navigation = { isSubMenu, icon, modelDependencies, name, model }
     const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
     const viewDir = path.join(__dirname, '../views', collection)
 
-    // Input Validation
     if (!collection || filteredFields.length === 0) return res.status(400).json({ error: 'All Fields are required.' })
 
     try {
@@ -46,30 +45,17 @@ const CRUD_GENERATOR = async (req, res) => {
 
         // Save metadata and upload required files
         const response = await SaveData(collection, timeStamp, filteredFields, navigation, req.method,
-            req.params.id, rewrite_files)
+            req.params.id, file_permissions)
         if (!response.success) return validate(res, response.error.errors)
 
         // Generate and write model file
         createModelFile(filePath, collection, filteredFields, timeStamp)
 
-        if (rewrite_files === 'on' || existingCollection.rewrite_files) {
-            // Create view directory
-            await fs.mkdir(viewDir, { recursive: true })
+        // Create view directory
+        if (view === 'on' || edit === 'on' || create === 'on') await fs.mkdir(viewDir, { recursive: true })
 
-            // Generate and write EJS view files
-            const views = {
-                create: createAddEJSFile(collection, filteredFields),
-                update: createUpdateEJSFile(collection, filteredFields),
-                view: createViewEJSFile(collection, filteredFields)
-            }
-
-            await Promise.all(
-                Object.entries(views).map(([name, content]) => {
-                    const viewPath = path.join(viewDir, `${name}.ejs`)
-                    return fs.writeFile(viewPath, content)
-                })
-            )
-        }
+        // Generate and write EJS view files
+        createEjsFiles(collection, filteredFields, viewDir, file_permissions)
 
         if (config.node_env === 'production') exec('npm restart', { shell: true })
         return res.status(200).json({ success: 'Schema created successfully.' })
@@ -79,7 +65,7 @@ const CRUD_GENERATOR = async (req, res) => {
     }
 }
 
-async function SaveData(collection, timeStamp, field, nav, requestMethod, id, rewrite_files) {
+async function SaveData(collection, timeStamp, field, nav, requestMethod, id, file_permissions) {
 
     try {
         const isSubMenu = nav.isSubMenu === 'on';
@@ -116,11 +102,16 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
                 : [{ model: collection, field: nav.modelDependencies.split('|')[1], relation: nav.modelDependencies.split('|')[0], }]
             : []
 
+        const rewrite = {
+            view: file_permissions.view === 'on',
+            edit: file_permissions.edit === 'on',
+            create: file_permissions.create === 'on',
+        }
+
         const data = {
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
-            rewrite_files: rewrite_files === undefined ? false : true,
-            modelDependencies,
+            rewrite, modelDependencies,
         }
 
         const res = requestMethod === 'PUT'
@@ -133,6 +124,26 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, re
         chalk.red(console.error('SaveData : ', error.message))
         return { success: false, error }
     }
+}
+
+async function createEjsFiles(collection, filteredFields, viewDir, file_permissions) {
+    const { edit: update, ...rest } = file_permissions;
+    const access = { ...rest, update }
+
+    const views = {
+        create: createAddEJSFile(collection, filteredFields),
+        update: createUpdateEJSFile(collection, filteredFields),
+        view: createViewEJSFile(collection, filteredFields)
+    }
+
+    return await Promise.all(
+        Object.entries(views).map(async ([name, content]) => {
+            const viewPath = path.join(viewDir, `${name}.ejs`)
+            return access[name] === 'on' && access[name] !== undefined
+                ? fs.writeFile(viewPath, content)
+                : await fs.unlink(viewPath).catch(err => err.code !== 'ENOENT' && Promise.reject(err))
+        })
+    )
 }
 
 // Function That's set multer Config
@@ -182,6 +193,8 @@ function createAddEJSFile(collection, fields) {
         const label = `<label for="${f.field_name}" class="form-label mb-2">${capitalizeFirstLetter(f.display_name || f.field_name)}</label>`;
 
         switch (f.form_type) {
+            case 'none':
+                return ''
             case 'select':
                 return `
                 <div class="mb-3">

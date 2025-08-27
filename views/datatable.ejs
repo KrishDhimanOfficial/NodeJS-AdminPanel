@@ -1,26 +1,29 @@
 <div class="container">
     <div class="row">
-        <div class="col-md-6">
-            <a href="<%= locals.addURL ? addURL : '' %>" class="btn btn-dark">Add new</a>
-        </div>
-        <div class="col-12">
-            <div class="d-flex justify-content-between mt-3">
-                <div class="d-flex gap-2">
-                    <button id="download-csv" type="button" class="btn btn-outline-purple btn-sm">Download
-                        CSV</button>
-                    <button id="download-xlsx" type="button" class="btn btn-outline-purple btn-sm">Download
-                        XLSX</button>
-                    <button id="download-pdf" type="button" class="btn btn-outline-purple btn-sm">Download PDF</button>
-                </div>
-                <select id="hide-column-select" class="form-control w-25">
-                    <option selected disabled>Hide Column</option>
-                </select>
+        <% if (locals.addURL || locals.isAddUrlVisible) { -%>
+            <div class="col-md-6">
+                <a href="<%= locals.addURL ? addURL : '' %>" class="btn btn-dark">Add new</a>
             </div>
-        </div>
-        <div class="col-12">
-            <input type="hidden" id="dataTableAPI" value="<%= locals.dataTableAPI ? dataTableAPI : ''  %>">
-            <div id="tabulator"></div>
-        </div>
+            <% } -%>
+                <div class="col-12">
+                    <div class="d-flex justify-content-between mt-3">
+                        <div class="d-flex gap-2">
+                            <button id="download-csv" type="button" class="btn btn-outline-purple btn-sm">Download
+                                CSV</button>
+                            <button id="download-xlsx" type="button" class="btn btn-outline-purple btn-sm">Download
+                                XLSX</button>
+                            <button id="download-pdf" type="button" class="btn btn-outline-purple btn-sm">Download
+                                PDF</button>
+                        </div>
+                        <select id="hide-column-select" class="form-control w-25">
+                            <option selected disabled>Hide Column</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <input type="hidden" id="dataTableAPI" value="<%= locals.dataTableAPI ? dataTableAPI : ''  %>">
+                    <div id="tabulator"></div>
+                </div>
     </div>
 </div>
 <%- include('./partials/table.script.ejs') %>

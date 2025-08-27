@@ -115,7 +115,7 @@ const columnsOptions = { // Tabulator Column Options
         buttons.className = 'd-flex flex-wrap gap-3';
 
         if (view) {
-            buttons.insertAdjacentHTML('beforeend', `<a href='${window.location.pathname}/view/${_id}' class="btn btn-primary btn-sm">
+            buttons.insertAdjacentHTML('beforeend', `<a href='${window.location.pathname}/${_id}' class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-eye" ></i>
                 </a>`)
         }

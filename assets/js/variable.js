@@ -183,6 +183,7 @@ export function FieldRow(fieldId, formTypeId, typeId, counter) {
     ]
 
     const formInputTypes = [
+        'none',
         "text", "select", "file", "email", "url", "tel", "search", "number", "range",
         "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"
     ]

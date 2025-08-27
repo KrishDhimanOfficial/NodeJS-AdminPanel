@@ -15,7 +15,7 @@ import { capitalizeFirstLetter } from "captialize";
 const log = console.log;
 const validateId = mongoose.Types.ObjectId.isValid;
 
-const createCrudController = (model, fields = [], modelDependencies = []) => ({
+const createCrudController = (model, fields = [], modelDependencies = [], rewrite = {}) => ({
     create: async (req, res) => {
         try {
             // console.log(req.body);
@@ -205,7 +205,7 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                     })),
                 {
                     col: 'table_actions', download: false, maxWidth: 180, actions: {
-                        edit: true, view: false,
+                        edit: rewrite.edit, view: rewrite.view,
                     }
                 }
             ]
@@ -475,7 +475,7 @@ const createCrudController = (model, fields = [], modelDependencies = []) => ({
                     collections, response,
                     breadcrumb: [{ name: 'CRUD', url: `${req.baseUrl}/crud` }, { name: 'Edit', active: true, }],
                     schemaTypes: ["String", "Number", "Boolean", "Array", "ObjectId", "Date", "Double", "Mixed", 'Map'],
-                    formTypes: ["text", "select", "file", "email", "url", "tel", "search", "number", "range", "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"],
+                    formTypes: ['none', "text", "select", "file", "email", "url", "tel", "search", "number", "range", "color", "date", "time", "datetime-local", "month", "week", "radio", "checkbox", "textarea"],
                     filters: ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number'],
                 }
             )

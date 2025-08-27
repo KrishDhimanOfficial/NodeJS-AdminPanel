@@ -12,12 +12,12 @@ const GenerateCRUDRoutes = async () => {
     const router = express.Router({ caseSensitive: true, strict: true })
     const resources = await sturctureModel.find({}).lean()
 
-    for await (const { model, fields, uploader, modelDependencies } of resources) {
+    for await (const { model, fields, uploader, modelDependencies, rewrite } of resources) {
         // console.log({ model, uploader })
         const modelInstance = await registerModel(model)
         const modelName = modelInstance.modelName;
         const collectionName = mongoose.model(modelName).collection.collectionName
-        const controller = createCrudController(modelInstance, fields, modelDependencies)
+        const controller = createCrudController(modelInstance, fields, modelDependencies, rewrite)
         const middlewares = [isAuthenticated, setUniversalData]
         const fileMiddlewares = [isAuthenticated, uploadHandler(uploader), handlemulterError, checkSizeLimits(uploader)]
         const basePath = `/resources/${modelName}`;
@@ -44,6 +44,7 @@ const GenerateCRUDRoutes = async () => {
         router.get(basePath, ...middlewares, (req, res) => {
             return res.status(200).render('datatable', {
                 title: capitalizeFirstLetter(collectionName),
+                isAddUrlVisible: rewrite.create,
                 addURL: `${req.originalUrl}/add`,
                 dataTableAPI: `${req.baseUrl}${apiPath}`,
                 api: req.originalUrl,

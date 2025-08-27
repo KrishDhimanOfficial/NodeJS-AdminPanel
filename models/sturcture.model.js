@@ -97,16 +97,23 @@ const structureSchema = new mongoose.Schema({
         required: [true, 'Model Name is required.'],
         unique: [true, 'Model Name is already in use.'],
         match: [
-            /^[a-zA-Z0-9_]+$/,
-            'Model Name must be alphanumeric and underscores only.'
+            /^[a-z0-9_]+$/,
+            'Model Name must be lowercase and underscores , numbers only.'
         ]
+    },
+    rewrite: {
+        type: {
+            view: { type: Boolean, default: true },
+            create: { type: Boolean, default: true },
+            edit: { type: Boolean, default: true },
+        }
     },
     modelDependencies: { type: Array },
     timestamps: { type: Boolean, default: true },
     navigation: navigationSchema,
     fields: { type: [fieldSchema] },
     uploader: { type: Object },
-    rewrite_files: { type: Boolean, default: true }
+    // rewrite_files: { type: Boolean, default: true }
 },
     { timestamps: true }
 )
