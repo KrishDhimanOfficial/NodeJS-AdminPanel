@@ -8,8 +8,9 @@ const cache_Key = 'navigation';
 const cache = new NodeCache({ stdTTL: 60 * 60 })
 
 const setUniversalData = async (req, res, next) => {
+    if (config.node_env === 'production') exec('npm restart')
     const cachedNavigation = await sturctureModel.find({}, { navigation: 1, _id: 0 }).lean()
-    console.log(cachedNavigation)
+    // console.log(cachedNavigation)
 
     // let cachedNavigation = cache.get(cache_Key)
     // console.log('cachedNavigation :', cachedNavigation)
