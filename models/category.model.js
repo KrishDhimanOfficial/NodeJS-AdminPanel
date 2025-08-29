@@ -1,13 +1,13 @@
 import mongoose from 'mongoose'
-            import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
+import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 
-            const categorySchema = new mongoose.Schema({
-              name: {
+const categorySchema = new mongoose.Schema({
+  name: {
     type: String,
+    unique: [true, "name is already in use."],
     required: [true, "name is required."],
-    unique: [true, "name is already in use."]
-}
-            }, { timestamps: true })
+  }
+}, { timestamps: true })
 
-            categorySchema.plugin(mongooseAggregatePaginate)
-            export default mongoose.model("category", categorySchema)
+categorySchema.plugin(mongooseAggregatePaginate)
+export default mongoose.model("category", categorySchema)

@@ -345,24 +345,76 @@ const ensureTimestamps = (schemaNewExpr, on) => {
     }
 }
 
+const ensurePreHooks = (ast, collection, isFresh = false) => {
+    if (!isFresh) return; // on update, do nothing
+
+    const schemaName = `${collection}Schema`;
+    const body = ast.program.body;
+
+    // Prepare the hook statements
+    const makeHook = (hookName) =>
+        b.expressionStatement(
+            b.callExpression(
+                b.memberExpression(b.identifier(schemaName), b.identifier("pre")),
+                [
+                    b.stringLiteral(hookName),
+                    b.arrowFunctionExpression(
+                        [b.identifier("next")],
+                        b.blockStatement([b.expressionStatement(b.callExpression(b.identifier("next"), []))])
+                    ),
+                ]
+            )
+        );
+
+    const hooksToAdd = [makeHook("save"), makeHook("findOneAndUpdate")];
+
+    // Find the export default mongoose.model(...) index
+    const exportIndex = body.findIndex(
+        (n) =>
+            t.isExportDefaultDeclaration(n) &&
+            t.isCallExpression(n.declaration) &&
+            t.isMemberExpression(n.declaration.callee) &&
+            t.isIdentifier(n.declaration.callee.object, { name: "mongoose" }) &&
+            t.isIdentifier(n.declaration.callee.property, { name: "model" }) &&
+            n.declaration.arguments.length >= 2 &&
+            t.isIdentifier(n.declaration.arguments[1], { name: `${collection}Schema` })
+    );
+
+    // Insert hooks before export, or at the end if export not found
+    if (exportIndex >= 0) {
+        body.splice(exportIndex, 0, ...hooksToAdd);
+    } else {
+        body.push(...hooksToAdd);
+    }
+}
+
 const createFreshContent = (collection, fields, timeStamp) => {
+    const schemaName = `${collection}Schema`;
+
     const fieldLines = fields
         .map((f) => {
             const name = f.field_name.replace(/\s+/g, "_").trim()
-            const node = buildFieldValue(f)
+            const node = buildFieldValue(f);
             return `  ${name}: ${recast.print(node).code}`;
         })
         .join(",\n")
 
-    return `import mongoose from 'mongoose'
-            import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
+    // pre hooks AST -> convert to code
+    const saveHook = `${schemaName}.pre('save', function(next) { next(); });`;
+    const updateHook = `${schemaName}.pre('findOneAndUpdate', function(next) { next(); });`;
 
-            const ${collection}Schema = new mongoose.Schema({
-            ${fieldLines}
-            }, { timestamps: ${timeStamp === 'on'} })
+    return `import mongoose from "mongoose";
+    import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-            ${collection}Schema.plugin(mongooseAggregatePaginate)
-            export default mongoose.model("${collection}", ${collection}Schema)`;
+    const ${schemaName} = new mongoose.Schema({
+    ${fieldLines}
+    }, { timestamps: ${timeStamp === "on"} })
+
+    ${schemaName}.plugin(mongooseAggregatePaginate)
+    ${saveHook}
+    ${updateHook}
+    export default mongoose.model("${collection}", ${schemaName});
+    `;
 }
 
 /** ============================== */
@@ -396,7 +448,7 @@ export default async function createModelFile(filePath, collection, fields, time
     // if schema not found, append a fresh one (do not touch manual code)
     if (!schemaDecl) {
         const fresh = "\n\n" + createFreshContent(collection, normalized, timeStamp)
-        await fs.writeFile(filePath, src + fresh, "utf8")
+        await fs.writeFile(filePath, fresh, "utf8")
         return;
     }
 
@@ -432,9 +484,10 @@ export default async function createModelFile(filePath, collection, fields, time
         upsertField(targetFieldsObj, f.field_name, newVal, f)
     })
 
-    // 5) ensure plugin and export lines exist
+    // 5) ensure plugin and export,hooks lines exist
     ensurePluginApplied(ast, collection)
     ensureExportDefaultModel(ast, collection)
+    ensurePreHooks(ast, collection, false)
 
     // 6) write back, preserving manual code/style
     const out = recast.print(ast).code;

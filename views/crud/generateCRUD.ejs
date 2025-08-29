@@ -48,6 +48,18 @@
                                 <input type="text" class="form-control iconpicker" name="icon"
                                     placeholder="search Icon" />
                             </div>
+                            <div class="col-md-4">
+                                <div class="d-flex gap-2 align-items-center mb-2">
+                                    <label for="" class="form-label m-0">OverWrite DataTable API</label>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" name="dataTableApi_check" type="checkbox"
+                                            id="overwrite">
+                                        <label class="form-check-label" for="overwrite">Overwrite</label>
+                                    </div>
+                                </div>
+                                <input type="text" name="dataTableApi" class="form-control d-none"
+                                    placeholder="/admin/resources/api/">
+                            </div>
                         </div>
 
                         <!-- Submenu Settings -->
@@ -133,12 +145,14 @@
                                         <label class="form-check-label" for="view">View</label>
                                     </div>
                                 </div>
-
-                                <!-- <div class="form-check float-end">
-                                    <input class="form-check-input" name="rewrite_files" type="checkbox" checked
-                                        id="makerewritefiles" />
-                                    <label class="form-check-label" for="makerewritefiles"><b>Rewrite EJS
-                                            Files</b></label>
+                                <!-- <div class="d-flex justify-content-end align-items-center">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" name="rewrite_files" type="checkbox" checked
+                                            id="makerewritefiles" />
+                                        <label class="form-check-label m-0" for="makerewritefiles">
+                                            Rewrite EJS Files
+                                        </label>
+                                    </div>
                                 </div> -->
                             </div>
                         </div>

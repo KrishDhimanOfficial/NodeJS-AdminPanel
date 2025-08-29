@@ -113,7 +113,7 @@ const structureSchema = new mongoose.Schema({
     navigation: navigationSchema,
     fields: { type: [fieldSchema] },
     uploader: { type: Object },
-    // rewrite_files: { type: Boolean, default: true }
+    rewrite_files: { type: Boolean, default: true }
 },
     { timestamps: true }
 )

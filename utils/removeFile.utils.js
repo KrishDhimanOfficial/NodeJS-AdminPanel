@@ -10,9 +10,9 @@ const __dirname = path.dirname(__filename)
 const deleteFile = async (folderPath) => {
     try {
         const imagePath = path.join(__dirname, '..', folderPath)
+        if (!fs.existsSync(imagePath)) return
 
-        if (fs.existsSync(imagePath)) await fs.promises.rm(imagePath, { force: true })
-        else console.log(chalk.red(`File not found: ${imagePath}`))
+        await fs.promises.rm(imagePath, { force: true })
     } catch (error) {
         console.error(chalk.red('deleteFile error:', error.message))
     }

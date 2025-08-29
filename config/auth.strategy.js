@@ -31,19 +31,3 @@ export const Login_Auth = async (model, field1 = 'email', field2 = 'password') =
         )
     )
 }
-
-passport.use(new Strategy( // JWT Auth
-    {
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: config.jwt_key,
-    },
-    async (jwt_payload, done) => {
-        try {
-            const user = await model.findById(jwt_payload.id)
-            if (user) return done(null, user)
-            return done(null, false)
-        } catch (err) {
-            return done(err, false)
-        }
-    })
-)

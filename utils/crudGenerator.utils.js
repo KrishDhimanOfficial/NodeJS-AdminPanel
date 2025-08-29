@@ -27,10 +27,12 @@ const CRUD_GENERATOR = async (req, res) => {
         modelDependencies,
         name,
         model,
-        view, edit, create
+        view, edit, create,
+        rewrite_files, dataTableApi_check, dataTableApi
     } = req.body;
     console.log(req.body);
-    const file_permissions = { view, edit, create }
+    const metaData = { dataTableApi_check, dataTableApi }
+    const file_permissions = { view, edit, create, rewrite_files }
     const filteredFields = field.filter(Boolean)
     const navigation = { isSubMenu, icon, modelDependencies, name, model }
     const filePath = path.join(__dirname, '../models', `${collection}.model.js`)
@@ -45,7 +47,7 @@ const CRUD_GENERATOR = async (req, res) => {
 
         // Save metadata and upload required files
         const response = await SaveData(collection, timeStamp, filteredFields, navigation, req.method,
-            req.params.id, file_permissions)
+            req.params.id, file_permissions, metaData)
         if (!response.success) return validate(res, response.error.errors)
 
         // Generate and write model file
@@ -65,7 +67,7 @@ const CRUD_GENERATOR = async (req, res) => {
     }
 }
 
-async function SaveData(collection, timeStamp, field, nav, requestMethod, id, file_permissions) {
+async function SaveData(collection, timeStamp, field, nav, requestMethod, id, file_permissions, metaData) {
 
     try {
         const isSubMenu = nav.isSubMenu === 'on';
@@ -112,6 +114,7 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, fi
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
             rewrite, modelDependencies,
+            rewrite_files: file_permissions.rewrite_files === 'on'
         }
 
         const res = requestMethod === 'PUT'
