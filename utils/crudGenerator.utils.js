@@ -28,10 +28,10 @@ const CRUD_GENERATOR = async (req, res) => {
         name,
         model,
         view, edit, create,
-        rewrite_files, dataTableApi_check, dataTableApi
+        rewrite_files, dataTableApi, dataTableApi_check,
     } = req.body;
     console.log(req.body);
-    const metaData = { dataTableApi_check, dataTableApi }
+    const metaData = { dataTableApi, dataTableApi_check }
     const file_permissions = { view, edit, create, rewrite_files }
     const filteredFields = field.filter(Boolean)
     const navigation = { isSubMenu, icon, modelDependencies, name, model }
@@ -114,11 +114,15 @@ async function SaveData(collection, timeStamp, field, nav, requestMethod, id, fi
             model: collection, timeStamp, navigation, fields,
             uploader: uploader(collection, field),
             rewrite, modelDependencies,
-            rewrite_files: file_permissions.rewrite_files === 'on'
+            // rewrite_files: file_permissions.rewrite_files === 'on',
+            ...(metaData.dataTableApi_check == 'on' && { dataTableApi: metaData.dataTableApi }),
         }
 
+        const unsetData = {}
+        if (metaData.dataTableApi_check !== 'on' && requestMethod === 'PUT') unsetData.dataTableApi = ''
+
         const res = requestMethod === 'PUT'
-            ? await sturctureModel.findByIdAndUpdate({ _id: id }, data, { new: true, runValidators: true })
+            ? await sturctureModel.findByIdAndUpdate({ _id: id }, { $set: data, $unset: unsetData }, { new: true, runValidators: true })
             : await sturctureModel.create(data)
 
         if (!res) return { success: false }
@@ -218,11 +222,17 @@ function createAddEJSFile(collection, fields) {
 
             case 'radio':
                 const options = f.radio_option?.split(',')
-                return ` <div class="mb-3 d-flex flex-column">
+                return `<div class="mb-3 d-flex flex-column">
                     ${label}
                     <div class='d-flex'>
-                     ${options.map(o => `<div class="form-check form-check-inline">
-                        <input class="form-check-input" type="${f.form_type}" name="${f.field_name}" id="${o}" value="${o}" />
+                     ${options?.map(o => `<div class="form-check form-check-inline">
+                        <input class="form-check-input"
+                            type="${f.form_type}" 
+                            name="${f.field_name}" 
+                            id="${o}" 
+                            value="response.${f.field_name}" 
+                            <%= response.${f.field_name} && 'checked' %> 
+                        />
                         <label class="form-check-label" for="${o}">${o}</label>
                     </div>`).join('')}
                      </div>
@@ -230,11 +240,18 @@ function createAddEJSFile(collection, fields) {
 
             case 'checkbox':
                 const checkoptions = f.checkbox_option?.split(',')
-                return ` <div class="mb-3 d-flex flex-column">
+                return `<div class="mb-3 d-flex flex-column">
                     ${label}
                     <div class='d-flex'>
-                     ${checkoptions.map(o => `<div class="form-check form-check-inline">
-                        <input class="form-check-input" type="${f.form_type}" name="${f.field_name}" id="${o}" value="${o}" />
+                     ${checkoptions?.map(o => `<div class="form-check form-check-inline">
+                        <input 
+                            class="form-check-input" 
+                            type="${f.form_type}" 
+                            name="${f.field_name}" 
+                            id="${o}" 
+                            value="${o}" 
+                            <%= response.${f.field_name}.includes('${o}') && 'checked' %> 
+                            /> 
                         <label class="form-check-label" for="${o}">${o}</label>
                     </div>`).join('')}
                      </div>
@@ -277,6 +294,8 @@ function createUpdateEJSFile(collection, fields) {
         const label = `<label for="${f.field_name}" class="form-label mb-2">${capitalizeFirstLetter(f.display_name || f.field_name)}</label>`;
 
         switch (f.form_type) {
+            case 'none':
+                return ''
             case 'select':
                 return `
                 <div class="mb-3">
@@ -314,13 +333,13 @@ function createUpdateEJSFile(collection, fields) {
                 return `<div class="mb-3 d-flex flex-column">
                     ${label}
                     <div class='d-flex'>
-                     ${options.map(o => `<div class="form-check form-check-inline">
+                     ${options?.map(o => `<div class="form-check form-check-inline">
                         <input class="form-check-input"
                             type="${f.form_type}" 
                             name="${f.field_name}" 
                             id="${o}" 
-                            value="${o}" 
-                            <%= response.${f.field_name} === '${o}' ? 'checked' : '' %> 
+                            value="response.${f.field_name}" 
+                            <%= response.${f.field_name} && 'checked' %> 
                         />
                         <label class="form-check-label" for="${o}">${o}</label>
                     </div>`).join('')}
@@ -332,7 +351,7 @@ function createUpdateEJSFile(collection, fields) {
                 return `<div class="mb-3 d-flex flex-column">
                     ${label}
                     <div class='d-flex'>
-                     ${checkoptions.map(o => `<div class="form-check form-check-inline">
+                     ${checkoptions?.map(o => `<div class="form-check form-check-inline">
                         <input 
                             class="form-check-input" 
                             type="${f.form_type}" 

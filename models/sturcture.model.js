@@ -113,6 +113,7 @@ const structureSchema = new mongoose.Schema({
     navigation: navigationSchema,
     fields: { type: [fieldSchema] },
     uploader: { type: Object },
+    dataTableApi: { type: String },
     rewrite_files: { type: Boolean, default: true }
 },
     { timestamps: true }

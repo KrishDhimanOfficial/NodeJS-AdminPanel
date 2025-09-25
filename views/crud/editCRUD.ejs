@@ -16,7 +16,7 @@
             <div class="col-12">
                 <div class="card card-primary">
                     <div class="card-header bg-purple">
-                        <h3 class="card-title">Collection Name</h3>
+                        <h3 class="card-title">Collection Configuration</h3>
                     </div>
 
                     <div class="card-body">
@@ -59,6 +59,21 @@
                                 <input type="text" id="mainIcon" value="<%= response.navigation?.icon %>"
                                     class="form-control iconpicker" name="icon" placeholder="search Icon" />
                             </div>
+
+                            <div class="col-md-4">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <label for="" class="form-label m-0">OverWrite DataTable API</label>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" name="dataTableApi_check" type="checkbox"
+                                            id="overwrite_dataTableApi_checkBox" <%=response.dataTableApi && 'checked'
+                                            -%>>
+                                        <label class="form-check-label" for="overwrite">Overwrite</label>
+                                    </div>
+                                </div>
+                                <input id="dataTableApi" type="text" name="dataTableApi"
+                                    class="form-control <%= response.dataTableApi ? '' : 'd-none' %>"
+                                    value="<%= response.dataTableApi ? response.dataTableApi : baseUrl %>">
+                            </div>
                         </div>
 
                         <!-- Submenu Settings -->
@@ -96,7 +111,7 @@
                         <!-- Prevent Deletion Dependencies -->
                         <div id="preventDeletionRow"
                             class="row <%= response.modelDependencies.length > 0 ? '' : 'd-none' %>">
-                            <div class="col-md-4 mb-2 d-flex flex-column">
+                            <div class="col-md-8 mb-2 d-flex flex-column">
                                 <label for="modelDependencies" class="form-label">Model Not To Delete</label>
                                 <select name="modelDependencies" class="select2 form-control" multiple
                                     id="modelDependencies">
@@ -133,8 +148,7 @@
                     <div class="card-body">
                         <div id="addField">
                             <% response.fields?.forEach((f, i)=> { -%>
-                                <!-- Single Field Group -->
-                                <div class="field-group">
+                                <div id="field_group_<%= i + 1 %>" class="field-group" draggable>
                                     <h3>Field <%= i + 1 %>
                                     </h3>
                                     <div class="row mb-2">

@@ -12,7 +12,7 @@ const GenerateCRUDRoutes = async () => {
     const router = express.Router({ caseSensitive: true, strict: true })
     const resources = await sturctureModel.find({}).lean()
 
-    for await (const { model, fields, uploader, modelDependencies, rewrite } of resources) {
+    for await (const { model, dataTableApi, fields, uploader, modelDependencies, rewrite } of resources) {
         // console.log({ model, uploader })
         const modelInstance = await registerModel(model)
         const modelName = modelInstance.modelName;
@@ -46,7 +46,7 @@ const GenerateCRUDRoutes = async () => {
                 title: capitalizeFirstLetter(collectionName),
                 isAddUrlVisible: rewrite.create,
                 addURL: `${req.originalUrl}/add`,
-                dataTableAPI: `${req.baseUrl}${apiPath}`,
+                dataTableAPI: dataTableApi || `${req.baseUrl}${apiPath}`,
                 api: req.originalUrl,
                 breadcrumb: [{ name: capitalizeFirstLetter(modelName), active: true, url: `${req.baseUrl}${basePath}` }]
             })

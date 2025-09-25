@@ -75,6 +75,12 @@ document.querySelectorAll('select[id]').forEach((select) => {
   }
 })
 
+// handle overwrite DataTable API checkBox
+const overwrite_dataTableApi_checkBox = document.querySelector('#overwrite_dataTableApi_checkBox')
+
+const dataTableApi = document.querySelector('#dataTableApi')
+overwrite_dataTableApi_checkBox?.addEventListener('change', () => dataTableApi.classList.toggle('d-none'))
+
 let counter = parseInt(document.querySelector('#counter')?.value) || 0;
 let collections = null;
 
@@ -103,7 +109,7 @@ addFieldBtn?.addEventListener('click', () => {
 
   // Template for new field block
   const fieldTemplate = `
-    <div class="field-group">
+    <div id="field_group_${counter + 1}" class="field-group-${counter + 1}" >
       <h3>Field ${counter + 1}</h3>
       ${FieldRow(fieldId, formTypeId, typeId, counter)}
       <div id="selectBox_form_type_${counter}" class="row mb-2 d-none"></div>
@@ -206,6 +212,13 @@ $(document).on('change', 'select[data-counter]', function () {
 fieldsContainer && (
   fieldsContainer.onclick = (e) => {
     const counter = e.target.dataset.counter;
+    console.log(counter);
+    
+    document.querySelector(`#field_group_${counter}`).addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", counter);
+    })
+    dragAndDrop(counter)
+
     if (!counter) return;
 
     const default_value_checkBox = e.target.closest(`#default_value_checkBox_${counter}`)
@@ -222,6 +235,9 @@ fieldsContainer && (
     // Attach onchange to type selector
     if (typeSelect && default_value_checkBox) {
       typeSelect.onchange = (e) => {
+        e.target.value != 'String' && e.target.value != 'Number'
+          ? default_value_checkBox.checked = false
+          : default_value_checkBox.checked = true, defaultRow.classList.toggle('d-none')
         setFieldDefaultValue(counter, defaultRow, e.target.value)
       }
     }
@@ -243,3 +259,11 @@ const prevent_deletion = document.querySelector('#prevent_deletion')
 prevent_deletion?.addEventListener('change', () => {
   document.querySelector('#preventDeletionRow')?.classList.toggle('d-none')
 })
+
+// drag & drop functionality
+function dragAndDrop(counter) {
+  const fieldGroup = document.querySelector(`#field_group_${counter}`)
+  fieldGroup.addEventListener("dragover", (e) => {
+    e.preventDefault()
+  })
+}

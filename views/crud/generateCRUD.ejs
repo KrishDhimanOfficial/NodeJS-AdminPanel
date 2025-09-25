@@ -13,7 +13,7 @@
             <div class="col-12">
                 <div class="card card-primary">
                     <div class="card-header bg-purple">
-                        <h3 class="card-title">Collection Name</h3>
+                        <h3 class="card-title">Collection Configuration</h3>
                     </div>
                     <div class="card-body">
                         <div class="row mb-2">
@@ -49,16 +49,16 @@
                                     placeholder="search Icon" />
                             </div>
                             <div class="col-md-4">
-                                <div class="d-flex gap-2 align-items-center mb-2">
+                                <div class="d-flex gap-2 align-items-center">
                                     <label for="" class="form-label m-0">OverWrite DataTable API</label>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" name="dataTableApi_check" type="checkbox"
-                                            id="overwrite">
+                                            id="overwrite_dataTableApi_checkBox" >
                                         <label class="form-check-label" for="overwrite">Overwrite</label>
                                     </div>
                                 </div>
-                                <input type="text" name="dataTableApi" class="form-control d-none"
-                                    placeholder="/admin/resources/api/">
+                                    <input id="dataTableApi" type="text" name="dataTableApi" class="form-control d-none"
+                                        value="<%= baseUrl %>">
                             </div>
                         </div>
 
@@ -90,7 +90,7 @@
 
                         <!-- Prevent Deletion -->
                         <div id="preventDeletionRow" class="row d-none">
-                            <div class="col-md-4 mb-2">
+                            <div class="col-md-8 mb-2">
                                 <label for="modelDependencies" class="form-label">Model Not To Delete</label>
                                 <select name="modelDependencies" class="select2 form-control" multiple
                                     id="modelDependencies">
