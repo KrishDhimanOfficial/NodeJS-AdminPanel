@@ -148,7 +148,7 @@
                     <div class="card-body">
                         <div id="addField">
                             <% response.fields?.forEach((f, i)=> { -%>
-                                <div id="field_group_<%= i + 1 %>" class="field-group" draggable>
+                                <div class="field-group" data-counter="<%= i +1 %>" draggable="true">
                                     <h3>Field <%= i + 1 %>
                                     </h3>
                                     <div class="row mb-2">

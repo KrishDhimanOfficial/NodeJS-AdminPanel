@@ -9,7 +9,7 @@ import Fetch from "./fetch.js"
 import {
   datatable, displayPreviewImage, updatetableDataStatus,
   Form, Notify, previewImageInput, openDangerModal, setupSelect2, deleteCRUDFieldRow,
-  FieldCheckBox, setFieldDefaultValue, FieldRow
+  FieldCheckBox, setFieldDefaultValue, FieldRow, getDragAfterElement, rearrangeFieldGroup
 } from "./variable.js";
 
 datatable && initializeTabulator()
@@ -37,8 +37,12 @@ Form && (
       submitFormBtn.disabled = true;
       submitFormBtn.innerHTML = 'Submitting...';
 
+      const FieldGroups = document.querySelectorAll('#addField .field-group')
+      FieldGroups && rearrangeFieldGroup(FieldGroups) // Reorder Field Groups
+
       const formdata = new FormData(e.target)
       document.querySelector('.summernote') && formdata.delete('files')
+
 
       Form.id === 'SubmitForm' // Handle Data Submission To Server
         ? res = await Fetch.post(apiInput.value.trim(), formdata)
@@ -212,13 +216,6 @@ $(document).on('change', 'select[data-counter]', function () {
 fieldsContainer && (
   fieldsContainer.onclick = (e) => {
     const counter = e.target.dataset.counter;
-    console.log(counter);
-    
-    document.querySelector(`#field_group_${counter}`).addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", counter);
-    })
-    dragAndDrop(counter)
-
     if (!counter) return;
 
     const default_value_checkBox = e.target.closest(`#default_value_checkBox_${counter}`)
@@ -261,9 +258,27 @@ prevent_deletion?.addEventListener('change', () => {
 })
 
 // drag & drop functionality
-function dragAndDrop(counter) {
-  const fieldGroup = document.querySelector(`#field_group_${counter}`)
-  fieldGroup.addEventListener("dragover", (e) => {
-    e.preventDefault()
+let draggedItem = null;
+fieldsContainer && (
+  fieldsContainer.addEventListener("dragstart", (e) => {
+    draggedItem = e.target;
+    setTimeout(() => (e.target.style.display = "none"), 0)
+  }),
+
+  fieldsContainer.addEventListener("dragend", (e) => {
+    setTimeout(() => {
+      draggedItem.style.display = "block";
+      draggedItem = null;
+    }, 0)
+  }),
+
+  fieldsContainer.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    const afterElement = getDragAfterElement(fieldsContainer, e.clientY)
+    if (afterElement == null) {
+      fieldsContainer.appendChild(draggedItem)
+    } else {
+      fieldsContainer.insertBefore(draggedItem, afterElement)
+    }
   })
-}
+)
