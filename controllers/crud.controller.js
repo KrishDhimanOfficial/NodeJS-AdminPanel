@@ -395,14 +395,27 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
     },
     renderGenerateCRUD: async (req, res) => {
         try {
-            const collections = mongoose.modelNames().filter(m => m !== 'Structure' && m !== 'Admin').map(m => {
-                const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
-                return {
-                    model: m,
-                    fields: Object.keys(mongoose.model(m).schema.paths)
-                        .filter(p => !notIncluded.includes(p))
-                }
-            })
+            const collections = mongoose.modelNames()
+                .filter(m => m !== 'Structure' && m !== 'Admin')
+                .map(m => {
+                    const model = mongoose.model(m)
+                    const schemaPaths = model.schema.paths;
+
+                    return {
+                        model: m,
+                        fields: Object.keys(schemaPaths).filter(p => {
+                            const path = schemaPaths[p]
+                            if (path.instance === "ObjectId") return true
+                            if (
+                                path.instance === "Array" &&
+                                path.caster && path.caster.instance === "ObjectId") {
+                                return true
+                            }
+
+                            return false
+                        })
+                    }
+                })
 
             return res.status(200).render('crud/generateCRUD',
                 {
@@ -453,20 +466,43 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
                 .map(m => {
                     const model = mongoose.model(m)
                     const schemaPaths = model.schema.paths;
-                    const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
-                    const types = ['String', 'Number', 'Boolean', 'Date']
 
                     return {
                         model: m,
                         fields: Object.keys(schemaPaths).filter(p => {
                             const path = schemaPaths[p]
-                            return (
-                                !notIncluded.includes(p) &&
-                                !types.includes(path.instance)
-                            )
+                            if (path.instance === "ObjectId") return true
+                            if (
+                                path.instance === "Array" &&
+                                path.caster && path.caster.instance === "ObjectId") {
+                                return true
+                            }
+
+                            return false
                         })
                     }
                 })
+
+            // const collections = mongoose.modelNames()
+            //     .filter(m => m !== 'Structure' && m !== 'Admin')
+            //     .map(m => {
+            //         const model = mongoose.model(m)
+            //         const schemaPaths = model.schema.paths;
+            //         const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
+            //         const types = ['String', 'Number', 'Boolean', 'Date']
+
+            //         return {
+            //             model: m,
+            //             fields: Object.keys(schemaPaths).filter(p => {
+            //                 const path = schemaPaths[p]
+            //                 return (
+            //                     !notIncluded.includes(p) &&
+            //                     !types.includes(path.instance)
+            //                 )
+            //             })
+            //         }
+            //     })
+
 
             return res.status(200).render('crud/editCRUD',
                 {

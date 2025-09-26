@@ -123,7 +123,7 @@
                                                         <%=response.modelDependencies.some(d=> d.relation === col.model
                                                         &&
                                                         d.field === f) ? 'selected' : '' %>>
-                                                        <%= col.model %> | <%= f %>
+                                                        <%= col.model -%> | <%= f %>
                                                     </option>
                                                     <% }) -%>
                                             </optgroup>

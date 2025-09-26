@@ -257,8 +257,8 @@ prevent_deletion?.addEventListener('change', () => {
   document.querySelector('#preventDeletionRow')?.classList.toggle('d-none')
 })
 
-// drag & drop functionality
-let draggedItem = null;
+// drag & drop functionality Field Row Groups
+let draggedItem = null; 
 fieldsContainer && (
   fieldsContainer.addEventListener("dragstart", (e) => {
     draggedItem = e.target;
