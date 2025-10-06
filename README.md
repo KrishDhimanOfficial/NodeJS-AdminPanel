@@ -3,6 +3,7 @@
 A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with Node.js, Express, MongoDB, and EJS templating. This project features automatic model generation, dynamic route creation, and a modern admin interface.
 
 ## To Create Project
+```bash
 npx create-admin-panel your-project-name
 
 ## 🚀 Features
