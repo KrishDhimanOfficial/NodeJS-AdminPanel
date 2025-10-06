@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "create-admin-panel": "./index.js"
+  },
   "scripts": {
     "start": "pm2 start ./bin/www",
     "restart": "pm2 restart ./bin/www",
