@@ -1,11 +1,9 @@
 import dotenv from 'dotenv'
 import bcrypt from 'bcrypt'
-import { Strategy, ExtractJwt } from 'passport-jwt'
 dotenv.config()
 
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
-import config from './config.js'
 
 export const Login_Auth = async (model, field1 = 'email', field2 = 'password') => {
     return passport.use(
