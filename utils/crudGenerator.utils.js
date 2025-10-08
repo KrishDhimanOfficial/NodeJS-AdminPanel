@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { capitalizeFirstLetter } from "captialize"
 import sturctureModel from "../models/sturcture.model.js"
 import validate from '../services/validate.service.js'
-import createModelFile from "../tools/createModeFile.tool.js"
+import createModelFile from "./createModeFile.utils.js"
 import config from '../config/config.js'
 import { exec } from 'node:child_process'
 const __filename = fileURLToPath(import.meta.url)
