@@ -6,6 +6,7 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 ```bash
  npx create-admin-panel your-project-name 
 ```
+![alt text](<Screenshot 2025-10-08 at 7.37.27 PM.png>)
 
 ## 🚀 Features
 
