@@ -80,12 +80,7 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 │  └─ setUniversalData.middleware.js
 ├─ models/
 │  ├─ admin.model.js
-│  ├─ author.model.js
-│  ├─ category.model.js
-│  ├─ post.model.js
-│  ├─ sturcture.model.js
-│  ├─ subcategory.model.js
-│  └─ tag.model.js
+│  |_ sturcture.model.js
 ├─ routes/
 │  ├─ server.routes.js   # Admin routes (mounted at /admin)
 │  └─ site.routes.js     # Public/site routes
@@ -96,13 +91,12 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 │  └─ validate.service.js
 ├─ utils/
 │  ├─ crudGenerator.utils.js
+|  |- createModeFile.tool.js
 │  ├─ generateRoutes.utils.js
 │  ├─ handlepagination.utils.js
 │  ├─ handleRemoveRecord.utils.js
 │  ├─ registerModel.utils.js
-│  └─ removeFile.utils.js
-├─ tools/
-│  └─ createModeFile.tool.js
+│  └─ removeFile.utils.js Punjabi
 ├─ assets/
 │  ├─ css/
 │  │  ├─ all.min.css
@@ -141,9 +135,7 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 │     └─ tabulator/
 │        ├─ css/{tabulator.min.css, tabulator_semanticui.min.css}
 │        └─ js/{tabulator.min.js, tabulator.js, xlsx.min.js, jspdf.min.js, autotable.min.js}
-├─ uploads/                 # Local uploads (non-persistent on serverless)
-│  ├─ admin/
-│  └─ post/
+├─ uploads/ 
 ├─ views/
 │  ├─ layout.ejs
 │  ├─ dashboard.ejs
@@ -159,11 +151,5 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 │  │  ├─ sidebar.ejs
 │  │  └─ table.script.ejs
 │  ├─ Admin_profile/profile.ejs
-│  ├─ author/{create.ejs, update.ejs, view.ejs}
-│  ├─ category/{create.ejs, update.ejs}
-│  ├─ post/{create.ejs, update.ejs}
-│  ├─ subcategory/
-│  ├─ tag/{create.ejs, update.ejs}
-│  └─ user/{create.ejs, update.ejs, view.ejs}
 └─ node_modules/
 ```
