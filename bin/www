@@ -21,6 +21,7 @@ if (cluster.isPrimary) {
 } else {
   const port = config.port;
   app.set('port', port)
+  app.set('trust proxy', 1)
   connectDB()
 
   const server = http.createServer(app)  // Create HTTP server.
@@ -30,7 +31,6 @@ if (cluster.isPrimary) {
     console.log(chalk.yellow(`Running http://localhost:${port}/admin/login`))
   })
 
-  server.set('trust proxy', 1)
   server.on('error', onError)
   server.on('listening', onListening)
   server.setTimeout(10000)
