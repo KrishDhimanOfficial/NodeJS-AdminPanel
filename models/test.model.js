@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 
     const testSchema = new mongoose.Schema({
       name: {
-    type: String,
-    required: [true, "name is required."]
-}
+          type: String,
+          required: [true, "name is required."],
+          unique: [true, "name is already in use."]
+      }
     }, { timestamps: true })
 
     testSchema.plugin(mongooseAggregatePaginate)
