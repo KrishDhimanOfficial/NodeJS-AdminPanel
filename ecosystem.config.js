@@ -2,7 +2,7 @@ export default {
     apps: [
         {
             name: "ADMINPANEL",
-            script: './bin/www',
+            script: 'bin/www',
             instances: "max",            // Or 1 for single instance
             autorestart: true,
             watch: false,
