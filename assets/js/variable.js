@@ -5,7 +5,7 @@ export const previewImagesInput = document.querySelector('#previewImagesInput')
 export const Form = document.querySelector('#SubmitForm') || document.querySelector('#updateForm')
 export const submitFormBtn = document.querySelector('#submitFormBtn')
 export const datatable = document.querySelector('#tabulator')
-import Fetch from "./fetch.js"
+import Fetch from "./Fetch.js"
 
 const notyf = new Notyf({
     duration: 2500,
