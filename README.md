@@ -153,14 +153,6 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 │  ├─ Admin_profile/profile.ejs
 └─ node_modules/
 ```
-## 🚀 Multer Middleware Utils Functins
-```bash
- upload('folderName').single('field_name')
-```
-
-```bash
-  app.get('/',upload('folderName').single('field_name') , handlemulterError, checkSizeLimits([{field_name:'',size: 'file_size'}]))
-```
 
 ### 📦 Multer Usage Guide (Detailed)
 
