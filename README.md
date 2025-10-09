@@ -155,5 +155,103 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 ```
 ## 🚀 Multer Middleware Utils Functins
 ```bash
- upload('folderName').single('field_name') // array() , .none()
+ upload('folderName').single('field_name')
 ```
+
+```bash
+  app.get('/',upload('folderName').single('field_name') , handlemulterError, checkSizeLimits([{field_name:'',size: 'file_size'}]))
+```
+
+### 📦 Multer Usage Guide (Detailed)
+
+Your Multer helpers live in `middleware/multer.middleware.js`.
+
+- `upload(folder?)` → configured disk storage under `uploads/<folder>`
+- `uploadHandler(config)` → wrapper for single/array/fields
+- `checkSizeLimits(rules)` → per-field size checks (KB) + auto-delete if too large
+- `handlemulterError` / `rendermulterError` → normalize errors (JSON vs redirect)
+
+#### 1) Single file example
+```js
+import { upload, handlemulterError } from './middleware/multer.middleware.js'
+
+app.post('/profile',
+  upload('admin').single('profile'),
+  handlemulterError,
+  (req, res) => res.json({ file: req.file })
+)
+```
+
+#### 2) Multiple files (array)
+```js
+import { upload, handlemulterError } from './middleware/multer.middleware.js'
+
+app.post('/gallery',
+  upload('post').array('images', 5),
+  handlemulterError,
+  (req, res) => res.json({ files: req.files })
+)
+```
+
+#### 3) Multiple named fields
+```js
+import { upload, handlemulterError } from './middleware/multer.middleware.js'
+
+app.post('/compose',
+  upload('post').fields([
+    { name: 'cover', maxCount: 1 },
+    { name: 'gallery', maxCount: 8 }
+  ]),
+  handlemulterError,
+  (req, res) => res.json({ cover: req.files?.cover?.[0], gallery: req.files?.gallery })
+)
+```
+
+#### 4) uploadHandler shortcut
+```js
+import { uploadHandler, handlemulterError } from './middleware/multer.middleware.js'
+
+app.post('/avatar',
+  uploadHandler({ type: 'single', folder: 'admin', field_name: 'avatar' }),
+  handlemulterError,
+  (req, res) => res.json({ file: req.file })
+)
+```
+
+#### 5) Enforce size limits per field
+```js
+import { upload, handlemulterError, checkSizeLimits } from './middleware/multer.middleware.js'
+
+app.post('/submit',
+  upload('post').fields([
+    { name: 'thumb', maxCount: 1 },
+    { name: 'attachments', maxCount: 10 }
+  ]),
+  checkSizeLimits([
+    { field_name: 'thumb', size: 300 },        // 300 KB
+    { field_name: 'attachments', size: 2048 }  // 2 MB
+  ]),
+  handlemulterError,
+  (req, res) => res.json({ ok: true })
+)
+```
+
+#### 6) Allowed file types
+Controlled via `config.allowedExtensions` in `config/config.js`.
+```js
+allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.pdf']
+```
+If the extension is not allowed, the middleware responds with `400 Invalid File Format`.
+
+#### 7) Error handling patterns
+- API endpoints: use `handlemulterError` (returns JSON with 400 status)
+- Form endpoints: use `rendermulterError` (sets `req.session.errors` then redirects)
+
+```js
+import { upload, rendermulterError } from './middleware/multer.middleware.js'
+app.post('/form', upload('post').single('image'), rendermulterError, (req, res) => res.redirect('/form/success'))
+```
+
+#### 8) Storage & production note
+- Files are stored in `uploads/<folder>`; directories are created automatically.
+- On serverless (Vercel), disk is ephemeral. For production, switch to external storage (S3/Cloudinary). Replace `multer.diskStorage` with an adapter, then store returned URLs in MongoDB.
