@@ -1,11 +1,11 @@
-import '../vendor/jquery/jquery.min.js'
-import '../vendor/bootstrap/js/bootstrap.bundle.min.js'
-import '../vendor/select2/js/select2.full.min.js'
-import '../vendor/pace-progress/pace.min.js'
-import '../vendor/adminlte/adminlte.min.js'
-import '../vendor/summernote/summernote.min.js'
-import '../vendor/iconpicker/fontawesome-iconpicker.min.js'
-import Fetch from "./Fetch.js"
+// import '../vendor/jquery/jquery.min.js'
+// import '../vendor/bootstrap/js/bootstrap.bundle.min.js'
+// import '../vendor/select2/js/select2.full.min.js'
+// import '../vendor/pace-progress/pace.min.js'
+// import '../vendor/adminlte/adminlte.min.js'
+// import '../vendor/summernote/summernote.min.js'
+// import '../vendor/iconpicker/fontawesome-iconpicker.min.js'
+// import Fetch from "./Fetch.js"
 import {
   datatable, displayPreviewImage, updatetableDataStatus,
   Form, Notify, previewImageInput, openDangerModal, setupSelect2, deleteCRUDFieldRow,
@@ -22,12 +22,6 @@ $('.select2').length && $('.select2').select2()
 previewImageInput && (
   previewImageInput.onchange = (e) => displayPreviewImage(e) // display image preview
 )
-
-// window['dark-mode-btn'].onclick = () => {
-//   document.body.classList.toggle('dark-mode')
-//   document.querySelector('.main-sidebar').classList.toggle('sidebar-dark-purple')
-//   document.querySelector('.navbar').classList.toggle('navbar-purple')
-// }
 
 Form && (
   Form.onsubmit = async (e) => {
