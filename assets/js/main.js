@@ -5,7 +5,7 @@ import '../vendor/pace-progress/pace.min.js'
 import '../vendor/adminlte/adminlte.min.js'
 import '../vendor/summernote/summernote.min.js'
 import '../vendor/iconpicker/fontawesome-iconpicker.min.js'
-import Fetch from "./fetch.js"
+import Fetch from "./Fetch.js"
 import {
   datatable, displayPreviewImage, updatetableDataStatus,
   Form, Notify, previewImageInput, openDangerModal, setupSelect2, deleteCRUDFieldRow,
