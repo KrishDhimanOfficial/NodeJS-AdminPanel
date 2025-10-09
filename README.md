@@ -153,3 +153,7 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 │  ├─ Admin_profile/profile.ejs
 └─ node_modules/
 ```
+## 🚀 Multer Middleware Utils Functins
+```bash
+ upload('folderName').single('field_name') // array() , .none()
+```
