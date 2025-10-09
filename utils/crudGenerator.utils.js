@@ -59,7 +59,7 @@ const CRUD_GENERATOR = async (req, res) => {
         // Generate and write EJS view files
         createEjsFiles(collection, filteredFields, viewDir, file_permissions)
 
-        if (config.node_env === 'production') exec('npm restart', { shell: true })
+        exec('npm restart', { shell: true })
         return res.status(200).json({ success: 'Schema created successfully.' })
     } catch (error) {
         console.error('createSchema:', error.message)

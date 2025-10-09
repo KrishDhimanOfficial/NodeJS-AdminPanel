@@ -1,6 +1,6 @@
 <div class="container">
     <div class="row">
-        <% if (locals.addURL || locals.isAddUrlVisible) { -%>
+        <% if (locals.addURL && locals.isAddUrlVisible) { -%>
             <div class="col-md-6">
                 <a href="<%= locals.addURL ? addURL : '' %>" class="btn btn-dark">Add new</a>
             </div>
