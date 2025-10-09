@@ -16,7 +16,7 @@ if (cluster.isPrimary) {
 
   cluster.on('exit', (worker, code, signal) => {
     cluster.fork()
-    console.log(`Worker ${worker.process.pid} died. Starting a new one...`)
+    config.node_env === 'development' && console.log(`Worker ${worker.process.pid} died. Starting a new one...`)
   })
 } else {
   const port = config.port;
@@ -27,8 +27,8 @@ if (cluster.isPrimary) {
   const server = http.createServer(app)  // Create HTTP server.
   server.listen(port, () => {
     const endTime = Date.now() // ⏱ Record end time
-    console.log(chalk.blue(`🚀 Startup Time: ${endTime - startTime} ms`))
-    console.log(chalk.yellow(`Running http://localhost:${port}/admin/login`))
+    config.node_env === 'development' && console.log(chalk.blue(`🚀 Startup Time: ${endTime - startTime} ms`))
+    config.node_env === 'development' && console.log(chalk.yellow(`Running http://localhost:${port}/admin/login`))
   })
 
   server.on('error', onError)
