@@ -7,7 +7,6 @@
     "create-admin-panel": "./index.js"
   },
   "scripts": {
-    "server": "npx pm2-runtime ecosystem.config.js",
     "start": "pm2 start ./bin/www",
     "restart": "pm2 restart ./bin/www",
     "stop": "pm2 stop ./bin/www",
