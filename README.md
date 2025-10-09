@@ -199,18 +199,7 @@ app.post('/compose',
 )
 ```
 
-#### 4) uploadHandler shortcut
-```js
-import { uploadHandler, handlemulterError } from './middleware/multer.middleware.js'
-
-app.post('/avatar',
-  uploadHandler({ type: 'single', folder: 'admin', field_name: 'avatar' }),
-  handlemulterError,
-  (req, res) => res.json({ file: req.file })
-)
-```
-
-#### 5) Enforce size limits per field
+#### 4) Enforce size limits per field
 ```js
 import { upload, handlemulterError, checkSizeLimits } from './middleware/multer.middleware.js'
 
@@ -220,22 +209,22 @@ app.post('/submit',
     { name: 'attachments', maxCount: 10 }
   ]),
   checkSizeLimits([
-    { field_name: 'thumb', size: 300 },        // 300 KB
-    { field_name: 'attachments', size: 2048 }  // 2 MB
+    { field_name: 'thumb', size: 30 },        // 30 * 10 = 300KB
+    { field_name: 'attachments', size: 100 }  // 100 * 10 = 1MB
   ]),
   handlemulterError,
-  (req, res) => res.json({ ok: true })
+  (req, res) => res.json({ success: true })
 )
 ```
 
-#### 6) Allowed file types
+#### 5) Allowed file types
 Controlled via `config.allowedExtensions` in `config/config.js`.
 ```js
 allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.pdf']
 ```
 If the extension is not allowed, the middleware responds with `400 Invalid File Format`.
 
-#### 7) Error handling patterns
+#### 6) Error handling patterns
 - API endpoints: use `handlemulterError` (returns JSON with 400 status)
 - Form endpoints: use `rendermulterError` (sets `req.session.errors` then redirects)
 
@@ -244,6 +233,6 @@ import { upload, rendermulterError } from './middleware/multer.middleware.js'
 app.post('/form', upload('post').single('image'), rendermulterError, (req, res) => res.redirect('/form/success'))
 ```
 
-#### 8) Storage & production note
+#### 7) Storage & production note
 - Files are stored in `uploads/<folder>`; directories are created automatically.
 - On serverless (Vercel), disk is ephemeral. For production, switch to external storage (S3/Cloudinary). Replace `multer.diskStorage` with an adapter, then store returned URLs in MongoDB.
