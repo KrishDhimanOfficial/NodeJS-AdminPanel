@@ -14,10 +14,10 @@ if (cluster.isPrimary) {
   for (let i = 0; i < numcpu.cpus().length; ++i)  cluster.fork()
   console.log(`Primary ${process.pid} is running`)
 
-  cluster.on('exit', (worker, code, signal) => {
-    cluster.fork()
-    config.node_env === 'development' && console.log(`Worker ${worker.process.pid} died. Starting a new one...`)
-  })
+  // cluster.on('exit', (worker, code, signal) => {
+  //   cluster.fork()
+  //   config.node_env === 'development' && console.log(`Worker ${worker.process.pid} died. Starting a new one...`)
+  // })
 } else {
   const port = config.port;
   app.set('port', port)
