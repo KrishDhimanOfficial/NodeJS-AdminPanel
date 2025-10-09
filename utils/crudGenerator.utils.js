@@ -60,6 +60,7 @@ const CRUD_GENERATOR = async (req, res) => {
         createEjsFiles(collection, filteredFields, viewDir, file_permissions)
 
         exec('npm restart', { shell: true })
+        exec('node ./bin/www', { shell: true })
         return res.status(200).json({ success: 'Schema created successfully.' })
     } catch (error) {
         console.error('createSchema:', error.message)
