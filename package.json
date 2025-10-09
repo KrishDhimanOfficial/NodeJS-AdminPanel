@@ -7,7 +7,7 @@
     "create-admin-panel": "./index.js"
   },
   "scripts": {
-    "server": "pm2-runtime ./bin/www",
+    "server": "node ./bin/www",
     "start": "pm2 start ./bin/www",
     "restart": "pm2 restart ./bin/www",
     "stop": "pm2 stop ./bin/www",
