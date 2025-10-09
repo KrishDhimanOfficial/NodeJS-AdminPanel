@@ -76,13 +76,13 @@ passport.deserializeUser((user, done) => {
 
 // View Engine
 app.set('view engine', 'ejs')
-app.set('views', 'views')
-app.use('/views', express.static('views'))
+app.set('views', path.join(__dirname, 'views'))
+app.use('/views', express.static(path.join(__dirname, 'views')))
 app.use(expressLayouts)
 
 // folder setup
-app.use('/uploads', express.static('uploads'))
-app.use('/assets', express.static('assets'))
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+app.use('/assets', express.static(path.join(__dirname, 'assets')))
 
 app.use(rateLimit(
   {
