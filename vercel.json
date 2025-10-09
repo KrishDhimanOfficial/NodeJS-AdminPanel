@@ -8,8 +8,8 @@
     ],
     "rewrites": [
         {
-            "source": "/(.*)",
-            "destination": "./bin/www"
+            "src": "/(.*)",
+            "dest": "./bin/www"
         }
     ]
 }
