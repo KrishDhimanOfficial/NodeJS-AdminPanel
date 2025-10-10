@@ -288,7 +288,8 @@ app.post('/form', upload('post').single('image'), rendermulterError, (req, res) 
 
 #### 7) Storage & production note
 - Files are stored in `uploads/<folder>`; directories are created automatically.
-- On serverless (Vercel), disk is ephemeral. For production, switch to external storage (S3/Cloudinary). Replace `multer.diskStorage` with an adapter, then store returned URLs in MongoDB.
+<!-- - On serverless (Vercel), disk is ephemeral. For production, switch to external storage (S3/Cloudinary). Replace `multer.diskStorage` with an adapter, then store returned URLs in MongoDB. -->
+
 
 
 ## 🔢 Pagination (utils/handlepagination.utils.js)
@@ -340,3 +341,68 @@ export const listPosts = async (req, res) => {
 Notes:
 - The helper injects filter stages into your provided aggregation pipeline.
 - It relies on `mongoose-aggregate-paginate-v2`; ensure your schema is plugin-enabled if required by your setup, or the model supports `aggregatePaginate`.
+
+## 🗑️ File Deletion Utilities (utils/removeFile.utils.js)
+
+This module provides two helpers to manage files saved on disk (typically in `uploads/`).
+
+### `deleteFile(relativePath)`
+Deletes a file by its relative path from project root.
+
+```js
+import { deleteFile } from './utils/removeFile.utils.js'
+
+// Example: remove a single file returned by multer
+await deleteFile('uploads/post/1734567890.png')
+```
+
+Notes:
+- `relativePath` should be the path you stored in the DB (e.g., `uploads/...`).
+- The function is safe if the file is missing; it returns without throwing.
+
+### `containsImage(document)`
+Scans an object/document and detects fields that look like image/file paths based on `config.allowedExtensions`.
+
+```js
+import { containsImage } from './utils/removeFile.utils.js'
+
+const doc = {
+  name: 'User A',
+  avatar: 'uploads/user.jpg',
+  gallery: ['uploads/img1.png', 'uploads/img2.webp']
+}
+
+const { hasImage, fields } = containsImage(doc)
+// hasImage === true
+// fields = [
+//   { field: 'avatar', type: 'single', value: 'uploads/user.jpg' },
+//   { field: 'gallery', type: 'multiple', value: ['uploads/img1.png', 'uploads/img2.webp'] }
+// ]
+```
+
+Typical usage: when deleting a DB record, first detect and remove any associated files.
+
+```js
+import { deleteFile, containsImage } from './utils/removeFile.utils.js'
+
+export const removePost = async (req, res) => {
+  const post = await PostModel.findById(req.params.id)
+  if (!post) return res.status(404).json({ error: 'Not found' })
+
+  const { hasImage, fields } = containsImage(post.toObject())
+  if (hasImage) {
+    for (const f of fields) {
+      if (f.type === 'single') await deleteFile(f.value)
+      if (f.type === 'multiple') {
+        for (const p of f.value) await deleteFile(p)
+      }
+    }
+  }
+
+  await post.deleteOne()
+  return res.json({ success: true })
+}
+```
+
+<!-- Serverless note:
+- On Vercel, the filesystem is ephemeral. `deleteFile` is still safe to call, but uploaded files should be stored on external storage (S3/Cloudinary). In that case, replace `deleteFile` with the provider's delete API. -->
