@@ -97,7 +97,7 @@ npm start    # pm2 start ./bin/www
 pm2 restart 
 ```
 
-### 5) Deploy on Vercel (serverless)
+<!-- ### 5) Deploy on Vercel (serverless)
 This project is pre-configured with `vercel.json` to run `app.js` as a serverless function.
 
 Steps:
@@ -105,7 +105,7 @@ Steps:
 2. Import the project in Vercel Dashboard
 3. Set Environment Variables (same as `.env`, at least: SERVER_URL, MONGODB_URL, SECURITY_KEY, MOGO_STORE_SECRET_KEY)
 4. No custom build needed; a `vercel-build` script is provided
-5. Deploy
+5. Deploy -->
 
 ## 📁 Folder Structure
 
