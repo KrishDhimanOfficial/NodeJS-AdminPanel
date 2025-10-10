@@ -25,7 +25,6 @@ A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with N
 - ✅ **Auto-generated Views** - Create, update, and view pages generated dynamically
 - ✅ **RESTful API** - Complete CRUD API endpoints for each model
 - ✅ **Real-time Validation** - Form validation and error handling
-- ✅ **Image Preview** - File upload with preview functionality
 - ✅ **Pagination** - Efficient data pagination
 - ✅ **Security** - CSRF protection, rate limiting, and input sanitization
 
