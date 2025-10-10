@@ -4,10 +4,65 @@
 
 A powerful, dynamic CRUD (Create, Read, Update, Delete) admin panel built with Node.js, Express, MongoDB, and EJS templating. This project features automatic model generation, dynamic route creation, and a modern admin interface.
 
-## 🚀 To Create Project
+<!-- ## 🚀 To Create Project
 ```bash
  npx create-admin-panel your-project-name 
+``` -->
+
+## ⚙️ Setup & Installation
+
+### Prerequisites
+- Node.js 20+
+- MongoDB (Atlas connection string recommended)
+- npm
+
+### 1) To Create Project
+```bash
+npx create-admin-panel your-project-name
+cd  your-project-name
+npm install
 ```
+
+### 2) Configure environment variables
+Copy `sample.env` to `.env` and fill the values:
+```bash
+cp sample.env .env
+```
+Required keys (adjust as needed):
+- SERVER_URL = https://localhost:3000 (or your domain)
+- NODE_ENV = development
+- PORT = 3000
+- MONGODB_URL = mongodb+srv://<user>:<pass>@<cluster>/<db>
+- SECURITY_KEY = <random_string>            # express-session secret
+- MOGO_STORE_SECRET_KEY = <random_string>   # connect-mongo crypto
+- JWT_KEY = <random_string>
+- JWT_REFRESH_KEY = <random_string>
+- SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_SERVICE (if sending email)
+- CRUD_URL = true|false
+
+### 3) Run locally (development)
+```bash
+npm run dev
+```
+Visit `http://localhost:3000`.
+
+### 4) Run in production on your server (PM2)
+This repo includes an `ecosystem.config.js`. Typical commands:
+```bash
+npm run start          # pm2 start ./bin/www
+pm2 logs ADMINPANEL   # view logs
+pm2 restart ADMINPANEL
+```
+
+### 5) Deploy on Vercel (serverless)
+This project is pre-configured with `vercel.json` to run `app.js` as a serverless function.
+
+Steps:
+1. Push your repo to GitHub/GitLab
+2. Import the project in Vercel Dashboard
+3. Set Environment Variables (same as `.env`, at least: SERVER_URL, MONGODB_URL, SECURITY_KEY, MOGO_STORE_SECRET_KEY)
+4. No custom build needed; a `vercel-build` script is provided
+5. Deploy
 
 ## 🚀 Features
 
