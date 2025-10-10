@@ -93,9 +93,8 @@ Visit `http://localhost:3000`.
 ### 4) Run in production on your server (PM2)
 This repo includes an `ecosystem.config.js`. Typical commands:
 ```bash
-npm run start          # pm2 start ./bin/www
-pm2 logs ADMINPANEL   # view logs
-pm2 restart ADMINPANEL
+npm start    # pm2 start ./bin/www
+pm2 restart 
 ```
 
 ### 5) Deploy on Vercel (serverless)
