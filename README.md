@@ -289,3 +289,54 @@ app.post('/form', upload('post').single('image'), rendermulterError, (req, res) 
 #### 7) Storage & production note
 - Files are stored in `uploads/<folder>`; directories are created automatically.
 - On serverless (Vercel), disk is ephemeral. For production, switch to external storage (S3/Cloudinary). Replace `multer.diskStorage` with an adapter, then store returned URLs in MongoDB.
+
+
+## 🔢 Pagination (utils/handlepagination.utils.js)
+
+`utils/handlepagination.utils.js` exposes `handleAggregatePagination(model, aggregation, query, filters)` to paginate any Mongoose model using an aggregation pipeline.
+
+### Usage
+```js
+import handleAggregatePagination from './utils/handlepagination.utils.js'
+
+// Controller example
+export const listPosts = async (req, res) => {
+   const query = {
+                page: req.query.page,
+                limit: req.query.size
+            }
+  const aggregation = [
+    { $match: {} },
+    { $sort: { createdAt: -1 } },
+    // ... add more stages as needed
+  ]
+
+  // Optional UI-driven filters (see below)
+  const filters = req.body?.filters || [] // tabulator filters
+
+  const response = await handleAggregatePagination(PostModel, aggregation, query, filters)
+  return res.status(200).json(resposne)
+}
+```
+
+### Query params
+- `page` (number, default 1)
+- `size` (number, default 10)
+
+### Response shape
+```json
+{
+  "totalDocs": number,
+  "totalPages": number,
+  "page": number,
+  "limit": number,
+  "prevpage": boolean,
+  "nextpage": boolean,
+  "pageCounter": number,
+  "collectionData": [/* docs */]
+}
+```
+
+Notes:
+- The helper injects filter stages into your provided aggregation pipeline.
+- It relies on `mongoose-aggregate-paginate-v2`; ensure your schema is plugin-enabled if required by your setup, or the model supports `aggregatePaginate`.
