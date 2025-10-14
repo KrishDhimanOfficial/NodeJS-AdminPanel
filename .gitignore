@@ -2,3 +2,24 @@ node_modules
 .env
 .DS_Store
 index.js
+
+# Ignore everything in this folder
+models/*
+uploads/*
+views/*
+views/*
+
+# But keep these two files or folders
+!models/admin.model.js
+!models/sturcture.model.js
+
+!views/Admin_profile
+!views/crud
+!views/partials
+!views/dashboard.ejs
+!views/datatable.ejs
+!views/layout.ejs
+!views/error.ejs
+!views/login.ejs
+!views/rate-limit.html
+!views/emailTemplate.html
