@@ -16,6 +16,11 @@
     "dev": "nodemon ./bin/www",
     "vercel-build": "echo 'Vercel build: no compile step'"
   },
+  "author": "Krish Dhiman",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KrishDhimanOfficial/NodeJS-AdminPanel"
+  },
   "dependencies": {
     "@babel/parser": "^7.28.0",
     "bcrypt": "^6.0.0",
