@@ -1,7 +1,9 @@
 # NodeJS Admin Panel
 
+## 🚀 Quick Start
+Run directly using NPX:
 ```bash
- npx create-admin-panel your-project-name 
+npx create-admin-panel your-project-name
 ```
 
 ![alt text](<Screenshot 2025-10-08 at 7.37.27 PM.png>)
