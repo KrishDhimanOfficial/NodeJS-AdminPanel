@@ -13,8 +13,6 @@ views/*
 !models/admin.model.js
 !models/sturcture.model.js
 
-!uploads/demo
-
 !views/Admin_profile
 !views/crud
 !views/partials
