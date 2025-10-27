@@ -1,7 +1,7 @@
 {
   "name": "create-admin-panel",
   "version": "1.0.4",
-  "private": false,
+  "private": true,
   "type": "module",
   "engines": {
     "node": "20.x"
