@@ -1,14 +1,8 @@
 {
-  "name": "create-admin-panel",
+  "name": "adminpanel",
   "version": "1.0.4",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": "20.x"
-  },
-  "bin": {
-    "create-admin-panel": "./index.js"
-  },
   "scripts": {
     "start": "pm2 start ./bin/www",
     "restart": "pm2 restart ./bin/www",
