@@ -4,6 +4,7 @@
  * @returns {object} CRUD methods
  * Developer - KRISH DHIMAN
 */
+
 import mongoose from "mongoose";
 import validate from "../services/validate.service.js"
 import { deleteFile, containsImage } from '../utils/removeFile.utils.js'
@@ -18,11 +19,6 @@ const validateId = mongoose.Types.ObjectId.isValid;
 const createCrudController = (model, fields = [], modelDependencies = [], rewrite = {}) => ({
     create: async (req, res) => {
         try {
-            // console.log(req.body);
-            // console.log(req.files);
-            // const val = options.check;
-            // const IsExist = await model.findOne({ val })
-            // if (IsExist) res.status(400).json({ info: `${options.check} Already Exist.` })
 
             if (req.file?.fieldname && req.file?.path) {
                 req.body[req.file.fieldname] = req.file.path;
@@ -265,24 +261,6 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
                             }
                         }
                         return [...docs_lookups, docs_unwind]
-
-                        // const relationModel = modelDependencies.find(d => d.model === model.modelName)
-                        // if (!relationModel) return [{ $addFields: { canDelete: true } }]
-
-                        // const collectionName = mongoose.model(relationModel.relation).collection.name;
-                        // return [
-                        //     { $lookup: { from: collectionName, localField: '_id', foreignField: relationModel.field, as: 'relatedDocs' } },
-                        //     {
-                        //         $addFields: {
-                        //             canDelete: {
-                        //                 $cond: {
-                        //                     if: { $gt: [{ $size: "$relatedDocs" }, 0] }, then: false,
-                        //                     else: true
-                        //                 }
-                        //             }
-                        //         }
-                        //     }
-                        // ]
                     }
 
                     // Case: Custom display_name (different from field_name)
@@ -393,6 +371,7 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
             console.log('renderCRUD : ' + error.message)
         }
     },
+
     renderGenerateCRUD: async (req, res) => {
         try {
             const collections = mongoose.modelNames()
@@ -430,6 +409,7 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
             console.log('renderGenerateCRUD : ' + error.message)
         }
     },
+
     getCRUDJsonData: async (req, res) => {
         try {
             const query = { page: req.query.page, limit: req.query.size, }
@@ -456,6 +436,7 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
             console.log('getCRUDJsonData : ' + error.message)
         }
     },
+
     renderEditCRUD: async (req, res) => {
         try {
             const response = await sturctureModel.findById({ _id: req.params.id })
@@ -483,27 +464,6 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
                     }
                 })
 
-            // const collections = mongoose.modelNames()
-            //     .filter(m => m !== 'Structure' && m !== 'Admin')
-            //     .map(m => {
-            //         const model = mongoose.model(m)
-            //         const schemaPaths = model.schema.paths;
-            //         const notIncluded = ['updatedAt', 'createdAt', '__v', '_id']
-            //         const types = ['String', 'Number', 'Boolean', 'Date']
-
-            //         return {
-            //             model: m,
-            //             fields: Object.keys(schemaPaths).filter(p => {
-            //                 const path = schemaPaths[p]
-            //                 return (
-            //                     !notIncluded.includes(p) &&
-            //                     !types.includes(path.instance)
-            //                 )
-            //             })
-            //         }
-            //     })
-
-
             return res.status(200).render('crud/editCRUD',
                 {
                     title: 'Edit CRUD',
@@ -519,14 +479,16 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
             console.log('renderEditCRUD : ' + error.message)
         }
     },
+
     removeCRUD: async (req, res) => {
         try {
             if (!validateId(req.params.id)) return res.status(400).json({ error: 'Invalid Request.' })
             const response = await sturctureModel.findByIdAndDelete({ _id: req.params.id })
             if (!response) return res.status(400).json({ error: 'Something went wrong, please try again later.' })
-            return res.status(200).json({ success: 'created successfully.' })
+            return res.status(200).json({ success: 'Deleted successfully.' })
         } catch (error) {
             console.log('removeCRUD : ' + error.message)
+            return res.status(400).json({ error: 'Something went wrong, please try again later.' })
         }
     },
 })

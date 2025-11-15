@@ -30,7 +30,7 @@ const CRUD_GENERATOR = async (req, res) => {
         view, edit, create,
         rewrite_files, dataTableApi, dataTableApi_check,
     } = req.body;
-    console.log(req.body);
+    console.log(req.body.field);
     const metaData = { dataTableApi, dataTableApi_check }
     const file_permissions = { view, edit, create, rewrite_files }
     const filteredFields = field.filter(Boolean)
@@ -60,7 +60,13 @@ const CRUD_GENERATOR = async (req, res) => {
         createEjsFiles(collection, filteredFields, viewDir, file_permissions)
 
         exec('npm restart', { shell: true })
-        return res.status(200).json({ success: 'Schema created successfully.' })
+        return res.status(200).json(
+            {
+                success: req.method === 'POST'
+                    ? 'Schema created successfully.'
+                    : 'Schema updated successfully.'
+            }
+        )
     } catch (error) {
         console.error('createSchema:', error.message)
         return res.status(500).json({ error: 'Internal Server Error. Unable to create schema.' })

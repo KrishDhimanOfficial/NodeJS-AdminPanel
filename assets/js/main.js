@@ -50,11 +50,12 @@ if (Form) {
       const formdata = new FormData(e.target);
       document.querySelector('.summernote') && formdata.delete('files');
 
-      if (Form.id === 'SubmitForm') {
-        res = await Fetch.post(apiInput.value.trim(), formdata);
-      } else {
-        res = await Fetch.put(`${apiInput.value.trim()}/${e.target.dataset?.id}`, formdata);
-      }
+      if (Form.id === 'SubmitForm') res = await Fetch.post(apiInput.value.trim(), formdata);
+      else res = await Fetch.put(`${apiInput.value.trim()}/${e.target.dataset?.id}`, formdata);
+      // for (let [key, value] of formdata.entries()) {
+      //   console.log(key, value);
+      // }
+
 
       Notify(res);
       if (res.success && res.redirect) {
@@ -114,7 +115,7 @@ deleteCRUDFieldRow('#addField');
 
 // Handle Add Field button click
 addFieldBtn?.addEventListener('click', () => {
-  const filters = ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number'];
+  const filters = ['search', 'boolean', 'groupValueFilter', 'date', 'minmax', 'number']
 
   // Generate dynamic IDs
   const fieldId = `field_${counter}`;
@@ -126,7 +127,7 @@ addFieldBtn?.addEventListener('click', () => {
 
   // HTML template for new field
   const fieldTemplate = `
-    <div id="field_group_${counter + 1}" class="field-group-${counter + 1}">
+    <div id="field_group_${counter + 1}" class="field-group-${counter + 1}" draggable="true">
       <h3>Field ${counter + 1}</h3>
       ${FieldRow(fieldId, formTypeId, typeId, counter)}
       <div id="selectBox_form_type_${counter}" class="row mb-2 d-none"></div>
@@ -166,18 +167,18 @@ addFieldBtn?.addEventListener('click', () => {
     </div>`;
 
   // Append template to container
-  fieldsContainer.insertAdjacentHTML('beforeend', fieldTemplate);
+  fieldsContainer.insertAdjacentHTML('beforeend', fieldTemplate)
 
   // Reinitialize Select2
-  $('.select2').select2();
-  counter++;
-});
+  $('.select2').select2()
+  counter++
+})
 
 // Handle dynamic changes on select elements with data-counter
 $(document).on('change', 'select[data-counter]', function () {
-  const counter = $(this).data('counter');
-  const selectedValue = $(this).val();
-  const imageSettingsEl = document.querySelector(`#selectBox_form_type_${counter}`);
+  const counter = $(this).data('counter')
+  const selectedValue = $(this).val()
+  const imageSettingsEl = document.querySelector(`#selectBox_form_type_${counter}`)
 
   const templates = {
     file: `
@@ -229,67 +230,67 @@ if (fieldsContainer) {
     const counter = e.target.dataset.counter;
     if (!counter) return;
 
-    const default_value_checkBox = e.target.closest(`#default_value_checkBox_${counter}`);
-    const display_name_checkBox = e.target.closest(`#display_name_checkBox_${counter}`);
-    const typeSelect = document.querySelector(`#type_${counter}`);
-    const defaultRow = document.querySelector(`#defaultValueRow_${counter}`);
-    const displayNameRow = document.querySelector(`#displayNameRow_${counter}`);
+    const default_value_checkBox = e.target.closest(`#default_value_checkBox_${counter}`)
+    const display_name_checkBox = e.target.closest(`#display_name_checkBox_${counter}`)
+    const typeSelect = document.querySelector(`#type_${counter}`)
+    const defaultRow = document.querySelector(`#defaultValueRow_${counter}`)
+    const displayNameRow = document.querySelector(`#displayNameRow_${counter}`)
 
     if (default_value_checkBox) {
       defaultRow.classList.toggle('d-none');
-      setFieldDefaultValue(counter, defaultRow, typeSelect?.value);
+      setFieldDefaultValue(counter, defaultRow, typeSelect?.value)
     }
 
     if (typeSelect && default_value_checkBox) {
       typeSelect.onchange = (e) => {
         e.target.value != 'String' && e.target.value != 'Number'
           ? default_value_checkBox.checked = false
-          : default_value_checkBox.checked = true, defaultRow.classList.toggle('d-none');
-        setFieldDefaultValue(counter, defaultRow, e.target.value);
-      };
+          : default_value_checkBox.checked = true, defaultRow.classList.toggle('d-none')
+        setFieldDefaultValue(counter, defaultRow, e.target.value)
+      }
     }
 
     if (display_name_checkBox) {
-      displayNameRow.classList.toggle('d-none');
+      displayNameRow.classList.toggle('d-none')
     }
-  };
+  }
 }
 
 // Handle submenu checkbox
-const subMenuCheck = document.querySelector('#isSubMenu');
+const subMenuCheck = document.querySelector('#isSubMenu')
 subMenuCheck?.addEventListener('change', () => {
-  document.querySelector('#subMenusettings')?.classList.toggle('d-none');
-  document.querySelector('#mainIcon')?.classList.toggle('d-none');
-});
+  document.querySelector('#subMenusettings')?.classList.toggle('d-none')
+  document.querySelector('#mainIcon')?.classList.toggle('d-none')
+})
 
 // Handle prevent deletion checkbox
-const prevent_deletion = document.querySelector('#prevent_deletion');
+const prevent_deletion = document.querySelector('#prevent_deletion')
 prevent_deletion?.addEventListener('change', () => {
-  document.querySelector('#preventDeletionRow')?.classList.toggle('d-none');
-});
+  document.querySelector('#preventDeletionRow')?.classList.toggle('d-none')
+})
 
 // Drag and drop functionality for field groups
 let draggedItem = null;
 if (fieldsContainer) {
   fieldsContainer.addEventListener("dragstart", (e) => {
     draggedItem = e.target;
-    setTimeout(() => (e.target.style.display = "none"), 0);
-  });
+    setTimeout(() => (e.target.style.display = "none"), 0)
+  })
 
   fieldsContainer.addEventListener("dragend", (e) => {
     setTimeout(() => {
       draggedItem.style.display = "block";
       draggedItem = null;
-    }, 0);
-  });
+    }, 0)
+  })
 
   fieldsContainer.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    const afterElement = getDragAfterElement(fieldsContainer, e.clientY);
+    e.preventDefault()
+    const afterElement = getDragAfterElement(fieldsContainer, e.clientY)
     if (afterElement == null) {
-      fieldsContainer.appendChild(draggedItem);
+      fieldsContainer.appendChild(draggedItem)
     } else {
-      fieldsContainer.insertBefore(draggedItem, afterElement);
+      fieldsContainer.insertBefore(draggedItem, afterElement)
     }
-  });
+  })
 }
