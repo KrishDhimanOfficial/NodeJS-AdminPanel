@@ -1,0 +1,46 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-primary">
+                <div class="card-header bg-purple">
+                    <h3 class="card-title">View <%= title %> Information</h3>
+                </div>
+                <div class="card-body">
+                    <% if (fields.length === 0) { %>
+                        <p class="text-muted mb-0">No information is available for this record.</p>
+                    <% } else { %>
+                        <dl class="row mb-0">
+                            <% fields.forEach(field => {
+                                const value = response[field.field_name];
+                                const label = (field.display_name || field.field_name).replace(/_/g, ' ');
+                                const values = Array.isArray(value) ? value : [value];
+                            %>
+                                <dt class="col-sm-3 text-capitalize"><%= label %></dt>
+                                <dd class="col-sm-9">
+                                    <% if (field.form_type === 'file' && value) { %>
+                                        <% values.forEach(file => { %>
+                                            <a href="/<%= file %>" target="_blank" rel="noopener noreferrer" class="d-inline-block mr-2">
+                                                <%= file %>
+                                            </a>
+                                        <% }) %>
+                                    <% } else if (value === null || value === undefined || value === '') { %>
+                                        <span class="text-muted">N/A</span>
+                                    <% } else if (typeof value === 'boolean') { %>
+                                        <%= value ? 'Yes' : 'No' %>
+                                    <% } else { %>
+                                        <%= values.map(item => {
+                                            if (item && typeof item === 'object') {
+                                                return item[field.display_key] || item.name || item._id || item.toString();
+                                            }
+                                            return item;
+                                        }).join(', ') %>
+                                    <% } %>
+                                </dd>
+                            <% }) %>
+                        </dl>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

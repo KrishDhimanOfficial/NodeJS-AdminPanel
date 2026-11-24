@@ -413,6 +413,12 @@ function createUpdateEJSFile(collection, fields) {
 
 // Function That's Create View EJS File
 function createViewEJSFile(collection, fields) {
+    const detailRows = fields
+        .filter(field => field.field_name !== 'password')
+        .map(field => `
+                    <dt class="col-sm-3 text-capitalize">${(field.display_name || field.field_name).replace(/_/g, ' ')}</dt>
+                    <dd class="col-sm-9"><%= response["${field.field_name}"] ?? 'N/A' %></dd>`)
+        .join('')
     const content = `<div class="container">
         <div class="row">
             <div class="col-12">
@@ -421,6 +427,8 @@ function createViewEJSFile(collection, fields) {
                 <h3 class="card-title">View ${capitalizeFirstLetter(collection)} Information</h3>
                 </div>
                 <div class="card-body">
+                    <dl class="row mb-0">${detailRows}
+                    </dl>
                 </div>
             </div>
             </div>

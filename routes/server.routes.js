@@ -11,7 +11,6 @@ import GenerateCRUDRoutes from "../utils/generateRoutes.utils.js"
 import config from "../config/config.js"
 import createCrudController from "../controllers/crud.controller.js"
 const router = express.Router({ caseSensitive: true, strict: true })
-
 router.get('/logout', (req, res, next) => authControllers.localStrategyLogout(req, res, next))
 router.route('/login')
     .get((req, res) => res.render('login', { layout: false, title: 'Login' }))

@@ -166,18 +166,30 @@ const createCrudController = (model, fields = [], modelDependencies = [], rewrit
         }
     },
 
-    getViewInfo: async (req, res) => {
+    getViewInfo: async (req, res, next) => {
         try {
             if (!validateId(req.params.id)) return res.status(400).redirect(`${req.baseUrl}/404`)
-            const response = await model.findById({ _id: req.params.id }, { _id: 0, __v: 0, createdAt: 0, updatedAt: 0 })
+            const response = await model
+                .findById(req.params.id)
+                .select('-__v -createdAt -updatedAt -password')
+                .lean()
 
-            return res.status(200).render(`${model.modelName}/view`, {
+            if (!response) return res.status(404).redirect(`${req.baseUrl}/404`)
+
+            // Render one shared detail view. Generated per-model view files used to
+            // have an empty card body, which meant the fetched record was never shown.
+            const viewFields = fields
+                .filter(field => field.field_name !== 'password' && Object.hasOwn(response, field.field_name))
+
+            return res.status(200).render('crud/view', {
                 title: capitalizeFirstLetter(model.modelName),
-                [model.modelName]: response,
+                response,
+                fields: viewFields,
                 breadcrumb: [{ name: capitalizeFirstLetter(model.modelName), url: `${req.baseUrl}/resources/${model.modelName}` }, { name: 'View', active: true }]
             })
         } catch (error) {
             log(chalk.red(`getViewInfo -> ${model.modelName} : ${error.message}`))
+            return next(error)
         }
     },
 

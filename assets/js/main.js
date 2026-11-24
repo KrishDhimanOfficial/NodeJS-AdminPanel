@@ -127,7 +127,7 @@ addFieldBtn?.addEventListener('click', () => {
 
   // HTML template for new field
   const fieldTemplate = `
-    <div id="field_group_${counter + 1}" class="field-group-${counter + 1}" draggable="true">
+    <div id="field_group_${counter + 1}" class="field-group field-group-${counter + 1}" draggable="true">
       <h3>Field ${counter + 1}</h3>
       ${FieldRow(fieldId, formTypeId, typeId, counter)}
       <div id="selectBox_form_type_${counter}" class="row mb-2 d-none"></div>

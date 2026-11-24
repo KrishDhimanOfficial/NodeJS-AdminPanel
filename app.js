@@ -96,6 +96,10 @@ app.use(rateLimit(
   }
 ))
 
+app.get('/', (req, res) => {
+  res.render('intro', { layout: false, title: 'Welcome to AdminPanel' })
+})
+
 app.use('/admin', router)
 app.use('/', siteRoutes)
 

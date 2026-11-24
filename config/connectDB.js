@@ -11,10 +11,8 @@ const options = {
 const connectDB = async () => {
     try {
         await mongoose.connect(config.mongodb_URL, options)
-        console.log(chalk.green(`✅ MongoDB connected!`))
-
-        // Initialize admin after successful connection
-        await initAdmin()
+        initAdmin()
+        console.log(chalk.green(`✅ MongoDB connected! [PID: ${process.pid}]`))
     } catch (error) {
         console.error(chalk.red(`❌ MongoDB connection error: ${error.message}`))
         process.exit(1)
